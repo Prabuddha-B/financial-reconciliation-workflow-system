@@ -99,6 +99,18 @@ public class IngestionController {
                                 row.getCell(5).toString()
                         );
 
+//                        Validation
+                        // Validation
+                        if (receipt.getAmount() <= 0) {
+                            receipt.setValid(false);
+                            receipt.setErrorMessage("Invalid amount");
+                        }
+
+                        if (receipt.getReferenceNo() == null || receipt.getReferenceNo().isEmpty()) {
+                            receipt.setValid(false);
+                            receipt.setErrorMessage("Missing reference");
+                        }
+
                         records.add(receipt);
 
                     } catch (Exception e) {

@@ -22,18 +22,23 @@
         <th>Amount</th>
         <th>Date</th>
         <th>Entered By</th>
+        <th>Error</th>
     </tr>
     </thead>
 
     <!-- DATA -->
     <tbody>
-    <tr th:each="r : ${records}">
+    <tr th:each="r : ${records}"
+        th:classappend="${!r.valid} ? 'table-danger'">
+
         <td th:text="${r.receiptId}"></td>
         <td th:text="${r.referenceNo}"></td>
         <td th:text="${r.payerName}"></td>
         <td th:text="${r.amount}"></td>
         <td th:text="${r.date}"></td>
         <td th:text="${r.enteredBy}"></td>
+
+        <td th:text="${r.errorMessage}"></td>
     </tr>
     </tbody>
 

@@ -9,6 +9,8 @@ public class Receipt {
     private double amount;
     private String date;
     private String enteredBy;
+    private boolean valid;
+    private String errorMessage;
 
 //    Constructor
     public Receipt(int receiptId, String referenceNo, String payerName, double amount, String date, String enteredBy) {
@@ -18,6 +20,10 @@ public class Receipt {
         setAmount(amount);
         setDate(date);
         setEnteredBy(enteredBy);
+        setValid(true);
+        setErrorMessage("");
+
+
     }
 
 //    Getters and Setter
@@ -70,5 +76,19 @@ public class Receipt {
         this.enteredBy = enteredBy;
     }
 
+    public boolean isValid() {
+        return valid;
+    }
 
+    public void setValid(boolean valid) {
+        this.valid = valid;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
 }
