@@ -16,14 +16,24 @@
     <!-- HEADER -->
     <thead>
     <tr>
-        <th th:each="col : ${records[0]}" th:text="${col}"></th>
+        <th>Receipt ID</th>
+        <th>Reference No</th>
+        <th>Payer Name</th>
+        <th>Amount</th>
+        <th>Date</th>
+        <th>Entered By</th>
     </tr>
     </thead>
 
     <!-- DATA -->
     <tbody>
-    <tr th:each="row, iterStat : ${records}" th:if="${iterStat.index > 0}">
-        <td th:each="col : ${row}" th:text="${col}"></td>
+    <tr th:each="r : ${records}">
+        <td th:text="${r.receiptId}"></td>
+        <td th:text="${r.referenceNo}"></td>
+        <td th:text="${r.payerName}"></td>
+        <td th:text="${r.amount}"></td>
+        <td th:text="${r.date}"></td>
+        <td th:text="${r.enteredBy}"></td>
     </tr>
     </tbody>
 
