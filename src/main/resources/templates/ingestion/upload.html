@@ -10,18 +10,126 @@
 
     <h2> Upload Data File</h2>
 
-    <form action = "/ingestion/upload"
-           method="post"
-            enctype="multipart/form-data">
+    <div class="container mt-5">
 
-        <div class="mb-3">
-            <label> Select File (CSV/ XLSX)</label><br>
-            <input type="file" name="file" class="form-control" required>
-        </div>
+        <form action="/ingestion/upload"
+              method="post"
+              enctype="multipart/form-data"
+              onsubmit="return handleUpload()">
 
-        <button class="btn btn-primary"> Upload </button>
+            <!-- DRAG & DROP AREA -->
+            <div id="dropArea"
+                 class="border border-2 border-primary p-5 text-center rounded mb-3"
+                 style="cursor:pointer;">
 
-    </form>
+                <p class="mb-2">Drag & Drop file here</p>
+                <p class="text-muted">or click to select file</p>
 
+                <input type="file" id="fileInput" name="file"
+                       class="form-control"
+                       hidden
+                       required>
+            </div>
+
+            <!-- FILE NAME -->
+            <p id="fileName" class="text-success fw-bold"></p>
+
+            <!-- ERROR MESSAGE -->
+            <p id="fileError" class="text-danger fw-bold"></p>
+
+            <!-- UPLOAD BUTTON -->
+            <button id="uploadBtn" class="btn btn-primary">
+                Upload
+            </button>
+
+            <!-- STATUS BAR -->
+            <p id="uploadStatus" class="text-info mt-2"></p>
+
+        </form>
+
+    </div>
+
+    <script>
+
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const dropArea = document.getElementById("dropArea");
+            const fileInput = document.getElementById("fileInput");
+
+            // Click to open file picker
+            dropArea.addEventListener("click", () => fileInput.click());
+
+            // Drag over
+            dropArea.addEventListener("dragover", (e) => {
+                e.preventDefault();
+                dropArea.classList.add("bg-light");
+            });
+
+            // Drag leave
+            dropArea.addEventListener("dragleave", () => {
+                dropArea.classList.remove("bg-light");
+            });
+
+            // Drop file
+            dropArea.addEventListener("drop", (e) => {
+                e.preventDefault();
+                dropArea.classList.remove("bg-light");
+
+                const file = e.dataTransfer.files[0];
+                fileInput.files = e.dataTransfer.files;
+
+                handleFileSelection(file);
+            });
+
+            // File selected normally
+            fileInput.addEventListener("change", function () {
+                const file = this.files[0];
+                handleFileSelection(file);
+            });
+
+        });
+
+        // File Validation
+        function handleFileSelection(file) {
+
+            const fileName = document.getElementById("fileName");
+            const fileError = document.getElementById("fileError");
+
+            fileError.innerText = "";
+
+            if (!file) return;
+
+            const allowedTypes = ["csv", "xlsx"];
+            const extension = file.name.split(".").pop().toLowerCase();
+
+            if (!allowedTypes.includes(extension)) {
+                fileName.innerText = "";
+                fileError.innerText = "Invalid file type. Only CSV or XLSX allowed.";
+                document.getElementById("fileInput").value = "";
+                return;
+            }
+
+            fileName.innerText = "Selected: " + file.name;
+        }
+
+        // Handle Upload
+        function handleUpload() {
+
+            const fileInput = document.getElementById("fileInput");
+            const uploadBtn = document.getElementById("uploadBtn");
+            const status = document.getElementById("uploadStatus");
+
+            if (!fileInput.files.length) {
+                document.getElementById("fileError").innerText = "Please select a file";
+                return false;
+            }
+
+            uploadBtn.disabled = true;
+            status.innerText = "Uploading...";
+
+            return true;
+        }
+
+    </script>
 </body>
 </html>

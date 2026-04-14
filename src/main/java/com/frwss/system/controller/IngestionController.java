@@ -34,6 +34,19 @@ public class IngestionController {
 
         model.addAttribute("records", records);
 
+        int total = records.size();
+        int validCount = 0;
+        int invalidCount = 0;
+
+        for(Receipt r : records){
+            if(r.isValid()) validCount++;
+            else invalidCount++;
+        }
+
+        model.addAttribute("total", total);
+        model.addAttribute("validCount",validCount);
+        model.addAttribute("invalidCount",invalidCount);
+
         return "ingestion/result";
     }
 }
