@@ -49,4 +49,9 @@ public class IngestionController {
 
         return "ingestion/result";
     }
+
+    @GetMapping("/dashboard")
+    public String dashboard(){
+        return "ingestion/dashboard";
+    }
 }
