@@ -1,25 +1,59 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>FRWSS - Upload</title>
+    <title>FRWSS - Data Ingestion</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body { background-color: #f8f9fa; }
+        .card { border-radius: 12px; border: none; }
+        .section-title { font-weight: 600; color: #495057; }
+        .upload-card { transition: transform 0.2s; }
+        .upload-card:hover { transform: translateY(-5px); }
+    </style>
 </head>
-<body class="container mt-5">
-<div class="card shadow p-4">
-    <h3>Data Ingestion Portal</h3>
-    <p class="text-muted">Upload your CSV records to pgAdmin</p>
-    <hr>
-
-    <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
-    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
-
-    <form method="POST" action="/upload-csv" enctype="multipart/form-data">
-        <div class="mb-3">
-            <label class="form-label">Select CSV File</label>
-            <input type="file" name="file" class="form-control" accept=".csv" required>
-        </div>
-        <button type="submit" class="btn btn-primary w-100">Upload to Database</button>
-    </form>
+<body class="container py-5">
+<div class="text-center mb-5">
+    <h1 class="display-5 fw-bold">FRWSS Portal</h1>
+    <p class="lead text-muted">System for Financial Reconciliation and Workflow Support</p>
 </div>
+
+<div th:if="${message}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+    <span th:text="${message}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm p-4 h-100 upload-card">
+            <h4 class="section-title mb-3">📦 Financial Records</h4>
+            <p class="small text-muted">Ingest main ledger data (Reference ID, Amount, Date).</p>
+            <form method="POST" th:action="@{/upload-csv}" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <input type="file" name="file" class="form-control" accept=".csv" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Process Ledger</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card shadow-sm p-4 h-100 upload-card">
+            <h4 class="section-title mb-3">💰 Payroll System</h4>
+            <p class="small text-muted">Ingest employee salary records and audit data.</p>
+            <form method="POST" th:action="@{/ingestion/upload/payroll}" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <input type="file" name="file" class="form-control" accept=".csv" required>
+                </div>
+                <button type="submit" class="btn btn-success w-100">Process Payroll</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<footer class="mt-5 text-center text-muted">
+    <small>&copy; 2026 University of Peradeniya - CS Department</small>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
