@@ -1,59 +1,124 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>FRWSS - Data Ingestion</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <style>
-        body { background-color: #f8f9fa; }
-        .card { border-radius: 12px; border: none; }
-        .section-title { font-weight: 600; color: #495057; }
-        .upload-card { transition: transform 0.2s; }
-        .upload-card:hover { transform: translateY(-5px); }
-    </style>
+    <meta charset="UTF-8">
+    <title>Upload File</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
 </head>
-<body class="container py-5">
-<div class="text-center mb-5">
-    <h1 class="display-5 fw-bold">FRWSS Portal</h1>
-    <p class="lead text-muted">System for Financial Reconciliation and Workflow Support</p>
-</div>
 
-<div th:if="${message}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
-    <span th:text="${message}"></span>
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-</div>
+<body class="container mt-5">
 
-<div class="row g-4">
-    <div class="col-md-6">
-        <div class="card shadow-sm p-4 h-100 upload-card">
-            <h4 class="section-title mb-3">📦 Financial Records</h4>
-            <p class="small text-muted">Ingest main ledger data (Reference ID, Amount, Date).</p>
-            <form method="POST" th:action="@{/upload-csv}" enctype="multipart/form-data">
-                <div class="mb-3">
-                    <input type="file" name="file" class="form-control" accept=".csv" required>
-                </div>
-                <button type="submit" class="btn btn-primary w-100">Process Ledger</button>
-            </form>
+<h2 class="mb-4">Upload Data File</h2>
+
+<div class="container mt-4">
+
+    <form action="/ingestion/upload"
+          method="post"
+          enctype="multipart/form-data"
+          onsubmit="return handleUpload()">
+
+        <!-- DRAG & DROP AREA -->
+        <div id="dropArea"
+             class="border border-2 border-primary p-5 text-center rounded mb-3"
+             style="cursor:pointer;">
+
+            <p class="mb-2">Drag & Drop file here</p>
+            <p class="text-muted">or click to select file</p>
+
+            <input type="file" id="fileInput" name="file"
+                   class="form-control"
+                   hidden
+                   required>
         </div>
-    </div>
 
-    <div class="col-md-6">
-        <div class="card shadow-sm p-4 h-100 upload-card">
-            <h4 class="section-title mb-3">💰 Payroll System</h4>
-            <p class="small text-muted">Ingest employee salary records and audit data.</p>
-            <form method="POST" th:action="@{/ingestion/upload/payroll}" enctype="multipart/form-data">
-                <div class="mb-3">
-                    <input type="file" name="file" class="form-control" accept=".csv" required>
-                </div>
-                <button type="submit" class="btn btn-success w-100">Process Payroll</button>
-            </form>
-        </div>
-    </div>
+        <!-- FILE NAME -->
+        <p id="fileName" class="text-success fw-bold"></p>
+
+        <!-- ERROR MESSAGE -->
+        <p id="fileError" class="text-danger fw-bold"></p>
+
+        <!-- UPLOAD BUTTON -->
+        <button id="uploadBtn" class="btn btn-primary">
+            Upload
+        </button>
+
+        <!-- STATUS -->
+        <p id="uploadStatus" class="text-info mt-2"></p>
+
+    </form>
+
 </div>
 
-<footer class="mt-5 text-center text-muted">
-    <small>&copy; 2026 University of Peradeniya - CS Department</small>
-</footer>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        const dropArea = document.getElementById("dropArea");
+        const fileInput = document.getElementById("fileInput");
+
+        dropArea.addEventListener("click", () => fileInput.click());
+
+        dropArea.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            dropArea.classList.add("bg-light");
+        });
+
+        dropArea.addEventListener("dragleave", () => {
+            dropArea.classList.remove("bg-light");
+        });
+
+        dropArea.addEventListener("drop", (e) => {
+            e.preventDefault();
+            dropArea.classList.remove("bg-light");
+
+            fileInput.files = e.dataTransfer.files;
+            handleFileSelection(fileInput.files[0]);
+        });
+
+        fileInput.addEventListener("change", function () {
+            handleFileSelection(this.files[0]);
+        });
+    });
+
+    // File validation
+    function handleFileSelection(file) {
+
+        const fileName = document.getElementById("fileName");
+        const fileError = document.getElementById("fileError");
+
+        fileError.innerText = "";
+
+        if (!file) return;
+
+        const allowed = ["csv", "xlsx"];
+        const ext = file.name.split(".").pop().toLowerCase();
+
+        if (!allowed.includes(ext)) {
+            fileName.innerText = "";
+            fileError.innerText = "Only CSV or XLSX files allowed.";
+            document.getElementById("fileInput").value = "";
+            return;
+        }
+
+        fileName.innerText = "Selected: " + file.name;
+    }
+
+    // upload validation
+    function handleUpload() {
+
+        const fileInput = document.getElementById("fileInput");
+        const status = document.getElementById("uploadStatus");
+
+        if (!fileInput.files.length) {
+            document.getElementById("fileError").innerText = "Please select a file";
+            return false;
+        }
+
+        status.innerText = "Uploading...";
+        document.getElementById("uploadBtn").disabled = true;
+
+        return true;
+    }
+</script>
+
 </body>
 </html>

@@ -1,51 +1,60 @@
 package com.frwss.system.controller;
 
+import com.frwss.system.model.Receipt;
 import com.frwss.system.service.IngestionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.springframework.web.bind.annotation.GetMapping;
+
+import java.util.List;
 
 @Controller
+@RequestMapping("/ingestion")
 public class IngestionController {
 
     @Autowired
     private IngestionService ingestionService;
 
-    @PostMapping("/upload-csv")
-    public String handleFileUpload(@RequestParam("file") MultipartFile file, RedirectAttributes ra) {
-        try {
-            ingestionService.processCSV(file);
-            ra.addFlashAttribute("message", "File processed and records saved to pgAdmin!");
-        } catch (Exception e) {
-            ra.addFlashAttribute("error", "Failed to process: " + e.getMessage());
-        }
-        // Redirect back to your upload page
-        return "redirect:/ingestion/upload";
+    // Dashboard
+    @GetMapping
+    public String ingestionPage(){
+        return "ingestion/dashboard";
     }
 
-    @PostMapping("/ingestion/upload/payroll")
-    public String uploadPayrollCsv(@RequestParam("file") MultipartFile file, RedirectAttributes attributes){
-        if(file.isEmpty()){
-            attributes.addFlashAttribute("message", "Please select a payroll CSV file to upload.");
-            return "redirect:/ingestion/upload";
-        }
-
-        try{
-            ingestionService.savePayrollCsv(file);
-            attributes.addFlashAttribute("message", "Payroll data uploaded successfully!");
-        } catch(Exception e){
-            attributes.addFlashAttribute("message", "Upload failed : " + e.getMessage());
-        }
-
-        return "redirect:/ingestion/upload";
+    @GetMapping("/dashboard")
+    public String dashboard(){
+        return "ingestion/dashboard";
     }
 
-    @GetMapping("/ingestion/upload")
-    public String showUploadPage() {
-        return "ingestion/upload"; // This looks for the HTML file you just made
+    // Upload page
+    @GetMapping("/upload")
+    public String uploadPage(){
+        return "ingestion/upload";
+    }
+
+    // MAIN upload handler (CSV / Excel processing)
+    @PostMapping("/upload")
+    public String handleFileUpload(@RequestParam("file") MultipartFile file, Model model) {
+
+        List<Receipt> records = ingestionService.processFile(file);
+
+        model.addAttribute("records", records);
+
+        int total = records.size();
+        int validCount = 0;
+        int invalidCount = 0;
+
+        for (Receipt r : records) {
+            if (r.isValid()) validCount++;
+            else invalidCount++;
+        }
+
+        model.addAttribute("total", total);
+        model.addAttribute("validCount", validCount);
+        model.addAttribute("invalidCount", invalidCount);
+
+        return "ingestion/result";
     }
 }
