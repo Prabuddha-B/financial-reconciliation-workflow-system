@@ -27,6 +27,23 @@ public class IngestionController {
         return "redirect:/ingestion/upload";
     }
 
+    @PostMapping("/ingestion/upload/payroll")
+    public String uploadPayrollCsv(@RequestParam("file") MultipartFile file, RedirectAttributes attributes){
+        if(file.isEmpty()){
+            attributes.addFlashAttribute("message", "Please select a payroll CSV file to upload.");
+            return "redirect:/ingestion/upload";
+        }
+
+        try{
+            ingestionService.savePayrollCsv(file);
+            attributes.addFlashAttribute("message", "Payroll data uploaded successfully!");
+        } catch(Exception e){
+            attributes.addFlashAttribute("message", "Upload failed : " + e.getMessage());
+        }
+
+        return "redirect:/ingestion/upload";
+    }
+
     @GetMapping("/ingestion/upload")
     public String showUploadPage() {
         return "ingestion/upload"; // This looks for the HTML file you just made
