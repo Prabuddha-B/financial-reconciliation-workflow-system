@@ -1,229 +1,302 @@
 package com.frwss.system.service;
 
-import com.frwss.system.model.FinancialRecord;
-import com.frwss.system.model.Payroll;
-import com.frwss.system.model.Receipt;
+import com.frwss.system.model.*;
 import com.frwss.system.repository.FinancialRecordRepository;
 import com.frwss.system.repository.PayrollRepository;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.commons.csv.*;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class IngestionService {
 
-    @Autowired
-    private FinancialRecordRepository financialRecordRepository;
+    private final FinancialRecordRepository financialRecordRepository;
+    private final PayrollRepository payrollRepository;
 
-    @Autowired
-    private PayrollRepository payrollRepository;
+    public IngestionService(FinancialRecordRepository financialRecordRepository,
+                            PayrollRepository payrollRepository) {
+        this.financialRecordRepository = financialRecordRepository;
+        this.payrollRepository = payrollRepository;
+    }
 
     // =========================================================
-    // 1. FINANCIAL RECORD INGESTION (DATABASE)
+    // ENTRY POINT
     // =========================================================
-    public void processCSV(MultipartFile file) throws Exception {
+    public IngestionResult processFile(MultipartFile file) {
+        try {
+            String fileName = file.getOriginalFilename();
 
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
-             CSVParser csvParser = new CSVParser(reader,
-                     CSVFormat.DEFAULT.builder()
-                             .setHeader()
-                             .setSkipHeaderRecord(true)
-                             .setIgnoreHeaderCase(true)
-                             .setTrim(true)
-                             .build())) {
+            if (fileName == null || file.isEmpty()) {
+                return IngestionResult.receiptResult(List.of(), 0, 0);
+            }
 
-            List<FinancialRecord> recordsToSave = new ArrayList<>();
-
-            for (CSVRecord csvRecord : csvParser) {
-
-                String refId = csvRecord.get("Reference ID");
-                Double amount = Double.parseDouble(csvRecord.get("Amount"));
-                LocalDate date = LocalDate.parse(csvRecord.get("Date"));
-
-                if (!financialRecordRepository.existsByReferenceIdAndAmountAndDate(refId, amount, date)) {
-
-                    FinancialRecord record = new FinancialRecord();
-                    record.setReferenceId(refId);
-                    record.setAmount(amount);
-                    record.setDate(date);
-
-                    recordsToSave.add(record);
+            if (fileName.toLowerCase().endsWith(".csv")) {
+                if (isPayrollFile(file)) {
+                    return savePayrollCsv(file);
+                } else {
+                    return processReceiptCsv(file);
                 }
             }
 
-            financialRecordRepository.saveAll(recordsToSave);
+            if (fileName.toLowerCase().endsWith(".xlsx")) {
+                return previewWorkbook(file.getInputStream());
+            }
+
+            throw new IllegalArgumentException("Unsupported file format");
+
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Unable to process uploaded file", e);
         }
     }
 
     // =========================================================
-    // 2. PAYROLL INGESTION (DATABASE)
+    // PAYROLL DB INGESTION (FIXED)
     // =========================================================
-    public void savePayrollCsv(MultipartFile file) throws Exception {
+    public IngestionResult savePayrollCsv(MultipartFile file) throws Exception {
 
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
-             CSVParser csvParser = new CSVParser(reader,
-                     CSVFormat.DEFAULT.builder()
-                             .setHeader()
-                             .setSkipHeaderRecord(true)
-                             .setIgnoreHeaderCase(true)
-                             .setTrim(true)
-                             .build())) {
+             CSVParser csvParser = CSVFormat.DEFAULT.builder()
+                     .setHeader()
+                     .setSkipHeaderRecord(true)
+                     .setIgnoreHeaderCase(true)
+                     .setTrim(true)
+                     .build()
+                     .parse(reader)) {
 
             List<Payroll> payrollList = new ArrayList<>();
+            List<Receipt> preview = new ArrayList<>();
+            Set<String> seen = new HashSet<>();
+            Set<String> toReplace = new HashSet<>();
+
+            int row = 1;
 
             for (CSVRecord record : csvParser) {
 
-                String pId = record.get("payroll_id");
+                String payrollId = record.get("payroll_id").trim();
 
-                if (!payrollRepository.existsById(pId)) {
+                Receipt uiRow = new Receipt(
+                        row++,
+                        payrollId,
+                        record.get("employee_name"),
+                        parseDouble(record.get("salary"), "salary"),
+                        record.get("payment_date"),
+                        record.get("entered_by")
+                );
 
-                    Payroll payroll = new Payroll();
-
-                    payroll.setPayrollId(pId);
-                    payroll.setEmployeeId(record.get("employee_id"));
-                    payroll.setEmployeeName(record.get("employee_name"));
-                    payroll.setSalary(new BigDecimal(record.get("salary")));
-                    payroll.setPaymentDate(LocalDate.parse(record.get("payment_date")));
-                    payroll.setReferenceNo(record.get("reference_no"));
-                    payroll.setStatus(record.get("status"));
-
-                    String createdAtRaw = record.get("created_at").replace("Z", "");
-                    if (createdAtRaw.length() > 19) {
-                        createdAtRaw = createdAtRaw.substring(0, 19);
-                    }
-                    payroll.setCreatedAt(LocalDateTime.parse(createdAtRaw));
-
-                    payroll.setEnteredBy(record.get("entered_by"));
-
-                    payrollList.add(payroll);
+                // duplicate inside file
+                if (!seen.add(payrollId)) {
+                    uiRow.setValid(false);
+                    uiRow.setErrorMessage("Duplicate payroll_id in file");
+                    preview.add(uiRow);
+                    continue;
                 }
+
+                // existing DB record
+                if (payrollRepository.existsById(payrollId)) {
+                    toReplace.add(payrollId);
+                    uiRow.setErrorMessage("Will replace existing record");
+                }
+
+                Payroll p = new Payroll();
+                p.setPayrollId(payrollId);
+                p.setEmployeeId(record.get("employee_id"));
+                p.setEmployeeName(record.get("employee_name"));
+                p.setSalary(new BigDecimal(record.get("salary")));
+                p.setPaymentDate(LocalDate.parse(record.get("payment_date")));
+                p.setReferenceNo(record.get("reference_no"));
+                p.setStatus(record.get("status"));
+
+                String createdAt = record.get("created_at").replace("Z", "");
+                if (createdAt.length() > 19) {
+                    createdAt = createdAt.substring(0, 19);
+                }
+                p.setCreatedAt(LocalDateTime.parse(createdAt));
+
+                p.setEnteredBy(record.get("entered_by"));
+
+                payrollList.add(p);
+                preview.add(uiRow);
+            }
+
+            if (!toReplace.isEmpty()) {
+                payrollRepository.deleteAllByIdInBatch(toReplace);
             }
 
             if (!payrollList.isEmpty()) {
                 payrollRepository.saveAll(payrollList);
             }
+
+            return IngestionResult.payrollResult(
+                    preview,
+                    payrollList.size(),
+                    0,
+                    toReplace.size()
+            );
         }
     }
 
     // =========================================================
-    // 3. FILE VALIDATION + PREVIEW (UI FEATURE - HIS IDEA)
+    // RECEIPT CSV (UI ONLY)
     // =========================================================
-    public List<Receipt> processFile(MultipartFile file) {
+    private IngestionResult processReceiptCsv(MultipartFile file) throws Exception {
 
-        List<Receipt> records = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
+             CSVParser csvParser = createCsvParser(reader)) {
 
-        try {
-            String fileName = file.getOriginalFilename();
+            List<Receipt> records = new ArrayList<>();
 
-            if (fileName == null) return records;
-
-            // ================= CSV =================
-            if (fileName.endsWith(".csv")) {
-
-                BufferedReader reader = new BufferedReader(
-                        new InputStreamReader(file.getInputStream())
+            for (CSVRecord r : csvParser) {
+                Receipt receipt = new Receipt(
+                        parseInt(r.get(0), "receiptId"),
+                        r.get(1),
+                        r.get(2),
+                        parseDouble(r.get(3), "amount"),
+                        r.get(4),
+                        r.get(5)
                 );
 
-                String line;
-                boolean isFirstLine = true;
-
-                while ((line = reader.readLine()) != null) {
-
-                    if (line.trim().isEmpty()) continue;
-
-                    if (isFirstLine) {
-                        isFirstLine = false;
-                        continue;
-                    }
-
-                    String[] data = line.split(",");
-
-                    Receipt receipt = new Receipt(
-                            Integer.parseInt(data[0]),
-                            data[1],
-                            data[2],
-                            Double.parseDouble(data[3]),
-                            data[4],
-                            data[5]
-                    );
-
-                    validate(receipt);
-                    records.add(receipt);
-                }
+                validate(receipt);
+                records.add(receipt);
             }
 
-            // ================= XLSX =================
-            else if (fileName.endsWith(".xlsx")) {
-
-                XSSFWorkbook workbook = new XSSFWorkbook(file.getInputStream());
-                XSSFSheet sheet = workbook.getSheetAt(0);
-
-                boolean isFirstRow = true;
-
-                for (var row : sheet) {
-
-                    if (isFirstRow) {
-                        isFirstRow = false;
-                        continue;
-                    }
-
-                    try {
-                        Receipt receipt = new Receipt(
-                                (int) row.getCell(0).getNumericCellValue(),
-                                row.getCell(1).toString(),
-                                row.getCell(2).toString(),
-                                row.getCell(3).getNumericCellValue(),
-                                row.getCell(4).toString(),
-                                row.getCell(5).toString()
-                        );
-
-                        validate(receipt);
-                        records.add(receipt);
-
-                    } catch (Exception e) {
-                        System.out.println("Row error: " + e.getMessage());
-                    }
-                }
-
-                workbook.close();
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
+            return summarize(records);
         }
-
-        return records;
     }
 
     // =========================================================
-    // 4. VALIDATION (UI SUPPORT)
+    // EXCEL PREVIEW (UI ONLY)
     // =========================================================
-    private void validate(Receipt receipt) {
+    private IngestionResult previewWorkbook(InputStream inputStream) throws Exception {
 
-        if (receipt.getAmount() <= 0) {
-            receipt.setValid(false);
-            receipt.setErrorMessage("Invalid amount");
+        List<Receipt> records = new ArrayList<>();
+        DataFormatter df = new DataFormatter();
+
+        try (XSSFWorkbook wb = new XSSFWorkbook(inputStream)) {
+            XSSFSheet sheet = wb.getSheetAt(0);
+            boolean first = true;
+
+            for (Row row : sheet) {
+                if (first) { first = false; continue; }
+                if (isRowEmpty(row)) continue;
+
+                Receipt r = new Receipt(
+                        parseInt(readCell(row, 0, df), "receiptId"),
+                        readCell(row, 1, df),
+                        readCell(row, 2, df),
+                        parseDouble(readCell(row, 3, df), "amount"),
+                        readCell(row, 4, df),
+                        readCell(row, 5, df)
+                );
+
+                validate(r);
+                records.add(r);
+            }
         }
 
-        if (receipt.getReferenceNo() == null || receipt.getReferenceNo().isEmpty()) {
-            receipt.setValid(false);
-            receipt.setErrorMessage("Missing reference");
+        return summarize(records);
+    }
+
+    // =========================================================
+    // PAYROLL DETECTION (FIXED - SAFE)
+    // =========================================================
+    private boolean isPayrollFile(MultipartFile file) throws Exception {
+
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
+             CSVParser parser = CSVFormat.DEFAULT.builder()
+                     .setHeader()
+                     .setSkipHeaderRecord(true)
+                     .build()
+                     .parse(reader)) {
+
+            Set<String> headers = parser.getHeaderMap().keySet().stream()
+                    .map(h -> h.toLowerCase(Locale.ROOT))
+                    .collect(Collectors.toSet());
+
+            return headers.contains("payroll_id")
+                    && headers.contains("employee_id")
+                    && headers.contains("payment_date");
+        }
+    }
+
+    // =========================================================
+    // VALIDATION
+    // =========================================================
+    private void validate(Receipt r) {
+        if (r.getAmount() <= 0) {
+            r.setValid(false);
+            r.setErrorMessage("Invalid amount");
+        }
+
+        if (r.getReferenceNo() == null || r.getReferenceNo().isEmpty()) {
+            r.setValid(false);
+            r.setErrorMessage("Missing reference");
+        }
+    }
+
+    // =========================================================
+    // HELPERS
+    // =========================================================
+    private IngestionResult summarize(List<Receipt> records) {
+        int valid = 0, invalid = 0;
+
+        for (Receipt r : records) {
+            if (r.isValid()) valid++;
+            else invalid++;
+        }
+
+        return IngestionResult.receiptResult(records, valid, invalid);
+    }
+
+    private CSVParser createCsvParser(BufferedReader reader) throws Exception {
+        return CSVFormat.DEFAULT.builder()
+                .setHeader()
+                .setSkipHeaderRecord(true)
+                .setIgnoreHeaderCase(true)
+                .setTrim(true)
+                .build()
+                .parse(reader);
+    }
+
+    private String readCell(Row row, int i, DataFormatter df) {
+        Cell c = row.getCell(i);
+        if (c == null) throw new IllegalArgumentException("Missing cell " + i);
+        return df.formatCellValue(c).trim();
+    }
+
+    private boolean isRowEmpty(Row row) {
+        for (int i = 0; i < 6; i++) {
+            Cell c = row.getCell(i);
+            if (c != null && !c.toString().trim().isEmpty()) return false;
+        }
+        return true;
+    }
+
+    private int parseInt(String v, String f) {
+        try {
+            return Integer.parseInt(v.trim());
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid " + f + ": " + v);
+        }
+    }
+
+    private double parseDouble(String v, String f) {
+        try {
+            return Double.parseDouble(v.trim());
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid " + f + ": " + v);
         }
     }
 }

@@ -13,37 +13,57 @@
 
 <body class="container mt-5">
 
-    <h3>Uploaded Data</h3>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="mb-1" th:text="${dataType == 'payroll'} ? 'Payroll Upload Result' : 'Uploaded Data'"></h3>
+            <p class="text-muted mb-0"
+               th:text="${dataType == 'payroll'} ? 'Payroll rows were imported into the payroll table.' : 'Review validation results for the uploaded file.'">
+                Review validation results for the uploaded file.
+            </p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="/ingestion/upload" class="btn btn-primary">Upload Another File</a>
+            <a href="/ingestion/dashboard" class="btn btn-outline-secondary">Back to Dashboard</a>
+        </div>
+    </div>
 
     <div class="row mb-4">
 
         <div class="col-md-4">
             <div class="card text-white bg-primary">
                 <div class="card-body">
-                    <h5>Total Records</h5>
+                    <h5 th:text="${dataType == 'payroll'} ? 'Total Rows' : 'Total Records'">Total Records</h5>
                     <h3 th:text="${total}"></h3>
                 </div>
             </div>
         </div>
 
         <div class="col-md-4">
-            <div class="card text-white bg-success">
+            <div class="card text-white" th:classappend="${dataType == 'payroll'} ? ' bg-success' : ' bg-success'">
                 <div class="card-body">
-                    <h5>Valid Records</h5>
-                    <h3 th:text="${validCount}"></h3>
+                    <h5 th:text="${dataType == 'payroll'} ? 'Inserted' : 'Valid Records'">Valid Records</h5>
+                    <h3 th:text="${dataType == 'payroll' ? insertedCount : validCount}"></h3>
                 </div>
             </div>
         </div>
 
         <div class="col-md-4">
-            <div class="card text-white bg-danger">
+            <div class="card text-white" th:classappend="${dataType == 'payroll'} ? ' bg-secondary' : ' bg-danger'">
                 <div class="card-body">
-                    <h5>Invalid Records</h5>
-                    <h3 th:text="${invalidCount}"></h3>
+                    <h5 th:text="${dataType == 'payroll'} ? 'Skipped In Upload' : 'Invalid Records'">Invalid Records</h5>
+                    <h3 th:text="${dataType == 'payroll' ? skippedCount : invalidCount}"></h3>
                 </div>
             </div>
         </div>
 
+    </div>
+
+    <div th:if="${dataType == 'payroll'}" class="alert alert-success">
+        Payroll import completed. Uploaded rows were written to the <strong>payroll</strong> table, replacing matching IDs already in the database.
+    </div>
+
+    <div th:if="${dataType == 'payroll' and replacedCount > 0}" class="alert alert-warning">
+        <span th:text="${replacedCount}"></span> existing payroll row(s) were replaced by uploaded data.
     </div>
 
     <div class="row mb-3">
@@ -68,19 +88,23 @@
     </p>
 
 
-    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+    <div th:if="${#lists.isEmpty(records)}" class="alert alert-warning">
+        No records were found in the uploaded file. Try another file and ensure it contains data rows.
+    </div>
+
+    <div th:if="${!#lists.isEmpty(records)}" class="table-responsive" style="max-height: 400px; overflow-y: auto;">
         <table class="table table-bordered table-hover">
 
             <!-- HEADER -->
             <thead class="table-dark" style="position: sticky; top: 0;">
             <tr>
-                <th>Receipt ID</th>
-                <th>Reference No</th>
-                <th>Payer Name</th>
-                <th>Amount</th>
-                <th>Date</th>
+                <th th:text="${dataType == 'payroll'} ? 'Row' : 'Receipt ID'">Receipt ID</th>
+                <th th:text="${dataType == 'payroll'} ? 'Payroll ID' : 'Reference No'">Reference No</th>
+                <th th:text="${dataType == 'payroll'} ? 'Employee Name' : 'Payer Name'">Payer Name</th>
+                <th th:text="${dataType == 'payroll'} ? 'Salary' : 'Amount'">Amount</th>
+                <th th:text="${dataType == 'payroll'} ? 'Payment Date' : 'Date'">Date</th>
                 <th>Entered By</th>
-                <th>Error</th>
+                <th th:text="${dataType == 'payroll'} ? 'Status' : 'Error'">Error</th>
             </tr>
             </thead>
 
@@ -99,7 +123,9 @@
 
                 <td>
                     <span th:if="${!r.valid}" class="badge bg-danger" th:text="${r.errorMessage}"></span>
-                    <span th:if="${r.valid}" class="text-muted">—</span>
+                    <span th:if="${r.valid and dataType == 'payroll' and !#strings.isEmpty(r.errorMessage)}" class="badge bg-warning text-dark" th:text="${r.errorMessage}"></span>
+                    <span th:if="${r.valid and dataType == 'payroll' and #strings.isEmpty(r.errorMessage)}" class="badge bg-success">Inserted</span>
+                    <span th:if="${r.valid and dataType != 'payroll'}" class="text-muted">—</span>
                 </td>
             </tr>
             </tbody>

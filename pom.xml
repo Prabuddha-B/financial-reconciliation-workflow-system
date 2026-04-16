@@ -69,6 +69,12 @@
 			<scope>runtime</scope>
 		</dependency>
 
+		<!-- H2 for local development and tests -->
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+		</dependency>
+
 		<!-- DevTools -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

@@ -9,8 +9,11 @@
 <body class="container mt-5">
 
 <h2 class="mb-4">Upload Data File</h2>
+<p class="text-muted">Upload receipt CSV/XLSX files for validation or payroll CSV files for database ingestion.</p>
 
 <div class="container mt-4">
+
+    <div th:if="${uploadError}" class="alert alert-danger" th:text="${uploadError}"></div>
 
     <form action="/ingestion/upload"
           method="post"
@@ -23,7 +26,7 @@
              style="cursor:pointer;">
 
             <p class="mb-2">Drag & Drop file here</p>
-            <p class="text-muted">or click to select file</p>
+            <p class="text-muted">or click to select a receipt CSV/XLSX or payroll CSV file</p>
 
             <input type="file" id="fileInput" name="file"
                    class="form-control"
@@ -94,7 +97,7 @@
 
         if (!allowed.includes(ext)) {
             fileName.innerText = "";
-            fileError.innerText = "Only CSV or XLSX files allowed.";
+            fileError.innerText = "Only receipt CSV/XLSX or payroll CSV files are allowed.";
             document.getElementById("fileInput").value = "";
             return;
         }
