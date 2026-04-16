@@ -1,4 +1,4 @@
-package com.peradeniya.frwss.model;
+package com.frwss.system.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
