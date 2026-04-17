@@ -28,19 +28,52 @@ public class IngestionController {
     }
 
     @PostMapping("/ingestion/upload/payroll")
-    public String uploadPayrollCsv(@RequestParam("file") MultipartFile file, RedirectAttributes attributes){
-        if(file.isEmpty()){
+    public String uploadPayrollCsv(@RequestParam("file") MultipartFile file, RedirectAttributes attributes) {
+        if (file.isEmpty()) {
             attributes.addFlashAttribute("message", "Please select a payroll CSV file to upload.");
             return "redirect:/ingestion/upload";
         }
 
-        try{
+        try {
             ingestionService.savePayrollCsv(file);
             attributes.addFlashAttribute("message", "Payroll data uploaded successfully!");
-        } catch(Exception e){
+        } catch (Exception e) {
             attributes.addFlashAttribute("message", "Upload failed : " + e.getMessage());
         }
 
+        return "redirect:/ingestion/upload";
+    }
+
+    @PostMapping("/upload-receipts")
+    public String uploadReceipts(@RequestParam("file") MultipartFile file, RedirectAttributes attributes) {
+        try {
+            ingestionService.saveReceiptCsv(file);
+            attributes.addFlashAttribute("message", "Receipts uploaded successfully!");
+        } catch (Exception e) {
+            attributes.addFlashAttribute("error", "Error: " + e.getMessage());
+        }
+        return "redirect:/ingestion/upload";
+    }
+
+    @PostMapping("/upload-purchases")
+    public String uploadPurchases(@RequestParam("file") MultipartFile file, RedirectAttributes attributes) {
+        try {
+            ingestionService.saveStockPurchaseCsv(file);
+            attributes.addFlashAttribute("message", "Stock purchases uploaded successfully!");
+        } catch (Exception e) {
+            attributes.addFlashAttribute("error", "Purchase Upload Error: " + e.getMessage());
+        }
+        return "redirect:/ingestion/upload";
+    }
+
+    @PostMapping("/upload-accounting")
+    public String uploadAccountingRecords(@RequestParam("file") MultipartFile file, RedirectAttributes attributes) {
+        try {
+            ingestionService.saveAccountingRecordCsv(file);
+            attributes.addFlashAttribute("message", "Master Accounting Records uploaded successfully!");
+        } catch (Exception e) {
+            attributes.addFlashAttribute("error", "Accounting Upload Error: " + e.getMessage());
+        }
         return "redirect:/ingestion/upload";
     }
 

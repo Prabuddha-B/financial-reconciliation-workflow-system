@@ -4,29 +4,46 @@
     <title>FRWSS - Data Ingestion</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <style>
-        body { background-color: #f8f9fa; }
-        .card { border-radius: 12px; border: none; }
-        .section-title { font-weight: 600; color: #495057; }
-        .upload-card { transition: transform 0.2s; }
-        .upload-card:hover { transform: translateY(-5px); }
+        body { background-color: #f4f7f6; font-family: 'Inter', sans-serif; }
+        .card { border-radius: 12px; border: none; transition: transform 0.2s, box-shadow 0.2s; }
+        .section-title { font-weight: 600; color: #343a40; }
+        .upload-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important; }
+        .btn-primary { background-color: #0d6efd; border: none; }
+        .btn-success { background-color: #198754; border: none; }
+        .btn-warning { background-color: #f39c12; color: white; border: none; }
+        .btn-warning:hover { color: white; background-color: #e67e22; }
     </style>
 </head>
 <body class="container py-5">
+
 <div class="text-center mb-5">
-    <h1 class="display-5 fw-bold">FRWSS Portal</h1>
-    <p class="lead text-muted">System for Financial Reconciliation and Workflow Support</p>
+    <h1 class="display-5 fw-bold text-dark">FRWSS Portal</h1>
+    <p class="lead text-muted">Financial Reconciliation & Workflow Support System</p>
+    <span class="badge bg-secondary px-3 py-2">University of Peradeniya</span>
 </div>
 
-<div th:if="${message}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
-    <span th:text="${message}"></span>
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div th:if="${message}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <span th:text="${message}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    </div>
 </div>
 
-<div class="row g-4">
-    <div class="col-md-6">
+<div class="row g-4 mt-2">
+
+    <div class="col-md-6 col-lg-4">
         <div class="card shadow-sm p-4 h-100 upload-card">
-            <h4 class="section-title mb-3">📦 Financial Records</h4>
-            <p class="small text-muted">Ingest main ledger data (Reference ID, Amount, Date).</p>
+            <h4 class="section-title mb-3">📦 Ledger Records</h4>
+            <p class="small text-muted mb-4">Ingest main accounting ledger data (Reference ID, Module, Amount).</p>
             <form method="POST" th:action="@{/upload-csv}" enctype="multipart/form-data">
                 <div class="mb-3">
                     <input type="file" name="file" class="form-control" accept=".csv" required>
@@ -36,10 +53,10 @@
         </div>
     </div>
 
-    <div class="col-md-6">
+    <div class="col-md-6 col-lg-4">
         <div class="card shadow-sm p-4 h-100 upload-card">
-            <h4 class="section-title mb-3">💰 Payroll System</h4>
-            <p class="small text-muted">Ingest employee salary records and audit data.</p>
+            <h4 class="section-title mb-3">💰 Payroll Data</h4>
+            <p class="small text-muted mb-4">Ingest employee salary records and internal audit data.</p>
             <form method="POST" th:action="@{/ingestion/upload/payroll}" enctype="multipart/form-data">
                 <div class="mb-3">
                     <input type="file" name="file" class="form-control" accept=".csv" required>
@@ -48,10 +65,49 @@
             </form>
         </div>
     </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow-sm p-4 h-100 upload-card">
+            <h4 class="section-title mb-3">🧾 Receipts System</h4>
+            <p class="small text-muted mb-4">Ingest customer payment receipts and external reference data.</p>
+            <form method="POST" th:action="@{/upload-receipts}" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <input type="file" name="file" class="form-control" accept=".csv" required>
+                </div>
+                <button type="submit" class="btn btn-warning w-100">Process Receipts</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow-sm p-4 h-100 upload-card">
+            <h4 class="section-title mb-3">🛒 Stock Purchases</h4>
+            <p class="small text-muted mb-4">Ingest vendor invoices and inventory procurement data.</p>
+            <form method="POST" th:action="@{/upload-purchases}" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <input type="file" name="file" class="form-control" accept=".csv" required>
+                </div>
+                <button type="submit" class="btn btn-info w-100 text-white">Process Purchases</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow-sm p-4 h-100 upload-card border-dark">
+            <h4 class="section-title mb-3">🏛️ Accounting Master</h4>
+            <p class="small text-muted mb-4">Ingest the Master Ledger for cross-system reconciliation.</p>
+            <form method="POST" th:action="@{/upload-accounting}" enctype="multipart/form-data">
+                <div class="mb-3"><input type="file" name="file" class="form-control" accept=".csv" required></div>
+                <button type="submit" class="btn btn-secondary w-100">Process Master Ledger</button>
+            </form>
+        </div>
+    </div>
+
 </div>
 
-<footer class="mt-5 text-center text-muted">
-    <small>&copy; 2026 University of Peradeniya - CS Department</small>
+<footer class="mt-5 pt-5 text-center text-muted border-top">
+    <p class="mb-1">&copy; 2026 University of Peradeniya</p>
+    <small>Computer Science Specialization - Final Major Project</small>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

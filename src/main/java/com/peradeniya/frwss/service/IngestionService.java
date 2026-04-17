@@ -2,8 +2,10 @@ package com.peradeniya.frwss.service;
 
 import com.peradeniya.frwss.model.FinancialRecord;
 import com.peradeniya.frwss.model.Payroll;
-import com.peradeniya.frwss.repository.FinancialRecordRepository;
-import com.peradeniya.frwss.repository.PayrollRepository;
+import com.peradeniya.frwss.model.Receipt;
+import com.peradeniya.frwss.model.StockPurchase;
+import com.peradeniya.frwss.model.AccountingRecord;
+import com.peradeniya.frwss.repository.*;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -30,6 +32,15 @@ public class IngestionService {
 
     @Autowired
     private PayrollRepository payrollRepository;
+
+    @Autowired
+    private ReceiptRepository receiptRepository;
+
+    @Autowired
+    private StockPurchaseRepository stockPurchaseRepository;
+
+    @Autowired
+    private AccountingRecordRepository accountingRecordRepository;
 
     // Financial Record Logic (Existing & Working)
     public void processCSV(MultipartFile file) throws Exception {
@@ -109,6 +120,102 @@ public class IngestionService {
             } else {
                 System.out.println("No new payroll records (duplicates skipped).");
             }
+        }
+    }
+
+    public void saveReceiptCsv(MultipartFile file) throws IOException {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
+             CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.builder()
+                     .setHeader().setSkipHeaderRecord(true).setIgnoreHeaderCase(true).setTrim(true).build())) {
+
+            List<Receipt> receiptsToSave = new ArrayList<>();
+
+            for (CSVRecord record : csvParser) {
+                String rId = record.get("receipt_id");
+
+                // Only process if the ID is unique to the database
+                if (!receiptRepository.existsById(rId)) {
+                    Receipt receipt = new Receipt();
+                    receipt.setReceiptId(rId);
+                    receipt.setReferenceNo(record.get("reference_no"));
+                    receipt.setPayerName(record.get("payer_name"));
+                    receipt.setAmount(new BigDecimal(record.get("amount")));
+                    receipt.setReceiptDate(LocalDate.parse(record.get("receipt_date")));
+                    receipt.setEnteredBy(record.get("entered_by"));
+
+                    // Handling ISO 8601 formatting from Mockaroo
+                    String rawCreated = record.get("created_at").replace("Z", "");
+                    receipt.setCreatedAt(LocalDateTime.parse(rawCreated.substring(0, 19)));
+
+                    receiptsToSave.add(receipt);
+                }
+            }
+
+            if (!receiptsToSave.isEmpty()) {
+                receiptRepository.saveAll(receiptsToSave);
+                System.out.println("Successfully saved " + receiptsToSave.size() + " receipts!");
+            }
+        }
+    }
+
+    public void saveStockPurchaseCsv(MultipartFile file) throws IOException {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
+             CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.builder()
+                     .setHeader().setSkipHeaderRecord(true).setIgnoreHeaderCase(true).setTrim(true).build())) {
+
+            List<StockPurchase> purchasesToSave = new ArrayList<>();
+
+            for (CSVRecord record : csvParser) {
+                String pId = record.get("purchase_id");
+
+                if (!stockPurchaseRepository.existsById(pId)) {
+                    StockPurchase purchase = new StockPurchase();
+                    purchase.setPurchaseId(pId);
+                    purchase.setVendorName(record.get("vendor_name"));
+                    purchase.setInvoiceNo(record.get("invoice_no"));
+                    purchase.setAmount(new BigDecimal(record.get("amount")));
+                    purchase.setPurchaseDate(LocalDate.parse(record.get("purchase_date")));
+                    purchase.setEnteredBy(record.get("entered_by"));
+
+                    String rawCreated = record.get("created_at").replace("Z", "");
+                    purchase.setCreatedAt(LocalDateTime.parse(rawCreated.substring(0, 19)));
+
+                    purchasesToSave.add(purchase);
+                }
+            }
+            stockPurchaseRepository.saveAll(purchasesToSave);
+        }
+    }
+
+
+
+    public void saveAccountingRecordCsv(MultipartFile file) throws IOException {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
+             CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.builder()
+                     .setHeader().setSkipHeaderRecord(true).setIgnoreHeaderCase(true).setTrim(true).build())) {
+
+            List<AccountingRecord> recordsToSave = new ArrayList<>();
+
+            for (CSVRecord record : csvParser) {
+                String rId = record.get("record_id");
+
+                if (!accountingRecordRepository.existsById(rId)) {
+                    AccountingRecord accRecord = new AccountingRecord();
+                    accRecord.setRecordId(rId);
+                    accRecord.setReferenceNo(record.get("reference_no"));
+                    accRecord.setCategory(record.get("category"));
+                    accRecord.setAmount(new BigDecimal(record.get("amount")));
+                    accRecord.setRecordDate(LocalDate.parse(record.get("record_date")));
+                    accRecord.setEnteredBy(record.get("entered_by"));
+
+                    // Parsing ISO timestamp
+                    String rawCreated = record.get("created_at").replace("Z", "");
+                    accRecord.setCreatedAt(LocalDateTime.parse(rawCreated.substring(0, 19)));
+
+                    recordsToSave.add(accRecord);
+                }
+            }
+            accountingRecordRepository.saveAll(recordsToSave);
         }
     }
 }
