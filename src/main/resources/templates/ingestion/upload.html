@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/html">
+
 <head>
     <meta charset="UTF-8">
     <title>Upload File</title>
@@ -17,7 +18,21 @@
               enctype="multipart/form-data"
               onsubmit="return handleUpload()">
 
-            <!-- DRAG & DROP AREA -->
+             <!--Drop Down-->
+            <div class="mb-3">
+                <label for="dataType">Select Data Type</label>
+
+                <select id="dataType" name="dataType" class="form-select" required>
+                    <option value="">-- Select Type --</option>
+                    <option value="RECEIPT">Receipts</option>
+                    <option value="PAYROLL">Payroll</option>
+                    <option value="STOCK">Stock Purchases</option>
+                    <option value="ACCOUNTING">Accounting</option>
+                </select>
+
+            </div>
+
+            <!-- Drag & Drop Area -->
             <div id="dropArea"
                  class="border border-2 border-primary p-5 text-center rounded mb-3"
                  style="cursor:pointer;">
@@ -25,24 +40,21 @@
                 <p class="mb-2">Drag & Drop file here</p>
                 <p class="text-muted">or click to select file</p>
 
-                <input type="file" id="fileInput" name="file"
-                       class="form-control"
-                       hidden
-                       required>
+                <input type="file" id="fileInput" name="file" class="form-control" hidden required>
             </div>
 
-            <!-- FILE NAME -->
+            <!-- File Name -->
             <p id="fileName" class="text-success fw-bold"></p>
 
-            <!-- ERROR MESSAGE -->
+            <!-- Error Message -->
             <p id="fileError" class="text-danger fw-bold"></p>
 
-            <!-- UPLOAD BUTTON -->
+            <!-- Upload Button -->
             <button id="uploadBtn" class="btn btn-primary">
                 Upload
             </button>
 
-            <!-- STATUS BAR -->
+            <!-- Status Bar -->
             <p id="uploadStatus" class="text-info mt-2"></p>
 
         </form>
@@ -50,7 +62,6 @@
     </div>
 
     <script>
-
         document.addEventListener("DOMContentLoaded", function () {
 
             const dropArea = document.getElementById("dropArea");
@@ -129,7 +140,6 @@
 
             return true;
         }
-
     </script>
 </body>
 </html>

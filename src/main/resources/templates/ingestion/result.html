@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <title>Uploaded Data</title>
 
@@ -14,6 +15,10 @@
 <body class="container mt-5">
 
     <h3>Uploaded Data</h3>
+
+    <h5 class="text-muted">
+        Data Type: <span th:text="${dataType}"></span>
+    </h5>
 
     <div class="row mb-4">
 
@@ -50,9 +55,15 @@
 
         <!-- SEARCH -->
         <div class="col-md-6">
-            <input type="text" id="searchInput"
+            <input type="text"
+                   id="searchInput"
                    class="form-control"
-                   placeholder="Search by reference or payer name...">
+                   th:placeholder="
+                                    ${dataType == 'RECEIPT'} ? 'Search by reference or payer name...' :
+                                    (${dataType == 'PAYROLL'} ? 'Search by employee or reference...' :
+                                    (${dataType == 'STOCK'} ? 'Search by vendor or invoice...' :
+                                    (${dataType == 'ACCOUNTING'} ? 'Search by account or transaction...' :
+                                    'Search...')))">
         </div>
 
         <!-- FILTER -->
@@ -69,42 +80,147 @@
 
 
     <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-        <table class="table table-bordered table-hover">
 
-            <!-- HEADER -->
-            <thead class="table-dark" style="position: sticky; top: 0;">
-            <tr>
-                <th>Receipt ID</th>
-                <th>Reference No</th>
-                <th>Payer Name</th>
-                <th>Amount</th>
-                <th>Date</th>
-                <th>Entered By</th>
-                <th>Error</th>
-            </tr>
-            </thead>
+        <div th:if="${dataType == 'RECEIPT'}">
 
-            <!-- DATA -->
-            <tbody>
-            <tr th:each="r : ${records}"
-                th:classappend="${!r.valid} ? 'table-danger'"
-                th:attr="data-valid=${r.valid}">
+            <!-- Receipt Table -->
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th>Receipt ID</th>
+                    <th>Reference No</th>
+                    <th>Payer Name</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                    <th>Entered By</th>
+                    <th>Error</th>
+                </tr>
+                </thead>
 
-                <td th:text="${r.receiptId}"></td>
-                <td th:text="${r.referenceNo}"></td>
-                <td th:text="${r.payerName}"></td>
-                <td class="text-end" th:text="${r.amount}" th:classappend="${!r.valid} ? 'text-danger fw-bold'"></td>
-                <td th:text="${r.date}"></td>
-                <td th:text="${r.enteredBy}"></td>
+                <tbody>
+                <tr th:each="r : ${records}" th:classappend="${!r.valid} ? 'table-danger'">
+                    <td th:text="${r.receiptId}"></td>
+                    <td th:text="${r.referenceNo}"></td>
+                    <td th:text="${r.payerName}"></td>
+                    <td th:text="${r.amount}"></td>
+                    <td th:text="${r.date}"></td>
+                    <td th:text="${r.enteredBy}"></td>
+                    <td>
+                        <span th:if="${!r.valid}" th:text="${r.errorMessage}" class="badge bg-danger"></span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
 
-                <td>
-                    <span th:if="${!r.valid}" class="badge bg-danger" th:text="${r.errorMessage}"></span>
-                    <span th:if="${r.valid}" class="text-muted">—</span>
-                </td>
-            </tr>
-            </tbody>
+        <div th:if="${dataType == 'PAYROLL'}">
 
-        </table>
+            <!-- Payroll Table-->
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th>Payroll ID</th>
+                    <th>Employee ID</th>
+                    <th>Employee Name</th>
+                    <th>Salary</th>
+                    <th>Payment Date</th>
+                    <th>Status</th>
+                    <th>Error</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="p : ${records}"
+                    th:classappend="${!p.valid} ? 'table-danger'"
+                    th:attr="data-valid=${p.valid}">
+                    <td th:text="${p.payrollId}"></td>
+                    <td th:text="${p.employeeId}"></td>
+                    <td th:text="${p.employeeName}"></td>
+                    <td th:text="${p.salary}"></td>
+                    <td th:text="${p.paymentDate}"></td>
+                    <td th:text="${p.status}"></td>
+                    <td>
+                        <span th:if="${!p.valid}" class="badge bg-danger" th:text="${p.errorMessage}"></span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div th:if="${dataType == 'STOCK'}">
+
+            <!-- Stock Table-->
+            <table class="table table-bordered table-hover">
+                <thead class="table-dark">
+                <tr>
+                    <th>Purchase ID</th>
+                    <th>Vendor</th>
+                    <th>Invoice</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                    <th>Entered By</th>
+                    <th>Error</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="s : ${records}"
+                    th:classappend="${!s.valid} ? 'table-danger'">
+
+                    <td th:text="${s.purchaseId}"></td>
+                    <td th:text="${s.vendorName}"></td>
+                    <td th:text="${s.invoiceNo}"></td>
+                    <td class="text-end" th:text="${s.amount}"></td>
+                    <td th:text="${s.purchaseDate}"></td>
+                    <td th:text="${s.enteredBy}"></td>
+
+                    <td>
+            <span th:if="${!s.valid}"
+                  class="badge bg-danger"
+                  th:text="${s.errorMessage}"></span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div th:if="${dataType == 'ACCOUNTING'}">
+
+            <!-- Accounting Table -->
+            <table class="table table-bordered table-hover">
+                <thead class="table-dark">
+                <tr>
+                    <th>Record ID</th>
+                    <th>Reference</th>
+                    <th>Module</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                    <th>Created At</th>
+                    <th>Error</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="a : ${records}"
+                    th:classappend="${!a.valid} ? 'table-danger'">
+
+                    <td th:text="${a.recordId}"></td>
+                    <td th:text="${a.referenceNo}"></td>
+                    <td th:text="${a.module}"></td>
+                    <td class="text-end" th:text="${a.amount}"></td>
+                    <td th:text="${a.recordDate}"></td>
+                    <td th:text="${a.createdAt}"></td>
+
+                    <td>
+            <span th:if="${!a.valid}"
+                  class="badge bg-danger"
+                  th:text="${a.errorMessage}"></span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+        </div>
     </div>
 
     <!-- JS -->
@@ -189,9 +305,6 @@
 
             applyFilters();
         }
-
     </script>
-
-
 </body>
 </html>

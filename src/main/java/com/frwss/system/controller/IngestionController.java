@@ -1,6 +1,9 @@
 package com.frwss.system.controller;
 
+import com.frwss.system.model.AccountingRecord;
+import com.frwss.system.model.Payroll;
 import com.frwss.system.model.Receipt;
+import com.frwss.system.model.StockPurchase;
 import com.frwss.system.service.IngestionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -28,27 +31,92 @@ public class IngestionController {
     }
 
     @PostMapping("/upload")
-    public String handleFileUpload(@RequestParam("file") MultipartFile file, Model model) {
+    public String handleFileUpload(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("dataType") String dataType,
+            Model model) {
 
-        List<Receipt> records = ingestionService.processFile(file);
+        List<?> records = ingestionService.processFile(file, dataType);
 
         model.addAttribute("records", records);
+        model.addAttribute("dataType", dataType);
 
-        int total = records.size();
-        int validCount = 0;
-        int invalidCount = 0;
 
-        for(Receipt r : records){
-            if(r.isValid()) validCount++;
-            else invalidCount++;
+        if ("RECEIPT".equals(dataType)) {
+
+            List<Receipt> list = (List<Receipt>) records;
+
+            int total = list.size();
+            int validCount = 0;
+            int invalidCount = 0;
+
+            for (Receipt r : list) {
+                if (r.isValid()) validCount++;
+                else invalidCount++;
+            }
+
+            model.addAttribute("total", total);
+            model.addAttribute("validCount", validCount);
+            model.addAttribute("invalidCount", invalidCount);
         }
 
-        model.addAttribute("total", total);
-        model.addAttribute("validCount",validCount);
-        model.addAttribute("invalidCount",invalidCount);
+        else if ("PAYROLL".equals(dataType)) {
+
+            List<Payroll> list = (List<Payroll>) records;
+
+            int total = list.size();
+            int validCount = 0;
+            int invalidCount = 0;
+
+            for (Payroll p : list) {
+                if (p.isValid()) validCount++;
+                else invalidCount++;
+            }
+
+            model.addAttribute("total", total);
+            model.addAttribute("validCount", validCount);
+            model.addAttribute("invalidCount", invalidCount);
+        }
+
+        else if ("STOCK".equals(dataType)) {
+
+            List<StockPurchase> list = (List<StockPurchase>) records;
+
+            int total = list.size();
+            int validCount = 0;
+            int invalidCount = 0;
+
+            for (StockPurchase s : list) {
+                if (s.isValid()) validCount++;
+                else invalidCount++;
+            }
+
+            model.addAttribute("total", total);
+            model.addAttribute("validCount", validCount);
+            model.addAttribute("invalidCount", invalidCount);
+        }
+
+        else if ("ACCOUNTING".equals(dataType)) {
+
+            List<AccountingRecord> list = (List<AccountingRecord>) records;
+
+            int total = list.size();
+            int validCount = 0;
+            int invalidCount = 0;
+
+            for (AccountingRecord a : list) {
+                if (a.isValid()) validCount++;
+                else invalidCount++;
+            }
+
+            model.addAttribute("total", total);
+            model.addAttribute("validCount", validCount);
+            model.addAttribute("invalidCount", invalidCount);
+        }
 
         return "ingestion/result";
     }
+
 
     @GetMapping("/dashboard")
     public String dashboard(){
