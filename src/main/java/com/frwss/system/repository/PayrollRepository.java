@@ -1,6 +1,6 @@
-package com.peradeniya.frwss.repository;
+package com.frwss.system.repository;
 
-import com.peradeniya.frwss.model.Payroll;
+import com.frwss.system.model.Payroll;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,4 +1,4 @@
-package com.peradeniya.frwss;
+package com.frwss.system;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

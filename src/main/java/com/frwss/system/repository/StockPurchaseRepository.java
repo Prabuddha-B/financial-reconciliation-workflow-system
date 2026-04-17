@@ -1,6 +1,6 @@
-package com.peradeniya.frwss.repository;
+package com.frwss.system.repository;
 
-import com.peradeniya.frwss.model.StockPurchase;
+import com.frwss.system.model.StockPurchase;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface StockPurchaseRepository extends JpaRepository<StockPurchase, String> {
