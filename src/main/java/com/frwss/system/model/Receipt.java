@@ -1,38 +1,44 @@
 package com.frwss.system.model;
 
+import jakarta.persistence.*;
+import org.springframework.data.domain.Persistable;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "receipts")
 public class Receipt {
 
-//    Attributes
-    private int receiptId;
+    @Id
+    @Column(name = "receipt_id")
+    private String receiptId;
+
+    @Column(name = "reference_no")
     private String referenceNo;
+
+    @Column(name = "payer_name")
     private String payerName;
-    private double amount;
-    private String date;
+
+    private BigDecimal amount;
+
+    @Column(name = "receipt_date")
+    private LocalDate receiptDate;
+
+    @Column(name = "entered_by")
     private String enteredBy;
-    private boolean valid;
-    private String errorMessage;
 
-//    Constructor
-    public Receipt(int receiptId, String referenceNo, String payerName, double amount, String date, String enteredBy) {
-        setReceiptId(receiptId);
-        setReferenceNo(referenceNo);
-        setPayerName(payerName);
-        setAmount(amount);
-        setDate(date);
-        setEnteredBy(enteredBy);
-        setValid(true);
-        setErrorMessage("");
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    // Getters and Setters for all fields...
 
 
-    }
-
-//    Getters and Setter
-
-    public int getReceiptId() {
+    public String getReceiptId() {
         return receiptId;
     }
 
-    public void setReceiptId(int receiptId) {
+    public void setReceiptId(String receiptId) {
         this.receiptId = receiptId;
     }
 
@@ -52,20 +58,20 @@ public class Receipt {
         this.payerName = payerName;
     }
 
-    public double getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
-    public void setAmount(double amount) {
+    public void setAmount(BigDecimal amount) {
         this.amount = amount;
     }
 
-    public String getDate() {
-        return date;
+    public LocalDate getReceiptDate() {
+        return receiptDate;
     }
 
-    public void setDate(String date) {
-        this.date = date;
+    public void setReceiptDate(LocalDate receiptDate) {
+        this.receiptDate = receiptDate;
     }
 
     public String getEnteredBy() {
@@ -76,19 +82,11 @@ public class Receipt {
         this.enteredBy = enteredBy;
     }
 
-    public boolean isValid() {
-        return valid;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
-    public void setValid(boolean valid) {
-        this.valid = valid;
-    }
-
-    public String getErrorMessage() {
-        return errorMessage;
-    }
-
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }

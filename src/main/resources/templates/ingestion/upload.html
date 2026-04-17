@@ -1,145 +1,191 @@
 <!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/html">
-
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Upload File</title>
+    <title>FRWSS - Data Ingestion</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+
+    <style>
+        body {
+            background-color: #f4f7f6;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .drop-area {
+            border: 2px dashed #0d6efd;
+            transition: background 0.3s, border 0.3s;
+            border-radius: 15px;
+        }
+
+        .drop-area.dragover {
+            background-color: #e9ecef;
+            border-color: #0a58ca;
+        }
+
+        .card {
+            border-radius: 12px;
+            border: none;
+        }
+    </style>
 </head>
 
-<body class="container mt-5">
+<body class="container py-5">
 
-    <h2> Upload Data File</h2>
+<div class="text-center mb-5">
+    <h1 class="display-5 fw-bold text-dark">FRWSS Portal</h1>
+    <p class="lead text-muted">University of Peradeniya - Financial Reconciliation</p>
+</div>
 
-    <div class="container mt-5">
+<div class="row justify-content-center">
+    <div class="col-md-6">
 
-        <form action="/ingestion/upload"
-              method="post"
-              enctype="multipart/form-data"
-              onsubmit="return handleUpload()">
+        <div class="card shadow p-4">
 
-             <!--Drop Down-->
-            <div class="mb-3">
-                <label for="dataType">Select Data Type</label>
+            <h3 class="mb-4 text-center">Upload Data File</h3>
 
-                <select id="dataType" name="dataType" class="form-select" required>
-                    <option value="">-- Select Type --</option>
-                    <option value="RECEIPT">Receipts</option>
-                    <option value="PAYROLL">Payroll</option>
-                    <option value="STOCK">Stock Purchases</option>
-                    <option value="ACCOUNTING">Accounting</option>
-                </select>
-
+            <!-- SUCCESS / ERROR -->
+            <div th:if="${message}" class="alert alert-success alert-dismissible fade show">
+                <span th:text="${message}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
 
-            <!-- Drag & Drop Area -->
-            <div id="dropArea"
-                 class="border border-2 border-primary p-5 text-center rounded mb-3"
-                 style="cursor:pointer;">
-
-                <p class="mb-2">Drag & Drop file here</p>
-                <p class="text-muted">or click to select file</p>
-
-                <input type="file" id="fileInput" name="file" class="form-control" hidden required>
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+                <span th:text="${error}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
 
-            <!-- File Name -->
-            <p id="fileName" class="text-success fw-bold"></p>
+            <!-- FORM -->
+            <form th:action="@{/ingestion/preview}"
+                  method="post"
+                  enctype="multipart/form-data"
+                  onsubmit="return handleUpload()">
 
-            <!-- Error Message -->
-            <p id="fileError" class="text-danger fw-bold"></p>
+                <!-- DATA TYPE -->
+                <div class="mb-4">
+                    <label for="dataType" class="form-label fw-bold">Select Data Source</label>
+                    <select id="dataType" name="dataType" class="form-select" required>
+                        <option value="">-- Choose Category --</option>
+                        <option value="RECEIPT">Receipts System</option>
+                        <option value="PAYROLL">Payroll Records</option>
+                        <option value="STOCK">Stock Purchases</option>
+                        <option value="ACCOUNTING">Accounting Master Ledger</option>
+                    </select>
+                </div>
 
-            <!-- Upload Button -->
-            <button id="uploadBtn" class="btn btn-primary">
-                Upload
-            </button>
+                <!-- DROP AREA -->
+                <div id="dropArea" class="drop-area p-5 text-center mb-3" style="cursor:pointer;">
+                    <p class="mb-2">Drag & Drop file here</p>
+                    <p class="text-muted small">or click to browse (CSV only)</p>
 
-            <!-- Status Bar -->
-            <p id="uploadStatus" class="text-info mt-2"></p>
+                    <input type="file"
+                           id="fileInput"
+                           name="file"
+                           class="form-control"
+                           hidden
+                           required
+                           accept=".csv">
+                </div>
 
-        </form>
+                <!-- FILE INFO -->
+                <p id="fileName" class="text-primary fw-bold text-center"></p>
+                <p id="fileError" class="text-danger small text-center"></p>
+
+                <!-- BUTTON -->
+                <button id="uploadBtn"
+                        type="submit"
+                        class="btn btn-primary w-100 py-2 fw-bold">
+                    Generate Preview
+                </button>
+
+                <p id="uploadStatus" class="text-center text-muted mt-2 small"></p>
+
+            </form>
+        </div>
 
     </div>
+</div>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
+<!-- SCRIPT -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
 
-            const dropArea = document.getElementById("dropArea");
-            const fileInput = document.getElementById("fileInput");
+        const dropArea = document.getElementById("dropArea");
+        const fileInput = document.getElementById("fileInput");
 
-            // Click to open file picker
-            dropArea.addEventListener("click", () => fileInput.click());
+        // click open file picker
+        dropArea.addEventListener("click", () => fileInput.click());
 
-            // Drag over
-            dropArea.addEventListener("dragover", (e) => {
-                e.preventDefault();
-                dropArea.classList.add("bg-light");
-            });
-
-            // Drag leave
-            dropArea.addEventListener("dragleave", () => {
-                dropArea.classList.remove("bg-light");
-            });
-
-            // Drop file
-            dropArea.addEventListener("drop", (e) => {
-                e.preventDefault();
-                dropArea.classList.remove("bg-light");
-
-                const file = e.dataTransfer.files[0];
-                fileInput.files = e.dataTransfer.files;
-
-                handleFileSelection(file);
-            });
-
-            // File selected normally
-            fileInput.addEventListener("change", function () {
-                const file = this.files[0];
-                handleFileSelection(file);
-            });
-
+        // drag over
+        dropArea.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            dropArea.classList.add("dragover");
         });
 
-        // File Validation
-        function handleFileSelection(file) {
+        // drag leave
+        dropArea.addEventListener("dragleave", () => {
+            dropArea.classList.remove("dragover");
+        });
 
-            const fileName = document.getElementById("fileName");
-            const fileError = document.getElementById("fileError");
+        // drop file (SAFE VERSION)
+        dropArea.addEventListener("drop", (e) => {
+            e.preventDefault();
+            dropArea.classList.remove("dragover");
 
-            fileError.innerText = "";
+            const dt = new DataTransfer();
+            dt.items.add(e.dataTransfer.files[0]);
+            fileInput.files = dt.files;
 
-            if (!file) return;
+            handleFileSelection(fileInput.files[0]);
+        });
 
-            const allowedTypes = ["csv", "xlsx"];
-            const extension = file.name.split(".").pop().toLowerCase();
+        // manual file select
+        fileInput.addEventListener("change", function () {
+            handleFileSelection(this.files[0]);
+        });
+    });
 
-            if (!allowedTypes.includes(extension)) {
-                fileName.innerText = "";
-                fileError.innerText = "Invalid file type. Only CSV or XLSX allowed.";
-                document.getElementById("fileInput").value = "";
-                return;
-            }
+    // FILE VALIDATION
+    function handleFileSelection(file) {
 
-            fileName.innerText = "Selected: " + file.name;
+        const fileName = document.getElementById("fileName");
+        const fileError = document.getElementById("fileError");
+
+        fileError.innerText = "";
+
+        if (!file) return;
+
+        const extension = file.name.split(".").pop().toLowerCase();
+
+        if (extension !== "csv") {
+            fileName.innerText = "";
+            fileError.innerText = "Please upload a CSV file only.";
+            document.getElementById("fileInput").value = "";
+            return;
         }
 
-        // Handle Upload
-        function handleUpload() {
+        fileName.innerText = "Selected: " + file.name;
+    }
 
-            const fileInput = document.getElementById("fileInput");
-            const uploadBtn = document.getElementById("uploadBtn");
-            const status = document.getElementById("uploadStatus");
+    // FORM SUBMIT GUARD
+    function handleUpload() {
 
-            if (!fileInput.files.length) {
-                document.getElementById("fileError").innerText = "Please select a file";
-                return false;
-            }
+        const fileInput = document.getElementById("fileInput");
+        const uploadBtn = document.getElementById("uploadBtn");
+        const status = document.getElementById("uploadStatus");
 
-            uploadBtn.disabled = true;
-            status.innerText = "Uploading...";
-
-            return true;
+        if (!fileInput.files.length) {
+            document.getElementById("fileError").innerText = "Please select a file";
+            return false;
         }
-    </script>
+
+        uploadBtn.disabled = true;
+        status.innerText = "Processing File for Preview...";
+
+        return true;
+    }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>

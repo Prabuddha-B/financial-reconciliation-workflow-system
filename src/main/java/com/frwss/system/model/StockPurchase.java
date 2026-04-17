@@ -1,80 +1,70 @@
 package com.frwss.system.model;
 
+import jakarta.persistence.*;
+import org.springframework.data.domain.Persistable;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "stock_purchases")
 public class StockPurchase {
 
+    @Id
+    @Column(name = "purchase_id")
     private String purchaseId;
+
+    @Column(name = "vendor_name")
     private String vendorName;
+
+    @Column(name = "invoice_no")
     private String invoiceNo;
-    private double amount;
-    private String purchaseDate;
-    private String enteredBy;
-    private String createdAt;
 
-    private boolean valid;
-    private String errorMessage;
+    private BigDecimal amount;
 
-    // Getters & Setters
+    @Column(name = "purchase_date")
+    private LocalDate purchaseDate;
+
+    @Column(name = "entered_by")
+    private String enteredBy; // Now a String/VARCHAR(50)
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
     public String getPurchaseId() {
         return purchaseId;
-    }
-    public void setPurchaseId(String purchaseId) {
-        this.purchaseId = purchaseId;
     }
 
     public String getVendorName() {
         return vendorName;
     }
-    public void setVendorName(String vendorName) {
-        this.vendorName = vendorName;
-    }
 
     public String getInvoiceNo() {
         return invoiceNo;
     }
-    public void setInvoiceNo(String invoiceNo) {
-        this.invoiceNo = invoiceNo;
-    }
 
-    public double getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
-    public void setAmount(double amount) {
-        this.amount = amount;
-    }
 
-    public String getPurchaseDate() {
+    public LocalDate getPurchaseDate() {
         return purchaseDate;
-    }
-    public void setPurchaseDate(String purchaseDate) {
-        this.purchaseDate = purchaseDate;
     }
 
     public String getEnteredBy() {
         return enteredBy;
     }
-    public void setEnteredBy(String enteredBy) {
-        this.enteredBy = enteredBy;
-    }
 
-    public String getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
-    public void setCreatedAt(String createdAt) {
-        this.createdAt = createdAt;
-    }
 
-    public boolean isValid() {
-        return valid;
-    }
-    public void setValid(boolean valid) {
-        this.valid = valid;
-    }
-
-    public String getErrorMessage() {
-        return errorMessage;
-    }
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
-    }
+    // Getters and Setters
+    public void setPurchaseId(String purchaseId) { this.purchaseId = purchaseId; }
+    public void setVendorName(String vendorName) { this.vendorName = vendorName; }
+    public void setInvoiceNo(String invoiceNo) { this.invoiceNo = invoiceNo; }
+    public void setAmount(BigDecimal amount) { this.amount = amount; }
+    public void setPurchaseDate(LocalDate purchaseDate) { this.purchaseDate = purchaseDate; }
+    public void setEnteredBy(String enteredBy) { this.enteredBy = enteredBy; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }

@@ -1,72 +1,72 @@
 package com.frwss.system.model;
 
-public class AccountingRecord {
+import jakarta.persistence.*;
+import org.springframework.data.domain.Persistable;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "accounting_records")
+public class AccountingRecord{
+
+    @Id
+    @Column(name = "record_id")
     private String recordId;
+
+    @Column(name = "reference_no")
     private String referenceNo;
-    private String module;
-    private double amount;
-    private String recordDate;
-    private String createdAt;
 
-    private boolean valid;
-    private String errorMessage;
+    private String category; // e.g., PAYROLL, PURCHASE, RECEIPT
 
-    // Getters & Setters
+    private BigDecimal amount;
+
+    @Column(name = "record_date")
+    private LocalDate recordDate;
+
+    @Column(name = "entered_by")
+    private String enteredBy;
 
     public String getRecordId() {
         return recordId;
-    }
-    public void setRecordId(String recordId) {
-        this.recordId = recordId;
     }
 
     public String getReferenceNo() {
         return referenceNo;
     }
-    public void setReferenceNo(String referenceNo) {
-        this.referenceNo = referenceNo;
+
+    public String getCategory() {
+        return category;
     }
 
-    public String getModule() {
-        return module;
-    }
-    public void setModule(String module) {
-        this.module = module;
-    }
-
-    public double getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
-    public void setAmount(double amount) {
-        this.amount = amount;
-    }
 
-    public String getRecordDate() {
+    public LocalDate getRecordDate() {
         return recordDate;
     }
-    public void setRecordDate(String recordDate) {
-        this.recordDate = recordDate;
+
+    public String getEnteredBy() {
+        return enteredBy;
     }
 
-    public String getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
-    public void setCreatedAt(String createdAt) {
-        this.createdAt = createdAt;
-    }
 
-    public boolean isValid() {
-        return valid;
-    }
-    public void setValid(boolean valid) {
-        this.valid = valid;
-    }
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
-    public String getErrorMessage() {
-        return errorMessage;
-    }
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
+    // Standard Setters
+    public void setRecordId(String recordId) { this.recordId = recordId; }
+    public void setReferenceNo(String referenceNo) { this.referenceNo = referenceNo; }
+    public void setCategory(String category) { this.category = category; }
+    public void setAmount(BigDecimal amount) { this.amount = amount; }
+    public void setRecordDate(LocalDate recordDate) { this.recordDate = recordDate; }
+    public void setEnteredBy(String enteredBy) { this.enteredBy = enteredBy; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public void setModule(String module) {
     }
 }
