@@ -17,7 +17,8 @@ public class AccountingRecord{
     @Column(name = "reference_no")
     private String referenceNo;
 
-    private String category; // e.g., PAYROLL, PURCHASE, RECEIPT
+    @Column(name = "module")
+    private String module;
 
     private BigDecimal amount;
 
@@ -35,8 +36,8 @@ public class AccountingRecord{
         return referenceNo;
     }
 
-    public String getCategory() {
-        return category;
+    public String getModule() {
+        return module;
     }
 
     public BigDecimal getAmount() {
@@ -61,12 +62,9 @@ public class AccountingRecord{
     // Standard Setters
     public void setRecordId(String recordId) { this.recordId = recordId; }
     public void setReferenceNo(String referenceNo) { this.referenceNo = referenceNo; }
-    public void setCategory(String category) { this.category = category; }
+    public void setModule(String module) { this.module = module; }
     public void setAmount(BigDecimal amount) { this.amount = amount; }
     public void setRecordDate(LocalDate recordDate) { this.recordDate = recordDate; }
     public void setEnteredBy(String enteredBy) { this.enteredBy = enteredBy; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
-
-    public void setModule(String module) {
-    }
 }

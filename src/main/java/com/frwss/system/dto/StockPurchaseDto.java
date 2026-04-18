@@ -12,16 +12,6 @@ public class StockPurchaseDto {
 
     private boolean valid;
 
-    public StockPurchaseDto(String purchaseId, String vendorName, String invoiceNo, double amount, String purchaseDate, String enteredBy, String createdAt) {
-        this.purchaseId = purchaseId;
-        this.vendorName = vendorName;
-        this.invoiceNo = invoiceNo;
-        this.amount = amount;
-        this.purchaseDate = purchaseDate;
-        this.enteredBy = enteredBy;
-        this.createdAt = createdAt;
-    }
-
     private String errorMessage;
 
     // Getters & Setters

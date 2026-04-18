@@ -19,12 +19,7 @@ public class PayrollDto {
     private boolean valid;
     private String errorMessage;
 
-    // Getters and Setters
-
-    public String getPayrollId() {
-        return payrollId;
-    }
-
+    // Constructor
     public PayrollDto(String payrollId, String employeeId, String employeeName, BigDecimal salary, LocalDate paymentDate, String referenceNo, String status, LocalDateTime createdAt, String enteredBy) {
         setPayrollId(payrollId);
         setEmployeeId(employeeId);
@@ -37,6 +32,12 @@ public class PayrollDto {
         setEnteredBy(enteredBy);
         setValid(true);
         setErrorMessage("");
+    }
+
+    // Getters and Setters
+
+    public String getPayrollId() {
+        return payrollId;
     }
 
     public void setPayrollId(String payrollId) {

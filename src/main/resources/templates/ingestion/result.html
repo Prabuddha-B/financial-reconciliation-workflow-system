@@ -20,6 +20,7 @@
         Data Type: <span th:text="${dataType}"></span>
     </h5>
 
+    <!-- Record Summary -->
     <div class="row mb-4">
 
         <div class="col-md-4">
@@ -53,7 +54,7 @@
 
     <div class="row mb-3">
 
-        <!-- SEARCH -->
+        <!-- Search  -->
         <div class="col-md-6">
             <input type="text"
                    id="searchInput"
@@ -66,7 +67,7 @@
                                     'Search...')))">
         </div>
 
-        <!-- FILTER -->
+        <!-- Filter -->
         <div class="col-md-6 text-end">
             <button id="btnAll" class="btn btn-secondary" onclick="setFilter('all')">All</button>
             <button id="btnValid" class="btn btn-success" onclick="setFilter('valid')">Valid</button>
@@ -74,11 +75,19 @@
         </div>
     </div>
 
+    <!-- Action Buttons -->
+    <div class="d-flex gap-2 mb-3">
+        <form th:action="@{/ingestion/save}" method="post">
+            <button type="submit" class="btn btn-primary">Save Valid Records</button>
+        </form>
+        <a th:href="@{/ingestion/upload}" class="btn btn-outline-secondary">Back to Upload</a>
+    </div>
+
     <p id="noResultsMessage" class="text-center text-danger fw-bold mt-3" style="display:none;">
         No matching records found
     </p>
 
-
+    <!-- Dynamic Tables -->
     <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
 
         <div th:if="${dataType == 'RECEIPT'}">
@@ -98,12 +107,14 @@
                 </thead>
 
                 <tbody>
-                <tr th:each="r : ${records}" th:classappend="${!r.valid} ? 'table-danger'">
+                <tr th:each="r : ${records}"
+                    th:classappend="${!r.valid} ? 'table-danger'"
+                    th:attr="data-valid=${r.valid}">
                     <td th:text="${r.receiptId}"></td>
                     <td th:text="${r.referenceNo}"></td>
                     <td th:text="${r.payerName}"></td>
                     <td th:text="${r.amount}"></td>
-                    <td th:text="${r.date}"></td>
+                    <td th:text="${r.receiptDate}"></td>
                     <td th:text="${r.enteredBy}"></td>
                     <td>
                         <span th:if="${!r.valid}" th:text="${r.errorMessage}" class="badge bg-danger"></span>
@@ -165,7 +176,8 @@
 
                 <tbody>
                 <tr th:each="s : ${records}"
-                    th:classappend="${!s.valid} ? 'table-danger'">
+                    th:classappend="${!s.valid} ? 'table-danger'"
+                    th:attr="data-valid=${s.valid}">
 
                     <td th:text="${s.purchaseId}"></td>
                     <td th:text="${s.vendorName}"></td>
@@ -195,21 +207,22 @@
                     <th>Module</th>
                     <th>Amount</th>
                     <th>Date</th>
-                    <th>Created At</th>
+                    <th>Entered By</th>
                     <th>Error</th>
                 </tr>
                 </thead>
 
                 <tbody>
                 <tr th:each="a : ${records}"
-                    th:classappend="${!a.valid} ? 'table-danger'">
+                    th:classappend="${!a.valid} ? 'table-danger'"
+                    th:attr="data-valid=${a.valid}">
 
                     <td th:text="${a.recordId}"></td>
                     <td th:text="${a.referenceNo}"></td>
                     <td th:text="${a.module}"></td>
                     <td class="text-end" th:text="${a.amount}"></td>
                     <td th:text="${a.recordDate}"></td>
-                    <td th:text="${a.createdAt}"></td>
+                    <td th:text="${a.enteredBy}"></td>
 
                     <td>
             <span th:if="${!a.valid}"

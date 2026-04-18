@@ -1,6 +1,6 @@
 package com.frwss.system.controller;
 
-import com.frwss.system.dto.IngestionResult; // Or .dto depending on your package
+import com.frwss.system.dto.IngestionResult;
 import com.frwss.system.service.IngestionService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
@@ -17,40 +17,50 @@ public class IngestionController {
 
     private final IngestionService ingestionService;
 
+//    Constructor
     public IngestionController(IngestionService ingestionService) {
         this.ingestionService = ingestionService;
     }
 
+//    Loads the ingestion dashboard with summary stat
+    @GetMapping
+    public String ingestionPage(Model model) {
+        populateDashboardStats(model);
+        return "ingestion/dashboard";
+    }
+
+//    Alternative route for dashboard
+    @GetMapping("/dashboard")
+    public String dashboard(Model model) {
+        populateDashboardStats(model);
+        return "ingestion/dashboard";
+    }
+
+//    Display the file upload page for ingestion
     @GetMapping("/upload")
     public String showUploadPage() {
         return "ingestion/upload";
     }
 
+//    Handle File Uploads
     // STEP 1: PREVIEW
-    @PostMapping("/preview")
+    @PostMapping({"/preview", "/upload"})
     public String previewFile(
             @RequestParam("file") MultipartFile file,
             @RequestParam("dataType") String dataType,
             Model model,
-            HttpSession session
-    ) {
+            HttpSession session) {
         try {
-            // Use our new IngestionResult class
             IngestionResult result = ingestionService.processFileForPreview(file, dataType);
 
-            model.addAttribute("result", result);
             model.addAttribute("dataType", dataType);
+            model.addAttribute("records", result.getRecords());
+            model.addAttribute("total", result.getTotalRecords());
+            model.addAttribute("validCount", result.getValidRecords());
+            model.addAttribute("invalidCount", result.getInvalidRecords());
 
-            // IMPORTANT: Instead of storing the 'file', we process it here or
-            // store the data. For now, we'll assume the user will re-upload
-            // or we use a 'Direct Save' approach if you don't want to re-parse.
-            // For a UoP project, re-parsing in Step 2 is the easiest "Safe" way:
             session.setAttribute("lastFileName", file.getOriginalFilename());
             session.setAttribute("pendingType", dataType);
-
-            // To avoid the 'File is deleted' error, for now, your Service
-            // should probably save the file to a temp folder, OR you can
-            // just use the List from the 'result' object.
             session.setAttribute("pendingRecords", result.getRecords());
 
             return "ingestion/result";
@@ -61,6 +71,7 @@ public class IngestionController {
         }
     }
 
+//    Save only valid records
     // STEP 2: SAVE
     @PostMapping("/save")
     public String saveFile(HttpSession session, RedirectAttributes ra) {
@@ -74,10 +85,17 @@ public class IngestionController {
         }
 
         try {
-            // Updated Service method to save the List directly
-            ingestionService.saveProcessedRecords(records, dataType);
+            IngestionService.SaveSummary summary = ingestionService.saveProcessedRecords(records, dataType);
 
-            ra.addFlashAttribute("message", "Successfully saved records!");
+            String message = "Saved " + summary.savedCount() + " records.";
+            if (summary.skippedDuplicateCount() > 0) {
+                message += " Skipped " + summary.skippedDuplicateCount() + " duplicate records.";
+            }
+            if (summary.skippedInvalidCount() > 0) {
+                message += " Skipped " + summary.skippedInvalidCount() + " invalid records.";
+            }
+
+            ra.addFlashAttribute("message", message);
             session.removeAttribute("pendingRecords");
             session.removeAttribute("pendingType");
 
@@ -86,5 +104,13 @@ public class IngestionController {
         }
 
         return "redirect:/ingestion/upload";
+    }
+
+//    Fetch dashboard summary stat and add to the model
+    private void populateDashboardStats(Model model) {
+        IngestionService.DashboardSummary summary = ingestionService.getDashboardSummary();
+        model.addAttribute("total", summary.totalCount());
+        model.addAttribute("validCount", summary.validCount());
+        model.addAttribute("invalidCount", summary.invalidCount());
     }
 }

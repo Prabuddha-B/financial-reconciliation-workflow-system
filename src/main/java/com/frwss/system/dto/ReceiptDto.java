@@ -68,6 +68,14 @@ public class ReceiptDto {
         this.date = date;
     }
 
+    public String getReceiptDate() {
+        return date;
+    }
+
+    public void setReceiptDate(String receiptDate) {
+        this.date = receiptDate;
+    }
+
     public String getEnteredBy() {
         return enteredBy;
     }

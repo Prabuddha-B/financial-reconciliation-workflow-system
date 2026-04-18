@@ -8,6 +8,7 @@ public class IngestionResult {
     private int validRecords;
     private int invalidRecords;
 
+    // Constructor
     public IngestionResult(List<?> records, int totalRecords, int validRecords, int invalidRecords) {
         this.records = records;
         this.totalRecords = totalRecords;

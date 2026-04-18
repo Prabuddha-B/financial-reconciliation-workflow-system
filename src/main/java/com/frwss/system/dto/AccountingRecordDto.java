@@ -7,15 +7,16 @@ public class AccountingRecordDto {
     private String module;
     private double amount;
     private String recordDate;
-    private String createdAt;
+    private String enteredBy;
 
-    public AccountingRecordDto(String recordId, String referenceNo, String module, double amount, String recordDate, String createdAt) {
+    // Constructor
+    public AccountingRecordDto(String recordId, String referenceNo, String module, double amount, String recordDate, String enteredBy) {
         this.recordId = recordId;
         this.referenceNo = referenceNo;
         this.module = module;
         this.amount = amount;
         this.recordDate = recordDate;
-        this.createdAt = createdAt;
+        this.enteredBy = enteredBy;
     }
 
     private boolean valid;
@@ -58,11 +59,11 @@ public class AccountingRecordDto {
         this.recordDate = recordDate;
     }
 
-    public String getCreatedAt() {
-        return createdAt;
+    public String getEnteredBy() {
+        return enteredBy;
     }
-    public void setCreatedAt(String createdAt) {
-        this.createdAt = createdAt;
+    public void setEnteredBy(String enteredBy) {
+        this.enteredBy = enteredBy;
     }
 
     public boolean isValid() {
