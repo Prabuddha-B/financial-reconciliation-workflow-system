@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ManualIngestionServiceImpl
-        implements ManualIngestionService {
+        implements ManualIngestionService{
 
     @Autowired
     private ReceiptRepository receiptRepository;
@@ -18,7 +18,6 @@ public class ManualIngestionServiceImpl
     @Autowired
     private StockPurchaseRepository stockRepository;
 
-
     public Receipt saveReceipt(Receipt receipt){
         return receiptRepository.save(receipt);
     }
@@ -27,7 +26,8 @@ public class ManualIngestionServiceImpl
         return payrollRepository.save(payroll);
     }
 
-    public StockPurchase savePurchase(StockPurchase purchase){
+    public StockPurchase savePurchase(
+            StockPurchase purchase){
         return stockRepository.save(purchase);
     }
 

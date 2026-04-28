@@ -9,4 +9,5 @@ public interface ManualIngestionService {
     Payroll savePayroll(Payroll payroll);
 
     StockPurchase savePurchase(StockPurchase purchase);
+
 }
