@@ -43,7 +43,8 @@ This system does NOT execute financial transactions. It is strictly a reconcilia
   - Stock Purchases  
   - Accounting Records  
 - Validation with error highlighting  
-- Duplicate detection  
+- Duplicate detection
+- Batch and Log Management
 - Preview before saving  
 
 ###  Reconciliation Engine
