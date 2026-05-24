@@ -1,6 +1,6 @@
-package com.peradeniya.frwss.service;
+package com.frwss.system.service;
 
-import com.peradeniya.frwss.model.FinancialRecord;
+import com.frwss.system.model.FinancialRecord;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
