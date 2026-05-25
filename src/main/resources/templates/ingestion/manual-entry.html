@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Manual Entry</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        .dtype-section { display: none; }
+        .req { color: #dc3545; }
+        .mode-active { font-weight: 600; }
+    </style>
+</head>
+<body>
+<!--/* @thymesVar id="record" type="com.frwss.system.dto.ManualEntryForm" */-->
+<div class="container py-5" style="max-width: 1050px;">
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                <div>
+                    <h3 class="mb-0">Manual Entry</h3>
+                    <div class="text-muted">Add new or search and update existing records</div>
+                </div>
+                <span class="badge text-bg-secondary" th:text="${dataType}">RECEIPT</span>
+            </div>
+
+            <!-- Messages (single red bar) -->
+            <div th:if="${errorMessage != null or pageError != null}"
+                 class="alert alert-danger"
+                 th:text="${errorMessage != null ? errorMessage : pageError}">
+            </div>
+
+
+
+            <!-- Hidden "mode" so JS can change it without server reload -->
+            <input type="hidden" id="modeHidden" th:value="${mode != null ? mode : 'ADD'}" />
+
+            <!-- Mode buttons -->
+            <div class="d-flex gap-2 mb-3">
+                <button type="button"
+                        id="btnAdd"
+                        class="btn btn-outline-primary"
+                        onclick="setMode('ADD')">
+                    Add New
+                </button>
+
+                <button type="button"
+                        id="btnUpdate"
+                        class="btn btn-outline-warning"
+                        onclick="setMode('UPDATE')">
+                    Update
+                </button>
+            </div>
+
+            <!-- Data type selector -->
+            <div class="row g-2 align-items-end mb-4">
+                <div class="col-md-5">
+                    <label class="form-label">Data Type</label>
+                    <select class="form-select" id="dataTypeSelect" onchange="toggleSections()">
+                        <option value="RECEIPT" th:selected="${dataType == 'RECEIPT'}">Receipt</option>
+                        <option value="PAYROLL" th:selected="${dataType == 'PAYROLL'}">Payroll</option>
+                        <option value="STOCK" th:selected="${dataType == 'STOCK'}">Stock Purchase</option>
+                        <option value="ACCOUNTING" th:selected="${dataType == 'ACCOUNTING'}">Accounting</option>
+                    </select>
+                </div>
+
+                <div class="col-md-7">
+                    <div class="text-muted small">
+                        Only relevant fields will be shown.
+                        <span class="ms-2"><span class="req">*</span> Required fields</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- UPDATE SEARCH  -->
+            <div id="updateSearchBlock" class="border rounded p-3 mb-4" style="display:none;">
+                <h5 class="mb-3">Search record to update</h5>
+
+        <form method="post" th:action="@{/ingestion/manual/update/search}" class="row g-3">
+                    <input type="hidden" name="dataType" id="searchDataType" th:value="${dataType}"/>
+
+                    <!-- RECEIPT search -->
+                    <div class="col-md-6 dtype-search" data-dtype="RECEIPT">
+                        <label class="form-label">Receipt ID <span class="req">*</span></label>
+                        <input class="form-control" name="receiptId" type="text" required th:value="${receiptId}">
+                    </div>
+
+                    <!-- PAYROLL search -->
+                    <div class="col-md-6 dtype-search" data-dtype="PAYROLL">
+                        <label class="form-label">Payroll ID <span class="req">*</span></label>
+                        <input class="form-control" name="payrollId" type="text" required th:value="${payrollId}">
+                    </div>
+
+                    <!-- STOCK search -->
+                    <div class="col-md-6 dtype-search" data-dtype="STOCK">
+                        <label class="form-label">Purchase ID <span class="req">*</span></label>
+                        <input class="form-control" name="purchaseId" type="text" required th:value="${purchaseId}">
+                    </div>
+
+                    <!-- ACCOUNTING search -->
+                    <div class="col-md-6 dtype-search" data-dtype="ACCOUNTING">
+                        <label class="form-label">Record ID <span class="req">*</span></label>
+                        <input class="form-control" name="recordId" type="text" required th:value="${recordId}">
+                    </div>
+
+                    <div class="col-12">
+                        <button class="btn btn-warning" type="submit">Search</button>
+                        <span class="ms-2 text-muted small" th:if="${updateReady != true}">
+                            Search first to load the record before updating.
+                        </span>
+                    </div>
+                </form>
+            </div>
+
+            <!-- MAIN FORM  -->
+            <form id="mainForm"
+                  method="post"
+                  th:object="${record}"
+                  th:attr="data-update-ready=${updateReady}"
+                  th:action="${mode == 'UPDATE'} ? @{/ingestion/manual/update} : @{/ingestion/manual/add}">
+                <input type="hidden" name="dataType" id="hiddenDataType" th:value="${dataType}"/>
+
+                <!-- RECEIPT -->
+                <div class="dtype-section" data-dtype="RECEIPT">
+                    <h5 class="mb-3">Receipt</h5>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Receipt ID <span class="req">*</span></label>
+                            <input class="form-control pk-field" th:field="*{receiptId}" type="text" required th:readonly="${mode == 'UPDATE'}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Reference No <span class="req">*</span></label>
+                            <input class="form-control" th:field="*{referenceNo}" type="text" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Entered By</label>
+                            <input class="form-control" th:field="*{enteredBy}" type="text">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Payer Name</label>
+                            <input class="form-control" th:field="*{payerName}" type="text">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Amount</label>
+                            <input class="form-control" th:field="*{amount}" type="number" min="0" step="0.01">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Date</label>
+                            <input class="form-control" th:field="*{receiptDate}" type="date">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PAYROLL -->
+                <div class="dtype-section" data-dtype="PAYROLL">
+                    <h5 class="mb-3">Payroll</h5>
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label">Payroll ID <span class="req">*</span></label>
+                            <input class="form-control pk-field" th:field="*{payrollId}" type="text" required th:readonly="${mode == 'UPDATE'}">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Employee ID <span class="req">*</span></label>
+                            <input class="form-control" th:field="*{employeeId}" type="text" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Employee Name</label>
+                            <input class="form-control" th:field="*{employeeName}" type="text">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Salary</label>
+                            <input class="form-control" th:field="*{salary}" type="number" min="0" step="0.01">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Payment Date</label>
+                            <input class="form-control" th:field="*{paymentDate}" type="date">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Reference No</label>
+                            <input class="form-control" th:field="*{referenceNo}" type="text">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Status <span class="req">*</span></label>
+                            <select class="form-select" th:field="*{status}" required>
+                                <option value="" disabled>Select status</option>
+                                <option value="Entered">Entered</option>
+                                <option value="Reviewed">Reviewed</option>
+                                <option value="Verified">Verified</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Entered By</label>
+                            <input class="form-control" th:field="*{enteredBy}" type="text">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STOCK -->
+                <div class="dtype-section" data-dtype="STOCK">
+                    <h5 class="mb-3">Stock Purchase</h5>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Purchase ID <span class="req">*</span></label>
+                            <input class="form-control pk-field" th:field="*{purchaseId}" type="text" required th:readonly="${mode == 'UPDATE'}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Invoice No</label>
+                            <input class="form-control" th:field="*{invoiceNo}" type="text">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Entered By</label>
+                            <input class="form-control" th:field="*{enteredBy}" type="text">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Vendor Name</label>
+                            <input class="form-control" th:field="*{vendorName}" type="text">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Amount</label>
+                            <input class="form-control" th:field="*{amount}" type="number" min="0" step="0.01">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Purchase Date</label>
+                            <input class="form-control" th:field="*{purchaseDate}" type="date">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Created At</label>
+                            <input class="form-control" th:field="*{createdAt}" type="text" placeholder="YYYY-MM-DDTHH:mm:ss">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ACCOUNTING -->
+                <div class="dtype-section" data-dtype="ACCOUNTING">
+                    <h5 class="mb-3">Accounting</h5>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Record ID <span class="req">*</span></label>
+                            <input class="form-control pk-field" th:field="*{recordId}" type="text" required th:readonly="${mode == 'UPDATE'}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Reference No <span class="req">*</span></label>
+                            <input class="form-control" th:field="*{referenceNo}" type="text" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Created At</label>
+                            <input class="form-control" th:field="*{createdAt}" type="text" placeholder="YYYY-MM-DDTHH:mm:ss">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Module</label>
+                            <input class="form-control" th:field="*{module}" type="text">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Amount</label>
+                            <input class="form-control" th:field="*{amount}" type="number" min="0" step="0.01">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Record Date</label>
+                            <input class="form-control" th:field="*{recordDate}" type="date">
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <button class="btn btn-success"
+                        type="submit"
+                        id="submitBtn"
+                        th:text="${mode == 'UPDATE'} ? 'Update Record' : 'Add Record'"
+                        th:disabled="${mode == 'UPDATE' and updateReady != true}">
+                    Add Record
+                </button>
+
+                <div class="text-muted small mt-2" id="updateTip"
+                     th:if="${mode == 'UPDATE' and updateReady != true}">
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function applyModeUI(mode) {
+      const btnAdd = document.getElementById('btnAdd');
+      const btnUpdate = document.getElementById('btnUpdate');
+      const updateSearchBlock = document.getElementById('updateSearchBlock');
+      const mainForm = document.getElementById('mainForm');
+      const submitBtn = document.getElementById('submitBtn');
+      const updateReady = mainForm.dataset.updateReady === 'true';
+
+      if (mode === 'ADD') {
+        btnAdd.classList.add('btn-primary');
+        btnAdd.classList.remove('btn-outline-primary');
+        btnAdd.classList.add('mode-active');
+
+        btnUpdate.classList.add('btn-outline-warning');
+        btnUpdate.classList.remove('btn-warning');
+        btnUpdate.classList.remove('mode-active');
+
+        updateSearchBlock.style.display = 'none';
+        mainForm.action = '/ingestion/manual/add';
+        submitBtn.textContent = 'Add Record';
+        submitBtn.disabled = false;
+        document.querySelectorAll('.pk-field').forEach(input => input.readOnly = false);
+      } else {
+        btnUpdate.classList.add('btn-warning');
+        btnUpdate.classList.remove('btn-outline-warning');
+        btnUpdate.classList.add('mode-active');
+
+        btnAdd.classList.add('btn-outline-primary');
+        btnAdd.classList.remove('btn-primary');
+        btnAdd.classList.remove('mode-active');
+
+        updateSearchBlock.style.display = 'block';
+        mainForm.action = '/ingestion/manual/update';
+        submitBtn.textContent = 'Update Record';
+        submitBtn.disabled = !updateReady;
+        document.querySelectorAll('.pk-field').forEach(input => input.readOnly = true);
+      }
+    }
+
+    function setMode(mode) {
+
+      document.getElementById('modeHidden').value = mode;
+      applyModeUI(mode);
+
+
+      if (mode === 'UPDATE') {
+        document.getElementById('updateSearchBlock').scrollIntoView({behavior: 'smooth', block: 'start'});
+      } else {
+        document.getElementById('mainForm').scrollIntoView({behavior: 'smooth', block: 'start'});
+      }
+    }
+
+    function toggleSections() {
+      const selected = document.getElementById('dataTypeSelect').value;
+
+      document.getElementById('hiddenDataType').value = selected;
+
+      const searchType = document.getElementById('searchDataType');
+      if (searchType) searchType.value = selected;
+
+
+      document.querySelectorAll('.dtype-section').forEach(sec => {
+        sec.style.display = 'none';
+        sec.querySelectorAll('input, select, textarea').forEach(input => input.disabled = true);
+      });
+      const active = document.querySelector('.dtype-section[data-dtype="' + selected + '"]');
+      if (active) {
+        active.style.display = 'block';
+        active.querySelectorAll('input, select, textarea').forEach(input => input.disabled = false);
+      }
+
+
+      document.querySelectorAll('.dtype-search').forEach(el => {
+        el.style.display = 'none';
+        el.querySelectorAll('input, select, textarea').forEach(input => input.disabled = true);
+      });
+      document.querySelectorAll('.dtype-search[data-dtype="' + selected + '"]').forEach(el => {
+        el.style.display = 'block';
+        el.querySelectorAll('input, select, textarea').forEach(input => input.disabled = false);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+
+      toggleSections();
+
+
+      const mode = document.getElementById('modeHidden').value || 'ADD';
+      applyModeUI(mode);
+    });
+</script>
+
+</body>
+</html>
