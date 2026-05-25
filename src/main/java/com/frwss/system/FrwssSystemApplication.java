@@ -10,4 +10,5 @@ public class FrwssSystemApplication {
         SpringApplication.run(FrwssSystemApplication.class, args);
     }
 
+
 }
