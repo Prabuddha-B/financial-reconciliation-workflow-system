@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Uploaded Data</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <style>
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+    </style>
+</head>
+
+<body class="container mt-5">
+
+    <h3>Uploaded Data</h3>
+
+    <h5 class="text-muted">
+        Data Type: <span th:text="${dataType}"></span>
+    </h5>
+
+    <!-- Record Summary -->
+    <div class="row mb-4">
+
+        <div class="col-md-4">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <h5>Total Records</h5>
+                    <h3 th:text="${total}"></h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <h5>Valid Records</h5>
+                    <h3 th:text="${validCount}"></h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card text-white bg-danger">
+                <div class="card-body">
+                    <h5>Invalid Records</h5>
+                    <h3 th:text="${invalidCount}"></h3>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row mb-3">
+
+        <!-- Search  -->
+        <div class="col-md-6">
+            <input type="text"
+                   id="searchInput"
+                   class="form-control"
+                   th:placeholder="
+                                    ${dataType == 'RECEIPT'} ? 'Search by reference or payer name...' :
+                                    (${dataType == 'PAYROLL'} ? 'Search by employee or reference...' :
+                                    (${dataType == 'STOCK'} ? 'Search by vendor or invoice no...' :
+                                    (${dataType == 'ACCOUNTING'} ? 'Search by record id, reference no, or module...' :
+                                    'Search...')))">
+        </div>
+
+        <!-- Filter -->
+        <div class="col-md-6 text-end">
+            <button id="btnAll" class="btn btn-secondary" onclick="setFilter('all')">All</button>
+            <button id="btnValid" class="btn btn-success" onclick="setFilter('valid')">Valid</button>
+            <button id="btnInvalid" class="btn btn-danger" onclick="setFilter('invalid')">Invalid</button>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="d-flex gap-2 mb-3">
+        <form th:action="@{/ingestion/save}" method="post">
+            <button type="submit" class="btn btn-primary">Save Valid Records</button>
+        </form>
+        <a th:href="@{/ingestion/upload}" class="btn btn-outline-secondary">Back to Upload</a>
+    </div>
+
+    <p id="noResultsMessage" class="text-center text-danger fw-bold mt-3" style="display:none;">
+        No matching records found
+    </p>
+
+    <!-- Dynamic Tables -->
+    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+
+        <div th:if="${dataType == 'RECEIPT'}">
+
+            <!-- Receipt Table -->
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th>Receipt ID</th>
+                    <th>Reference No</th>
+                    <th>Payer Name</th>
+                    <th>Amount</th>
+                    <th>Receipt Date</th>
+                    <th>Entered By</th>
+                    <th>Error</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="r : ${records}"
+                    th:classappend="${!r.valid} ? 'table-danger'"
+                    th:attr="data-valid=${r.valid}">
+                    <td th:text="${r.receiptId}"></td>
+                    <td th:text="${r.referenceNo}"></td>
+                    <td th:text="${r.payerName}"></td>
+                    <td th:text="${r.amount}"></td>
+                    <td th:text="${r.receiptDate}"></td>
+                    <td th:text="${r.enteredBy}"></td>
+                    <td>
+                        <span th:if="${!r.valid}" th:text="${r.errorMessage}" class="badge bg-danger"></span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div th:if="${dataType == 'PAYROLL'}">
+
+            <!-- Payroll Table-->
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th>Payroll ID</th>
+                    <th>Employee ID</th>
+                    <th>Employee Name</th>
+                    <th>Salary</th>
+                    <th>Payment Date</th>
+                    <th>Status</th>
+                    <th>Error</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="p : ${records}"
+                    th:classappend="${!p.valid} ? 'table-danger'"
+                    th:attr="data-valid=${p.valid}">
+                    <td th:text="${p.payrollId}"></td>
+                    <td th:text="${p.employeeId}"></td>
+                    <td th:text="${p.employeeName}"></td>
+                    <td th:text="${p.salary}"></td>
+                    <td th:text="${p.paymentDate}"></td>
+                    <td th:text="${p.status}"></td>
+                    <td>
+                        <span th:if="${!p.valid}" class="badge bg-danger" th:text="${p.errorMessage}"></span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div th:if="${dataType == 'STOCK'}">
+
+            <!-- Stock Table-->
+            <table class="table table-bordered table-hover">
+                <thead class="table-dark">
+                <tr>
+                    <th>Purchase ID</th>
+                    <th>Vendor Name</th>
+                    <th>Invoice No</th>
+                    <th>Amount</th>
+                    <th>Purchase Date</th>
+                    <th>Entered By</th>
+                    <th>Error</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="s : ${records}"
+                    th:classappend="${!s.valid} ? 'table-danger'"
+                    th:attr="data-valid=${s.valid}">
+
+                    <td th:text="${s.purchaseId}"></td>
+                    <td th:text="${s.vendorName}"></td>
+                    <td th:text="${s.invoiceNo}"></td>
+                    <td class="text-end" th:text="${s.amount}"></td>
+                    <td th:text="${s.purchaseDate}"></td>
+                    <td th:text="${s.enteredBy}"></td>
+
+                    <td>
+            <span th:if="${!s.valid}"
+                  class="badge bg-danger"
+                  th:text="${s.errorMessage}"></span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div th:if="${dataType == 'ACCOUNTING'}">
+
+            <!-- Accounting Table -->
+            <table class="table table-bordered table-hover">
+                <thead class="table-dark">
+                <tr>
+                    <th>Record ID</th>
+                    <th>Reference No</th>
+                    <th>Module</th>
+                    <th>Amount</th>
+                    <th>Record Date</th>
+                    <th>Entered By</th>
+                    <th>Error</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="a : ${records}"
+                    th:classappend="${!a.valid} ? 'table-danger'"
+                    th:attr="data-valid=${a.valid}">
+
+                    <td th:text="${a.recordId}"></td>
+                    <td th:text="${a.referenceNo}"></td>
+                    <td th:text="${a.module}"></td>
+                    <td class="text-end" th:text="${a.amount}"></td>
+                    <td th:text="${a.recordDate}"></td>
+                    <td th:text="${a.enteredBy}"></td>
+
+                    <td>
+            <span th:if="${!a.valid}"
+                  class="badge bg-danger"
+                  th:text="${a.errorMessage}"></span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+    <!-- JS -->
+    <script>
+
+        let currentFilter = "all";
+        let currentSearch = "";
+
+        //  Main Filter Engine
+        function applyFilters() {
+            const rows = document.querySelectorAll("tbody tr");
+
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+
+                const isValid = row.getAttribute("data-valid");
+                const text = row.innerText.toLowerCase();
+
+                let matchesFilter = false;
+                let matchesSearch = false;
+
+                // Filter Logic
+                if (currentFilter === "all") {
+                    matchesFilter = true;
+                } else if (currentFilter === "valid") {
+                    matchesFilter = (isValid === "true");
+                } else if (currentFilter === "invalid") {
+                    matchesFilter = (isValid === "false");
+                }
+
+                // Search Logic
+                matchesSearch = text.includes(currentSearch);
+
+                const show = matchesFilter && matchesSearch;
+
+                row.style.display = show ? "" : "none";
+
+                if (show) visibleCount++;
+            });
+
+            //  No results message
+            const msg = document.getElementById("noResultsMessage");
+            if (msg) {
+                msg.style.display = (visibleCount === 0) ? "block" : "none";
+            }
+        }
+
+        //  Search event
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const searchInput = document.getElementById("searchInput");
+
+            if (searchInput) {
+                searchInput.addEventListener("keyup", function () {
+                    currentSearch = this.value.toLowerCase();
+                    applyFilters();
+                });
+            }
+
+        });
+
+        //  Filter Button Click
+        function filterTable(type) {
+            currentFilter = type;
+            applyFilters();
+        }
+
+        // Filter Button State
+        function setFilter(type) {
+            currentFilter = type;
+
+            // remove active
+            document.getElementById("btnAll").classList.remove("active");
+            document.getElementById("btnValid").classList.remove("active");
+            document.getElementById("btnInvalid").classList.remove("active");
+
+            // add active
+            if (type === "all") document.getElementById("btnAll").classList.add("active");
+            if (type === "valid") document.getElementById("btnValid").classList.add("active");
+            if (type === "invalid") document.getElementById("btnInvalid").classList.add("active");
+
+            applyFilters();
+        }
+    </script>
+</body>
+</html>
