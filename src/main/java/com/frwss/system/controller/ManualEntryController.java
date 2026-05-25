@@ -40,6 +40,7 @@ public class ManualEntryController {
 
     @PostMapping("/manual/update/search")
     public String searchForUpdate(@RequestParam("dataType") String dataType,
+                                  @RequestParam(value = "receiptId", required = false) String receiptId,
                                   @RequestParam(value = "referenceNo", required = false) String referenceNo,
                                   @RequestParam(value = "payrollId", required = false) String payrollId,
                                   @RequestParam(value = "employeeId", required = false) String employeeId,
@@ -51,6 +52,7 @@ public class ManualEntryController {
         model.addAttribute("mode", "UPDATE");
 
         // Keep user-entered search values for showing back in the UI.
+        model.addAttribute("receiptId", receiptId);
         model.addAttribute("referenceNo", referenceNo);
         model.addAttribute("payrollId", payrollId);
         model.addAttribute("employeeId", employeeId);
@@ -58,7 +60,7 @@ public class ManualEntryController {
         model.addAttribute("recordId", recordId);
 
         try {
-            Object found = fetchExistingByRequiredKeys(dataType, referenceNo, payrollId, employeeId, purchaseId, recordId);
+            Object found = fetchExistingByRequiredKeys(dataType, receiptId, payrollId, purchaseId, recordId);
             if (found == null) {
                 throw new IllegalArgumentException("No record found for the given keys.");
             }
@@ -86,7 +88,7 @@ public class ManualEntryController {
             validateRequiredKeysForAdd(dataType, record);
 
             if (existsByPk(dataType, record)) {
-                throw new IllegalArgumentException("Duplicate ID: primary key already exists.");
+                throw new IllegalArgumentException("Duplicate primary key. A record with this ID already exists.");
             }
 
             Object saved = saveNew(dataType, record);
@@ -159,37 +161,23 @@ public class ManualEntryController {
         }
     }
 
-    private Object fetchExistingByRequiredKeys(String dataType,String referenceNo,String payrollId,String employeeId, String purchaseId, String recordId) {
+    private Object fetchExistingByRequiredKeys(String dataType, String receiptId, String payrollId, String purchaseId, String recordId) {
         switch (dataType) {
             case "RECEIPT":
-                if (isBlank(referenceNo)) throw new IllegalArgumentException("Reference No is required to search receipts.");
-                return receiptRepository.findByReferenceNo(referenceNo).orElse(null);
+                if (isBlank(receiptId)) throw new IllegalArgumentException("Receipt ID is required to search receipts.");
+                return receiptRepository.findById(receiptId).orElse(null);
 
             case "PAYROLL":
-                if (isBlank(payrollId) || isBlank(employeeId)) {
-                    throw new IllegalArgumentException("Payroll ID and Employee ID are required to search payroll.");
-                }
-                Payroll p = payrollRepository.findById(payrollId).orElse(null);
-                if (p == null) return null;
-                if (p.getEmployeeId() == null || !p.getEmployeeId().equals(employeeId)) {
-                    throw new IllegalArgumentException("Employee ID does not match the Payroll ID.");
-                }
-                return p;
+                if (isBlank(payrollId)) throw new IllegalArgumentException("Payroll ID is required to search payroll.");
+                return payrollRepository.findById(payrollId).orElse(null);
 
             case "STOCK":
                 if (isBlank(purchaseId)) throw new IllegalArgumentException("Purchase ID is required to search stock purchases.");
                 return stockPurchaseRepository.findById(purchaseId).orElse(null);
 
             case "ACCOUNTING":
-                if (isBlank(recordId) || isBlank(referenceNo)) {
-                    throw new IllegalArgumentException("Record ID and Reference No are required to search accounting.");
-                }
-                AccountingRecord ar = accountingRecordRepository.findById(recordId).orElse(null);
-                if (ar == null) return null;
-                if (ar.getReferenceNo() == null || !ar.getReferenceNo().equals(referenceNo)) {
-                    throw new IllegalArgumentException("Reference No does not match the Record ID.");
-                }
-                return ar;
+                if (isBlank(recordId)) throw new IllegalArgumentException("Record ID is required to search accounting.");
+                return accountingRecordRepository.findById(recordId).orElse(null);
             default:
                 throw new IllegalArgumentException("Invalid data type: " + dataType);
         }
@@ -257,27 +245,44 @@ public class ManualEntryController {
         switch (dataType) {
             case "RECEIPT": {
                 Receipt ex = (Receipt) existing;
+                ex.setReferenceNo(incoming.getReferenceNo());
                 ex.setPayerName(incoming.getPayerName());
                 ex.setAmount(incoming.getAmount());
+                ex.setReceiptDate(incoming.getReceiptDate());
+                ex.setEnteredBy(incoming.getEnteredBy());
+                ex.setCreatedAt(incoming.getCreatedAt());
                 return ex;
             }
             case "PAYROLL": {
                 Payroll ex = (Payroll) existing;
+                ex.setEmployeeId(incoming.getEmployeeId());
                 ex.setEmployeeName(incoming.getEmployeeName());
                 ex.setSalary(incoming.getSalary());
+                ex.setPaymentDate(incoming.getPaymentDate());
+                ex.setReferenceNo(incoming.getReferenceNo());
                 ex.setStatus(incoming.getStatus());
+                ex.setEnteredBy(incoming.getEnteredBy());
+                ex.setCreatedAt(incoming.getCreatedAt());
                 return ex;
             }
             case "STOCK": {
                 StockPurchase ex = (StockPurchase) existing;
                 ex.setVendorName(incoming.getVendorName());
+                ex.setInvoiceNo(incoming.getInvoiceNo());
                 ex.setAmount(incoming.getAmount());
+                ex.setPurchaseDate(incoming.getPurchaseDate());
+                ex.setEnteredBy(incoming.getEnteredBy());
+                ex.setCreatedAt(incoming.getCreatedAt());
                 return ex;
             }
             case "ACCOUNTING": {
                 AccountingRecord ex = (AccountingRecord) existing;
+                ex.setReferenceNo(incoming.getReferenceNo());
                 ex.setModule(incoming.getModule());
                 ex.setAmount(incoming.getAmount());
+                ex.setRecordDate(incoming.getRecordDate());
+                ex.setEnteredBy(incoming.getEnteredBy());
+                ex.setCreatedAt(incoming.getCreatedAt());
                 return ex;
             }
             default:

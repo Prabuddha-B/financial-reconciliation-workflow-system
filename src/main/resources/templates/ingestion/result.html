@@ -62,8 +62,8 @@
                    th:placeholder="
                                     ${dataType == 'RECEIPT'} ? 'Search by reference or payer name...' :
                                     (${dataType == 'PAYROLL'} ? 'Search by employee or reference...' :
-                                    (${dataType == 'STOCK'} ? 'Search by vendor or invoice...' :
-                                    (${dataType == 'ACCOUNTING'} ? 'Search by account or transaction...' :
+                                    (${dataType == 'STOCK'} ? 'Search by vendor or invoice no...' :
+                                    (${dataType == 'ACCOUNTING'} ? 'Search by record id, reference no, or module...' :
                                     'Search...')))">
         </div>
 
@@ -100,7 +100,7 @@
                     <th>Reference No</th>
                     <th>Payer Name</th>
                     <th>Amount</th>
-                    <th>Date</th>
+                    <th>Receipt Date</th>
                     <th>Entered By</th>
                     <th>Error</th>
                 </tr>
@@ -165,10 +165,10 @@
                 <thead class="table-dark">
                 <tr>
                     <th>Purchase ID</th>
-                    <th>Vendor</th>
-                    <th>Invoice</th>
+                    <th>Vendor Name</th>
+                    <th>Invoice No</th>
                     <th>Amount</th>
-                    <th>Date</th>
+                    <th>Purchase Date</th>
                     <th>Entered By</th>
                     <th>Error</th>
                 </tr>
@@ -203,10 +203,10 @@
                 <thead class="table-dark">
                 <tr>
                     <th>Record ID</th>
-                    <th>Reference</th>
+                    <th>Reference No</th>
                     <th>Module</th>
                     <th>Amount</th>
-                    <th>Date</th>
+                    <th>Record Date</th>
                     <th>Entered By</th>
                     <th>Error</th>
                 </tr>

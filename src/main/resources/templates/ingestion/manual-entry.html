@@ -79,18 +79,14 @@
 
                     <!-- RECEIPT search -->
                     <div class="col-md-6 dtype-search" data-dtype="RECEIPT">
-                        <label class="form-label">Reference No <span class="req">*</span></label>
-                        <input class="form-control" name="referenceNo" type="text" required th:value="${referenceNo}">
+                        <label class="form-label">Receipt ID <span class="req">*</span></label>
+                        <input class="form-control" name="receiptId" type="text" required th:value="${receiptId}">
                     </div>
 
                     <!-- PAYROLL search -->
-                    <div class="col-md-4 dtype-search" data-dtype="PAYROLL">
+                    <div class="col-md-6 dtype-search" data-dtype="PAYROLL">
                         <label class="form-label">Payroll ID <span class="req">*</span></label>
                         <input class="form-control" name="payrollId" type="text" required th:value="${payrollId}">
-                    </div>
-                    <div class="col-md-4 dtype-search" data-dtype="PAYROLL">
-                        <label class="form-label">Employee ID <span class="req">*</span></label>
-                        <input class="form-control" name="employeeId" type="text" required th:value="${employeeId}">
                     </div>
 
                     <!-- STOCK search -->
@@ -100,13 +96,9 @@
                     </div>
 
                     <!-- ACCOUNTING search -->
-                    <div class="col-md-4 dtype-search" data-dtype="ACCOUNTING">
+                    <div class="col-md-6 dtype-search" data-dtype="ACCOUNTING">
                         <label class="form-label">Record ID <span class="req">*</span></label>
                         <input class="form-control" name="recordId" type="text" required th:value="${recordId}">
-                    </div>
-                    <div class="col-md-4 dtype-search" data-dtype="ACCOUNTING">
-                        <label class="form-label">Reference No <span class="req">*</span></label>
-                        <input class="form-control" name="referenceNo" type="text" required th:value="${referenceNo}">
                     </div>
 
                     <div class="col-12">
@@ -122,7 +114,8 @@
             <form id="mainForm"
                   method="post"
                   th:object="${record}"
-              th:action="${mode == 'UPDATE'} ? @{/ingestion/manual/update(dataType=${dataType})} : @{/ingestion/manual/add(dataType=${dataType})}">
+                  th:attr="data-update-ready=${updateReady}"
+                  th:action="${mode == 'UPDATE'} ? @{/ingestion/manual/update} : @{/ingestion/manual/add}">
                 <input type="hidden" name="dataType" id="hiddenDataType" th:value="${dataType}"/>
 
                 <!-- RECEIPT -->
@@ -131,7 +124,7 @@
                     <div class="row g-3">
                         <div class="col-md-4">
                             <label class="form-label">Receipt ID <span class="req">*</span></label>
-                            <input class="form-control" th:field="*{receiptId}" type="text" required>
+                            <input class="form-control pk-field" th:field="*{receiptId}" type="text" required th:readonly="${mode == 'UPDATE'}">
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Reference No <span class="req">*</span></label>
@@ -163,7 +156,7 @@
                     <div class="row g-3">
                         <div class="col-md-3">
                             <label class="form-label">Payroll ID <span class="req">*</span></label>
-                            <input class="form-control" th:field="*{payrollId}" type="text" required>
+                            <input class="form-control pk-field" th:field="*{payrollId}" type="text" required th:readonly="${mode == 'UPDATE'}">
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Employee ID <span class="req">*</span></label>
@@ -210,7 +203,7 @@
                     <div class="row g-3">
                         <div class="col-md-4">
                             <label class="form-label">Purchase ID <span class="req">*</span></label>
-                            <input class="form-control" th:field="*{purchaseId}" type="text" required>
+                            <input class="form-control pk-field" th:field="*{purchaseId}" type="text" required th:readonly="${mode == 'UPDATE'}">
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Invoice No</label>
@@ -247,7 +240,7 @@
                     <div class="row g-3">
                         <div class="col-md-4">
                             <label class="form-label">Record ID <span class="req">*</span></label>
-                            <input class="form-control" th:field="*{recordId}" type="text" required>
+                            <input class="form-control pk-field" th:field="*{recordId}" type="text" required th:readonly="${mode == 'UPDATE'}">
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Reference No <span class="req">*</span></label>
@@ -278,9 +271,9 @@
                 <button class="btn btn-success"
                         type="submit"
                         id="submitBtn"
-                        th:text="${mode == 'UPDATE'} ? 'Update Record' : 'Submit'"
+                        th:text="${mode == 'UPDATE'} ? 'Update Record' : 'Add Record'"
                         th:disabled="${mode == 'UPDATE' and updateReady != true}">
-                    Submit
+                    Add Record
                 </button>
 
                 <div class="text-muted small mt-2" id="updateTip"
@@ -296,6 +289,9 @@
       const btnAdd = document.getElementById('btnAdd');
       const btnUpdate = document.getElementById('btnUpdate');
       const updateSearchBlock = document.getElementById('updateSearchBlock');
+      const mainForm = document.getElementById('mainForm');
+      const submitBtn = document.getElementById('submitBtn');
+      const updateReady = mainForm.dataset.updateReady === 'true';
 
       if (mode === 'ADD') {
         btnAdd.classList.add('btn-primary');
@@ -307,6 +303,10 @@
         btnUpdate.classList.remove('mode-active');
 
         updateSearchBlock.style.display = 'none';
+        mainForm.action = '/ingestion/manual/add';
+        submitBtn.textContent = 'Add Record';
+        submitBtn.disabled = false;
+        document.querySelectorAll('.pk-field').forEach(input => input.readOnly = false);
       } else {
         btnUpdate.classList.add('btn-warning');
         btnUpdate.classList.remove('btn-outline-warning');
@@ -317,6 +317,10 @@
         btnAdd.classList.remove('mode-active');
 
         updateSearchBlock.style.display = 'block';
+        mainForm.action = '/ingestion/manual/update';
+        submitBtn.textContent = 'Update Record';
+        submitBtn.disabled = !updateReady;
+        document.querySelectorAll('.pk-field').forEach(input => input.readOnly = true);
       }
     }
 
@@ -342,13 +346,25 @@
       if (searchType) searchType.value = selected;
 
 
-      document.querySelectorAll('.dtype-section').forEach(sec => sec.style.display = 'none');
+      document.querySelectorAll('.dtype-section').forEach(sec => {
+        sec.style.display = 'none';
+        sec.querySelectorAll('input, select, textarea').forEach(input => input.disabled = true);
+      });
       const active = document.querySelector('.dtype-section[data-dtype="' + selected + '"]');
-      if (active) active.style.display = 'block';
+      if (active) {
+        active.style.display = 'block';
+        active.querySelectorAll('input, select, textarea').forEach(input => input.disabled = false);
+      }
 
 
-      document.querySelectorAll('.dtype-search').forEach(el => el.style.display = 'none');
-      document.querySelectorAll('.dtype-search[data-dtype="' + selected + '"]').forEach(el => el.style.display = 'block');
+      document.querySelectorAll('.dtype-search').forEach(el => {
+        el.style.display = 'none';
+        el.querySelectorAll('input, select, textarea').forEach(input => input.disabled = true);
+      });
+      document.querySelectorAll('.dtype-search[data-dtype="' + selected + '"]').forEach(el => {
+        el.style.display = 'block';
+        el.querySelectorAll('input, select, textarea').forEach(input => input.disabled = false);
+      });
     }
 
     document.addEventListener('DOMContentLoaded', function () {

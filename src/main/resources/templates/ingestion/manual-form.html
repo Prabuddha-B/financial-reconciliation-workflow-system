@@ -34,15 +34,13 @@
 
                     <input type="hidden" name="dataType" th:value="${dataType}"/>
 
-                    <input th:if="${dataType == 'RECEIPT'}" type="hidden" name="referenceNo" th:value="${record.referenceNo}"/>
+                    <input th:if="${dataType == 'RECEIPT'}" type="hidden" name="receiptId" th:value="${record.receiptId}"/>
 
                     <input th:if="${dataType == 'PAYROLL'}" type="hidden" name="payrollId" th:value="${record.payrollId}"/>
-                    <input th:if="${dataType == 'PAYROLL'}" type="hidden" name="employeeId" th:value="${record.employeeId}"/>
 
                     <input th:if="${dataType == 'STOCK'}" type="hidden" name="purchaseId" th:value="${record.purchaseId}"/>
 
                     <input th:if="${dataType == 'ACCOUNTING'}" type="hidden" name="recordId" th:value="${record.recordId}"/>
-                    <input th:if="${dataType == 'ACCOUNTING'}" type="hidden" name="referenceNo" th:value="${record.referenceNo}"/>
 
                     <button type="submit" class="btn btn-warning">Update This Record</button>
                 </form>
@@ -58,38 +56,38 @@
                     <tr><td>Data Type</td><td th:text="${dataType}"></td></tr>
 
                     <!-- RECEIPT -->
-                    <tr th:if="${dataType == 'RECEIPT'}"><td>receiptId</td><td th:text="${record.receiptId}"></td></tr>
-                    <tr th:if="${dataType == 'RECEIPT'}"><td>referenceNo</td><td th:text="${record.referenceNo}"></td></tr>
-                    <tr th:if="${dataType == 'RECEIPT'}"><td>payerName</td><td th:text="${record.payerName}"></td></tr>
-                    <tr th:if="${dataType == 'RECEIPT'}"><td>amount</td><td th:text="${record.amount}"></td></tr>
-                    <tr th:if="${dataType == 'RECEIPT'}"><td>receiptDate</td><td th:text="${record.receiptDate}"></td></tr>
-                    <tr th:if="${dataType == 'RECEIPT'}"><td>enteredBy</td><td th:text="${record.enteredBy}"></td></tr>
+                    <tr th:if="${dataType == 'RECEIPT'}"><td>Receipt ID</td><td th:text="${record.receiptId}"></td></tr>
+                    <tr th:if="${dataType == 'RECEIPT'}"><td>Reference No</td><td th:text="${record.referenceNo}"></td></tr>
+                    <tr th:if="${dataType == 'RECEIPT'}"><td>Payer Name</td><td th:text="${record.payerName}"></td></tr>
+                    <tr th:if="${dataType == 'RECEIPT'}"><td>Amount</td><td th:text="${record.amount}"></td></tr>
+                    <tr th:if="${dataType == 'RECEIPT'}"><td>Receipt Date</td><td th:text="${record.receiptDate}"></td></tr>
+                    <tr th:if="${dataType == 'RECEIPT'}"><td>Entered By</td><td th:text="${record.enteredBy}"></td></tr>
 
                     <!-- PAYROLL -->
-                    <tr th:if="${dataType == 'PAYROLL'}"><td>payrollId</td><td th:text="${record.payrollId}"></td></tr>
-                    <tr th:if="${dataType == 'PAYROLL'}"><td>employeeId</td><td th:text="${record.employeeId}"></td></tr>
-                    <tr th:if="${dataType == 'PAYROLL'}"><td>employeeName</td><td th:text="${record.employeeName}"></td></tr>
-                    <tr th:if="${dataType == 'PAYROLL'}"><td>salary</td><td th:text="${record.salary}"></td></tr>
-                    <tr th:if="${dataType == 'PAYROLL'}"><td>paymentDate</td><td th:text="${record.paymentDate}"></td></tr>
-                    <tr th:if="${dataType == 'PAYROLL'}"><td>referenceNo</td><td th:text="${record.referenceNo}"></td></tr>
-                    <tr th:if="${dataType == 'PAYROLL'}"><td>status</td><td th:text="${record.status}"></td></tr>
-                    <tr th:if="${dataType == 'PAYROLL'}"><td>enteredBy</td><td th:text="${record.enteredBy}"></td></tr>
+                    <tr th:if="${dataType == 'PAYROLL'}"><td>Payroll ID</td><td th:text="${record.payrollId}"></td></tr>
+                    <tr th:if="${dataType == 'PAYROLL'}"><td>Employee ID</td><td th:text="${record.employeeId}"></td></tr>
+                    <tr th:if="${dataType == 'PAYROLL'}"><td>Employee Name</td><td th:text="${record.employeeName}"></td></tr>
+                    <tr th:if="${dataType == 'PAYROLL'}"><td>Salary</td><td th:text="${record.salary}"></td></tr>
+                    <tr th:if="${dataType == 'PAYROLL'}"><td>Payment Date</td><td th:text="${record.paymentDate}"></td></tr>
+                    <tr th:if="${dataType == 'PAYROLL'}"><td>Reference No</td><td th:text="${record.referenceNo}"></td></tr>
+                    <tr th:if="${dataType == 'PAYROLL'}"><td>Status</td><td th:text="${record.status}"></td></tr>
+                    <tr th:if="${dataType == 'PAYROLL'}"><td>Entered By</td><td th:text="${record.enteredBy}"></td></tr>
 
                     <!-- STOCK -->
-                    <tr th:if="${dataType == 'STOCK'}"><td>purchaseId</td><td th:text="${record.purchaseId}"></td></tr>
-                    <tr th:if="${dataType == 'STOCK'}"><td>vendorName</td><td th:text="${record.vendorName}"></td></tr>
-                    <tr th:if="${dataType == 'STOCK'}"><td>invoiceNo</td><td th:text="${record.invoiceNo}"></td></tr>
-                    <tr th:if="${dataType == 'STOCK'}"><td>amount</td><td th:text="${record.amount}"></td></tr>
-                    <tr th:if="${dataType == 'STOCK'}"><td>purchaseDate</td><td th:text="${record.purchaseDate}"></td></tr>
-                    <tr th:if="${dataType == 'STOCK'}"><td>enteredBy</td><td th:text="${record.enteredBy}"></td></tr>
+                    <tr th:if="${dataType == 'STOCK'}"><td>Purchase ID</td><td th:text="${record.purchaseId}"></td></tr>
+                    <tr th:if="${dataType == 'STOCK'}"><td>Vendor Name</td><td th:text="${record.vendorName}"></td></tr>
+                    <tr th:if="${dataType == 'STOCK'}"><td>Invoice No</td><td th:text="${record.invoiceNo}"></td></tr>
+                    <tr th:if="${dataType == 'STOCK'}"><td>Amount</td><td th:text="${record.amount}"></td></tr>
+                    <tr th:if="${dataType == 'STOCK'}"><td>Purchase Date</td><td th:text="${record.purchaseDate}"></td></tr>
+                    <tr th:if="${dataType == 'STOCK'}"><td>Entered By</td><td th:text="${record.enteredBy}"></td></tr>
 
                     <!-- ACCOUNTING -->
-                    <tr th:if="${dataType == 'ACCOUNTING'}"><td>recordId</td><td th:text="${record.recordId}"></td></tr>
-                    <tr th:if="${dataType == 'ACCOUNTING'}"><td>referenceNo</td><td th:text="${record.referenceNo}"></td></tr>
-                    <tr th:if="${dataType == 'ACCOUNTING'}"><td>module</td><td th:text="${record.module}"></td></tr>
-                    <tr th:if="${dataType == 'ACCOUNTING'}"><td>amount</td><td th:text="${record.amount}"></td></tr>
-                    <tr th:if="${dataType == 'ACCOUNTING'}"><td>recordDate</td><td th:text="${record.recordDate}"></td></tr>
-                    <tr th:if="${dataType == 'ACCOUNTING'}"><td>createdAt</td><td th:text="${record.createdAt}"></td></tr>
+                    <tr th:if="${dataType == 'ACCOUNTING'}"><td>Record ID</td><td th:text="${record.recordId}"></td></tr>
+                    <tr th:if="${dataType == 'ACCOUNTING'}"><td>Reference No</td><td th:text="${record.referenceNo}"></td></tr>
+                    <tr th:if="${dataType == 'ACCOUNTING'}"><td>Module</td><td th:text="${record.module}"></td></tr>
+                    <tr th:if="${dataType == 'ACCOUNTING'}"><td>Amount</td><td th:text="${record.amount}"></td></tr>
+                    <tr th:if="${dataType == 'ACCOUNTING'}"><td>Record Date</td><td th:text="${record.recordDate}"></td></tr>
+                    <tr th:if="${dataType == 'ACCOUNTING'}"><td>Created At</td><td th:text="${record.createdAt}"></td></tr>
                     </tbody>
                 </table>
             </div>
