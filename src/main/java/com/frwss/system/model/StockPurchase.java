@@ -1,7 +1,6 @@
 package com.frwss.system.model;
 
 import jakarta.persistence.*;
-import org.springframework.data.domain.Persistable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;

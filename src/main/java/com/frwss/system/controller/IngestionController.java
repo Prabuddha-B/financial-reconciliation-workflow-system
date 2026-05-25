@@ -12,39 +12,32 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.List;
 
 @Controller
-@RequestMapping("/ingestion")
 public class IngestionController {
 
     private final IngestionService ingestionService;
 
-//    Constructor
     public IngestionController(IngestionService ingestionService) {
         this.ingestionService = ingestionService;
     }
 
-//    Loads the ingestion dashboard with summary stat
-    @GetMapping
+    @GetMapping("/ingestion")
     public String ingestionPage(Model model) {
         populateDashboardStats(model);
         return "ingestion/dashboard";
     }
 
-//    Alternative route for dashboard
-    @GetMapping("/dashboard")
+    @GetMapping("/ingestion/dashboard")
     public String dashboard(Model model) {
         populateDashboardStats(model);
         return "ingestion/dashboard";
     }
 
-//    Display the file upload page for ingestion
-    @GetMapping("/upload")
+    @GetMapping("/ingestion/upload")
     public String showUploadPage() {
         return "ingestion/upload";
     }
 
-//    Handle File Uploads
-    // STEP 1: PREVIEW
-    @PostMapping({"/preview", "/upload"})
+    @PostMapping({"/ingestion/preview", "/ingestion/upload"})
     public String previewFile(
             @RequestParam("file") MultipartFile file,
             @RequestParam("dataType") String dataType,
@@ -71,11 +64,8 @@ public class IngestionController {
         }
     }
 
-//    Save only valid records
-    // STEP 2: SAVE
-    @PostMapping("/save")
+    @PostMapping("/ingestion/save")
     public String saveFile(HttpSession session, RedirectAttributes ra) {
-        // Retrieve the List we stored in Step 1
         List<?> records = (List<?>) session.getAttribute("pendingRecords");
         String dataType = (String) session.getAttribute("pendingType");
 
@@ -106,7 +96,17 @@ public class IngestionController {
         return "redirect:/ingestion/upload";
     }
 
-//    Fetch dashboard summary stat and add to the model
+    @PostMapping("/upload-csv")
+    public String handleFileUpload(@RequestParam("file") MultipartFile file, RedirectAttributes ra) {
+        try {
+            ingestionService.processCSV(file);
+            ra.addFlashAttribute("message", "File processed and records saved to pgAdmin!");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", "Failed to process: " + e.getMessage());
+        }
+        return "redirect:/ingestion/upload";
+    }
+
     private void populateDashboardStats(Model model) {
         IngestionService.DashboardSummary summary = ingestionService.getDashboardSummary();
         model.addAttribute("total", summary.totalCount());

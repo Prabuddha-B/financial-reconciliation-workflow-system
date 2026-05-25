@@ -6,13 +6,18 @@ import com.frwss.system.dto.PayrollDto;
 import com.frwss.system.dto.ReceiptDto;
 import com.frwss.system.dto.StockPurchaseDto;
 import com.frwss.system.model.AccountingRecord;
+import com.frwss.system.model.FinancialRecord;
 import com.frwss.system.model.Payroll;
 import com.frwss.system.model.Receipt;
 import com.frwss.system.model.StockPurchase;
 import com.frwss.system.repository.AccountingRecordRepository;
+import com.frwss.system.repository.FinancialRecordRepository;
 import com.frwss.system.repository.PayrollRepository;
 import com.frwss.system.repository.ReceiptRepository;
 import com.frwss.system.repository.StockPurchaseRepository;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
@@ -41,11 +46,9 @@ import java.util.Set;
 @Service
 public class IngestionService {
 
-//    Represents the results of saving records
     public record SaveSummary(int savedCount, int skippedDuplicateCount, int skippedInvalidCount) {
     }
 
-//    Dashboard summary stat from DB
     public record DashboardSummary(long totalCount, long validCount, long invalidCount) {
     }
 
@@ -72,16 +75,19 @@ public class IngestionService {
     private final PayrollRepository payrollRepository;
     private final StockPurchaseRepository stockPurchaseRepository;
     private final AccountingRecordRepository accountingRecordRepository;
+    private final FinancialRecordRepository financialRecordRepository;
 
     public IngestionService(
             ReceiptRepository receiptRepository,
             PayrollRepository payrollRepository,
             StockPurchaseRepository stockPurchaseRepository,
-            AccountingRecordRepository accountingRecordRepository) {
+            AccountingRecordRepository accountingRecordRepository,
+            FinancialRecordRepository financialRecordRepository) {
         this.receiptRepository = receiptRepository;
         this.payrollRepository = payrollRepository;
         this.stockPurchaseRepository = stockPurchaseRepository;
         this.accountingRecordRepository = accountingRecordRepository;
+        this.financialRecordRepository = financialRecordRepository;
     }
 
 //    Process file and returns only records
@@ -617,6 +623,35 @@ public class IngestionService {
         return false;
     }
 
+    public void processCSV(MultipartFile file) throws IOException {
+        try (BufferedReader reader = createReader(file);
+             CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.builder()
+                     .setHeader()
+                     .setSkipHeaderRecord(true)
+                     .setIgnoreHeaderCase(true)
+                     .setTrim(true)
+                     .build())) {
+
+            List<FinancialRecord> recordsToSave = new ArrayList<>();
+
+            for (CSVRecord csvRecord : csvParser) {
+                String refId = csvRecord.get("Reference ID");
+                Double amount = Double.parseDouble(csvRecord.get("Amount"));
+                LocalDate date = LocalDate.parse(csvRecord.get("Date"));
+
+                if (!financialRecordRepository.existsByReferenceIdAndAmountAndDate(refId, amount, date)) {
+                    FinancialRecord record = new FinancialRecord();
+                    record.setReferenceId(refId);
+                    record.setAmount(amount);
+                    record.setDate(date);
+                    recordsToSave.add(record);
+                }
+            }
+
+            financialRecordRepository.saveAll(recordsToSave);
+        }
+    }
+
 //    File Utilities
     private BufferedReader createReader(MultipartFile file) throws IOException {
         return new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
@@ -809,7 +844,7 @@ public class IngestionService {
         throw new DateTimeParseException("Unsupported date-time format", cleaned, 0);
     }
 
-//    Validation MEthods
+//    Validation Methods
     private void validateReceipt(ReceiptDto dto) {
         if (dto.getReferenceNo() == null || dto.getReferenceNo().isBlank()) {
             dto.setValid(false);

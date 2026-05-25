@@ -5,6 +5,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 </head>
 <body>
+<!--/* @thymesVar id="record" type="com.frwss.system.dto.ManualEntryForm" */-->
 <div class="container py-5" style="max-width: 1050px;">
     <div class="card shadow-sm">
         <div class="card-body p-4">
@@ -22,13 +23,13 @@
             <!-- Redirect buttons -->
             <div class="d-flex gap-2 mb-3">
                 <a class="btn btn-outline-primary"
-                   th:href="@{/manual(dataType=${dataType}, mode='ADD')}"
+       th:href="@{/ingestion/manual(dataType=${dataType}, mode='ADD')}"
                     onclick="window.location.href=this.href; return false;">
                     Add Another
                 </a>
 
 
-                <form method="post" th:action="@{/manual/update/search}" class="d-inline" th:if="${record != null}">
+    <form method="post" th:action="@{/ingestion/manual/update/search}" class="d-inline" th:if="${record != null}">
 
 
                     <input type="hidden" name="dataType" th:value="${dataType}"/>
@@ -61,7 +62,7 @@
                     <tr th:if="${dataType == 'RECEIPT'}"><td>referenceNo</td><td th:text="${record.referenceNo}"></td></tr>
                     <tr th:if="${dataType == 'RECEIPT'}"><td>payerName</td><td th:text="${record.payerName}"></td></tr>
                     <tr th:if="${dataType == 'RECEIPT'}"><td>amount</td><td th:text="${record.amount}"></td></tr>
-                    <tr th:if="${dataType == 'RECEIPT'}"><td>date</td><td th:text="${record.date}"></td></tr>
+                    <tr th:if="${dataType == 'RECEIPT'}"><td>receiptDate</td><td th:text="${record.receiptDate}"></td></tr>
                     <tr th:if="${dataType == 'RECEIPT'}"><td>enteredBy</td><td th:text="${record.enteredBy}"></td></tr>
 
                     <!-- PAYROLL -->
@@ -144,7 +145,7 @@
             </div>
             <div class="modal-footer">
                 <a class="btn btn-primary"
-                   th:href="@{/manual(dataType=${dataType}, mode='ADD')}"
+       th:href="@{/ingestion/manual(dataType=${dataType}, mode='ADD')}"
                    onclick="return confirm('Start a new entry? Unsaved changes will be lost.')">
                     Add New
                 </a>
