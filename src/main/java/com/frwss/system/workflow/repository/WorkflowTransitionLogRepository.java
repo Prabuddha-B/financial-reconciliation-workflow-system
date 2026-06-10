@@ -1,3 +1,5 @@
+//--------------------- Provides Database Access For Workflow Transition Logs -----------------------------------
+
 package com.frwss.system.workflow.repository;
 
 import com.frwss.system.workflow.model.WorkflowTransitionLog;

@@ -1,3 +1,5 @@
+//-------------------------- Stores Workflow State Transition History -------------------------------------------
+
 package com.frwss.system.workflow.model;
 
 import jakarta.persistence.*;

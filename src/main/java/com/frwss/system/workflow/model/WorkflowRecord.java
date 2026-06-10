@@ -1,3 +1,5 @@
+//-------------------------- Stores Workflow Record Information -----------------------------------------
+
 package com.frwss.system.workflow.model;
 
 import jakarta.persistence.*;
