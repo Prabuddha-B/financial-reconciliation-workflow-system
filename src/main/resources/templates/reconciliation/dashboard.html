@@ -15,22 +15,30 @@
     <div>
       <h2>Reconciliation Dashboard</h2>
       <p class="text-muted mb-0">
-        Exact matching based on Reference No, Amount, and Date
+        Exact and partial matching based on Reference No, Amount, and Date Tolerance
       </p>
     </div>
 
-    <form th:action="@{/reconciliation/run-exact}" method="post">
-      <button type="submit" class="btn btn-primary">
-        Run Exact Reconciliation
-      </button>
-    </form>
+    <div class="d-flex">
+      <form th:action="@{/reconciliation/run-exact}" method="post">
+        <button type="submit" class="btn btn-primary">
+          Run Exact Reconciliation
+        </button>
+      </form>
+
+      <form th:action="@{/reconciliation/run-partial}" method="post" class="ms-2">
+        <button type="submit" class="btn btn-warning">
+          Run Partial Reconciliation
+        </button>
+      </form>
+    </div>
   </div>
 
   <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
 
   <div class="row mb-4">
 
-    <div class="col-md-4">
+    <div class="col-md-3">
       <div class="card shadow-sm">
         <div class="card-body">
           <h6 class="text-muted">Total Results</h6>
@@ -39,7 +47,7 @@
       </div>
     </div>
 
-    <div class="col-md-4">
+    <div class="col-md-3">
       <div class="card shadow-sm border-success">
         <div class="card-body">
           <h6 class="text-muted">Exact Matches</h6>
@@ -48,11 +56,20 @@
       </div>
     </div>
 
-    <div class="col-md-4">
+    <div class="col-md-3">
       <div class="card shadow-sm border-warning">
         <div class="card-body">
           <h6 class="text-muted">Orphan Records</h6>
           <h3 class="text-warning" th:text="${#lists.size(orphanResults)}">0</h3>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card shadow-sm border-info">
+        <div class="card-body">
+          <h6 class="text-muted">Partial Matches</h6>
+          <h3 class="text-info" th:text="${#lists.size(partialResults)}">0</h3>
         </div>
       </div>
     </div>
@@ -101,7 +118,13 @@
                             ORPHAN
                         </span>
 
-            <span th:if="${result.status.name() != 'EXACT' and result.status.name() != 'ORPHAN'}"
+            <span th:if="${result.status.name() == 'PARTIAL'}"
+                  class="badge bg-info text-dark"
+                  th:text="${result.status}">
+                            PARTIAL
+                        </span>
+
+            <span th:if="${result.status.name() != 'EXACT' and result.status.name() != 'ORPHAN' and result.status.name() != 'PARTIAL'}"
                   class="badge bg-secondary"
                   th:text="${result.status}">
                             STATUS

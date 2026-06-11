@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -16,4 +17,12 @@ public interface PayrollRepository extends JpaRepository<Payroll, String> {
             BigDecimal salary,
             LocalDate paymentDate
     );
+
+    List<Payroll> findByReferenceNoAndSalaryAndPaymentDateBetween(
+            String referenceNo,
+            BigDecimal salary,
+            LocalDate startDate,
+            LocalDate endDate
+    );
+
 }

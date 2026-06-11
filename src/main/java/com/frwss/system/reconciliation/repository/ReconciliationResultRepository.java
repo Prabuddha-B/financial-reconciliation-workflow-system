@@ -12,4 +12,5 @@ public interface ReconciliationResultRepository extends JpaRepository<Reconcilia
     boolean existsByAccountingRecordId(String accountingRecord);
     List<ReconciliationResult> findByStatus(ReconciliationStatus status);
     List<ReconciliationResult> findAllByOrderByReconciledAtDesc();
+    List<ReconciliationResult> findByStatusOrderByReconciledAtDesc(ReconciliationStatus status);
 }

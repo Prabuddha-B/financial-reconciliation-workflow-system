@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -15,6 +16,12 @@ public interface ReceiptRepository extends JpaRepository<Receipt, String> {
             String referenceNo,
             BigDecimal amount,
             LocalDate receiptDate
+    );
 
+    List<Receipt> findByReferenceNoAndAmountAndReceiptDateBetween(
+            String referenceNo,
+            BigDecimal amount,
+            LocalDate startDate,
+            LocalDate endDate
     );
 }

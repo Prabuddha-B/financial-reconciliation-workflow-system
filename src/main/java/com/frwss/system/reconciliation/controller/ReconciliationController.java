@@ -24,6 +24,7 @@ public class ReconciliationController {
         model.addAttribute("results", reconciliationService.getAllResults());
         model.addAttribute("exactResults", reconciliationService.getResultsByStatus(ReconciliationStatus.EXACT));
         model.addAttribute("orphanResults", reconciliationService.getResultsByStatus(ReconciliationStatus.ORPHAN));
+        model.addAttribute("partialResults", reconciliationService.getResultsByStatus(ReconciliationStatus.PARTIAL));
 
         return "reconciliation/dashboard";
     }
@@ -36,6 +37,18 @@ public class ReconciliationController {
         redirectAttributes.addFlashAttribute(
                 "successMessage",
                 "Exact reconciliation completed successfully."
+        );
+
+        return "redirect:/reconciliation";
+    }
+
+    @PostMapping("/run-partial")
+    public String runPartialReconciliation(RedirectAttributes redirectAttributes){
+        reconciliationService.runPartialReconciliation("admin", 3);
+
+        redirectAttributes.addFlashAttribute(
+                "successMessage",
+                "Partial reconciliation completed successfully with ±3 days tolerance."
         );
 
         return "redirect:/reconciliation";
