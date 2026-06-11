@@ -1,0 +1,8 @@
+POST http://localhost:8080/api/workflows
+Content-Type: application/json
+
+{
+  "sourceType":"STOCK",
+  "sourceRecordId":"STK-1001",
+  "createdBy":"Prabuddha"
+}
