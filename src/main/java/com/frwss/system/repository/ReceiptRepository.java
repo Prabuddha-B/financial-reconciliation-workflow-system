@@ -24,4 +24,10 @@ public interface ReceiptRepository extends JpaRepository<Receipt, String> {
             LocalDate startDate,
             LocalDate endDate
     );
+
+    List<Receipt> findByAmountAndReceiptDateBetween(
+            BigDecimal amount,
+            LocalDate startDate,
+            LocalDate endDate
+    );
 }

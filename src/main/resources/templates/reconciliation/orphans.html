@@ -71,9 +71,10 @@
                     <td th:text="${orphan.recordDate}">2026-06-10</td>
                     <td th:text="${orphan.remarks}">No exact match found</td>
                     <td>
-                        <button class="btn btn-sm btn-outline-secondary" disabled>
-                            Resolve Later
-                        </button>
+                        <a th:href="@{/reconciliation/orphans/{id}/candidates(id=${orphan.reconciliationResultId})}"
+                           class="btn btn-sm btn-outline-primary">
+                            View Candidates
+                        </a>
                     </td>
                 </tr>
 

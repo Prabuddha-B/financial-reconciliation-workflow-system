@@ -25,4 +25,10 @@ public interface StockPurchaseRepository extends JpaRepository<StockPurchase, St
             LocalDate startDate,
             LocalDate endDate
     );
+
+    List<StockPurchase> findByAmountAndPurchaseDateBetween(
+            BigDecimal amount,
+            LocalDate startDate,
+            LocalDate endDate
+    );
 }

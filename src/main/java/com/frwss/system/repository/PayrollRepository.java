@@ -25,4 +25,12 @@ public interface PayrollRepository extends JpaRepository<Payroll, String> {
             LocalDate endDate
     );
 
+    List<Payroll> findBySalaryAndPaymentDateBetween(
+            BigDecimal salary,
+            LocalDate startDate,
+            LocalDate endDate
+    );
+
+
+
 }

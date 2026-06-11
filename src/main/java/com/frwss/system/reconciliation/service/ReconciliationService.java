@@ -7,6 +7,7 @@ import com.frwss.system.model.Payroll;
 import com.frwss.system.model.Receipt;
 import com.frwss.system.model.StockPurchase;
 import com.frwss.system.reconciliation.dto.OrphanRecordView;
+import com.frwss.system.reconciliation.dto.CandidateMatchView;
 import com.frwss.system.reconciliation.model.MatchedSourceType;
 import com.frwss.system.reconciliation.model.ReconciliationResult;
 import com.frwss.system.reconciliation.model.ReconciliationStatus;
@@ -460,5 +461,136 @@ public class ReconciliationService {
         }
 
         return orphanViews;
+    }
+
+    @Transactional(readOnly = true)
+    public List<CandidateMatchView> getCandidateMatchesForOrphan(Long reconciliationResultId){
+        Optional<ReconciliationResult> optionalResult = reconciliationResultRepository.findById(reconciliationResultId);
+
+        if(optionalResult.isEmpty()){
+            return new ArrayList<>();
+        }
+
+        ReconciliationResult orphanResult = optionalResult.get();
+
+        if(orphanResult.getStatus() != ReconciliationStatus.ORPHAN){
+            return new ArrayList<>();
+        }
+
+        Optional<AccountingRecord> optionalAccountingRecord = accountingRecordRepository.findById(orphanResult.getAccountingRecordId());
+
+        if(optionalAccountingRecord.isEmpty()){
+            return new ArrayList<>();
+        }
+
+        AccountingRecord accountingRecord = optionalAccountingRecord.get();
+
+        int widerToleranceDays = 7;
+
+        LocalDate startDate = accountingRecord.getRecordDate().minusDays(widerToleranceDays);
+        LocalDate endDate = accountingRecord.getRecordDate().plusDays(widerToleranceDays);
+
+        List<CandidateMatchView> candidates = new ArrayList<>();
+
+        List<Payroll> payrollCandidates = payrollRepository.findBySalaryAndPaymentDateBetween(
+                accountingRecord.getAmount(),
+                startDate,
+                endDate
+        );
+
+        for(Payroll payroll : payrollCandidates){
+            long daysDifference = Math.abs(
+                    ChronoUnit.DAYS.between(accountingRecord.getRecordDate(),payroll.getPaymentDate())
+            );
+
+            candidates.add(new CandidateMatchView(
+                    "PAYROLL",
+                    payroll.getPayrollId(),
+                    payroll.getReferenceNo(),
+                    payroll.getSalary(),
+                    payroll.getPaymentDate(),
+                    payroll.getEmployeeName(),
+                    calculateCandidateConfidence(accountingRecord.getReferenceNo(), payroll.getReferenceNo(), daysDifference),
+                    "Same amount with date difference of " + daysDifference + " day(s)"
+            ));
+        }
+
+        List<Receipt> receiptCandidates = receiptRepository.findByAmountAndReceiptDateBetween(
+                accountingRecord.getAmount(),
+                startDate,
+                endDate
+        );
+
+        for(Receipt receipt : receiptCandidates){
+            long daysDifference = Math.abs(
+                    ChronoUnit.DAYS.between(accountingRecord.getRecordDate(), receipt.getReceiptDate())
+            );
+
+            candidates.add(new CandidateMatchView(
+                    "RECEIPT",
+                    receipt.getReceiptId(),
+                    receipt.getReferenceNo(),
+                    receipt.getAmount(),
+                    receipt.getReceiptDate(),
+                    receipt.getPayerName(),
+                    calculateCandidateConfidence(accountingRecord.getReferenceNo(), receipt.getReferenceNo(), daysDifference),
+                    "Same amount with date difference of " + daysDifference + " days(s)"
+            ));
+        }
+
+        List<StockPurchase> stockPurchaseCandidates = stockPurchaseRepository.findByAmountAndPurchaseDateBetween(
+                accountingRecord.getAmount(),
+                startDate,
+                endDate
+        );
+
+        for(StockPurchase stockPurchase : stockPurchaseCandidates){
+            long daysDifference = Math.abs(
+                    ChronoUnit.DAYS.between(accountingRecord.getRecordDate(), stockPurchase.getPurchaseDate())
+            );
+
+            candidates.add(new CandidateMatchView(
+                    "STOCK_PURCHASE",
+                    stockPurchase.getPurchaseId(),
+                    stockPurchase.getInvoiceNo(),
+                    stockPurchase.getAmount(),
+                    stockPurchase.getPurchaseDate(),
+                    stockPurchase.getVendorName(),
+                    calculateCandidateConfidence(accountingRecord.getReferenceNo(), stockPurchase.getInvoiceNo(), daysDifference),
+                    "Same amount with date difference of " + daysDifference + " day(s)"
+            ));
+        }
+        candidates.sort((c1, c2) ->
+                Double.compare(c2.getSuggestedConfidence(), c1.getSuggestedConfidence())
+        );
+
+        return candidates;
+    }
+
+    private double calculateCandidateConfidence(
+            String accountingReference,
+            String candidateReference,
+            long daysDifference
+    ){
+        // base score because candidate already has the same amount
+        double confidence = 60.0;
+
+        // strong bonus only if full reference number matches only
+        if(accountingReference != null && candidateReference != null){
+            if(accountingReference.equalsIgnoreCase(candidateReference)){
+                confidence += 20.0;
+            }
+        }
+
+        // date proximity bonus
+        if(daysDifference == 0){
+            confidence += 15.0;
+        } else if(daysDifference <= 3){
+            confidence += 10.0;
+        } else if (daysDifference <= 7){
+            confidence += 5.0;
+        }
+
+        return Math.min(confidence, 95.0);
     }
 }

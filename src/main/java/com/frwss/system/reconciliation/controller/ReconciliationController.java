@@ -5,6 +5,7 @@ import com.frwss.system.reconciliation.service.ReconciliationService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -33,6 +34,17 @@ public class ReconciliationController {
     public String showOrphanResolutionView(Model model){
         model.addAttribute("orphans", reconciliationService.getOrphanRecordViews());
         return "reconciliation/orphans";
+    }
+
+    @GetMapping("/orphans/{resultId}/candidates")
+    public String showCandidateMatches(
+            @PathVariable Long resultId,
+            Model model
+    ){
+        model.addAttribute("candidates", reconciliationService.getCandidateMatchesForOrphan(resultId));
+        model.addAttribute("resultId", resultId);
+
+        return "reconciliation/candidates";
     }
 
     @PostMapping("/run-exact")
