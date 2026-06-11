@@ -122,4 +122,9 @@ public class AuditService {
         }
     }
 
+    @Transactional(readOnly = true)
+    public List<AuditLog> getAllLogs(){
+        return auditLogRepository.findAllByOrderByTimestampDesc();
+    }
+
 }
