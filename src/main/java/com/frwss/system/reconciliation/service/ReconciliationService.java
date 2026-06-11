@@ -6,6 +6,7 @@ import com.frwss.system.model.AccountingRecord;
 import com.frwss.system.model.Payroll;
 import com.frwss.system.model.Receipt;
 import com.frwss.system.model.StockPurchase;
+import com.frwss.system.reconciliation.dto.OrphanRecordView;
 import com.frwss.system.reconciliation.model.MatchedSourceType;
 import com.frwss.system.reconciliation.model.ReconciliationResult;
 import com.frwss.system.reconciliation.model.ReconciliationStatus;
@@ -14,12 +15,16 @@ import com.frwss.system.repository.AccountingRecordRepository;
 import com.frwss.system.repository.PayrollRepository;
 import com.frwss.system.repository.ReceiptRepository;
 import com.frwss.system.repository.StockPurchaseRepository;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -59,15 +64,16 @@ public class ReconciliationService {
                 "Exact reconciliation process started"
         );
 
-        List<AccountingRecord> accountingRecords = accountingRecordRepository.findAll();
+        List<AccountingRecord> accountingRecords =
+                accountingRecordRepository.findRecentRecordsWithoutReconciliationResult(PageRequest.of(0,10));
 
         int exactCount = 0;
         int orphanCount = 0;
 
         for(AccountingRecord accountingRecord : accountingRecords){
-            if(reconciliationResultRepository.existsByAccountingRecordId(accountingRecord.getRecordId())){
-                continue;
-            }
+//            if(reconciliationResultRepository.existsByAccountingRecordId(accountingRecord.getRecordId())){
+//                continue;
+//            }
 
             ReconciliationResult result = reconcileSingleAccountingRecord(accountingRecord, performedBy);
 
@@ -430,5 +436,29 @@ public class ReconciliationService {
     @Transactional(readOnly = true)
     public List<ReconciliationResult> getResultsByStatus(ReconciliationStatus status){
         return reconciliationResultRepository.findByStatus(status);
+    }
+
+    @Transactional(readOnly = true)
+    public List<OrphanRecordView> getOrphanRecordViews(){
+        List<ReconciliationResult> orphanResults = reconciliationResultRepository.findByStatusOrderByReconciledAtDesc(ReconciliationStatus.ORPHAN);
+
+        List<OrphanRecordView> orphanViews = new ArrayList<>();
+
+        for(ReconciliationResult result : orphanResults){
+            accountingRecordRepository.findById(result.getAccountingRecordId())
+                    .ifPresent(accountingRecord -> orphanViews.add(
+                            new OrphanRecordView(
+                                    result.getId(),
+                                    accountingRecord.getRecordId(),
+                                    accountingRecord.getReferenceNo(),
+                                    accountingRecord.getModule(),
+                                    accountingRecord.getAmount(),
+                                    accountingRecord.getRecordDate(),
+                                    result.getRemarks()
+                            )
+                    ));
+        }
+
+        return orphanViews;
     }
 }

@@ -29,6 +29,12 @@ public class ReconciliationController {
         return "reconciliation/dashboard";
     }
 
+    @GetMapping("/orphans")
+    public String showOrphanResolutionView(Model model){
+        model.addAttribute("orphans", reconciliationService.getOrphanRecordViews());
+        return "reconciliation/orphans";
+    }
+
     @PostMapping("/run-exact")
     public String runExactReconciliation(RedirectAttributes redirectAttributes){
         // temporary user until Spring Security is fully integrated
