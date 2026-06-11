@@ -34,4 +34,61 @@ public class WorkflowRecord {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+//    Getters and Setters
+
+    public Long getWorkflowId() {
+        return workflowId;
+    }
+
+    public void setWorkflowId(Long workflowId) {
+        this.workflowId = workflowId;
+    }
+
+    public String getSourceType() {
+        return sourceType;
+    }
+
+    public void setSourceType(String sourceType) {
+        this.sourceType = sourceType;
+    }
+
+    public String getSourceRecordId() {
+        return sourceRecordId;
+    }
+
+    public void setSourceRecordId(String sourceRecordId) {
+        this.sourceRecordId = sourceRecordId;
+    }
+
+    public WorkflowState getCurrentState() {
+        return currentState;
+    }
+
+    public void setCurrentState(WorkflowState currentState) {
+        this.currentState = currentState;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 }

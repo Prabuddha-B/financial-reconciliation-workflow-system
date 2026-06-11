@@ -33,4 +33,61 @@ public class WorkflowTransitionLog {
     @Column(name = "transition_time")
     private LocalDateTime transitionTime;
 
+//    Getters and Setters
+
+    public Long getLogId() {
+        return logId;
+    }
+
+    public void setLogId(Long logId) {
+        this.logId = logId;
+    }
+
+    public Long getWorkflowId() {
+        return workflowId;
+    }
+
+    public void setWorkflowId(Long workflowId) {
+        this.workflowId = workflowId;
+    }
+
+    public String getFromState() {
+        return fromState;
+    }
+
+    public void setFromState(String fromState) {
+        this.fromState = fromState;
+    }
+
+    public String getToState() {
+        return toState;
+    }
+
+    public void setToState(String toState) {
+        this.toState = toState;
+    }
+
+    public String getPerformedBy() {
+        return performedBy;
+    }
+
+    public void setPerformedBy(String performedBy) {
+        this.performedBy = performedBy;
+    }
+
+    public String getJustification() {
+        return justification;
+    }
+
+    public void setJustification(String justification) {
+        this.justification = justification;
+    }
+
+    public LocalDateTime getTransitionTime() {
+        return transitionTime;
+    }
+
+    public void setTransitionTime(LocalDateTime transitionTime) {
+        this.transitionTime = transitionTime;
+    }
 }

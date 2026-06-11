@@ -10,6 +10,7 @@ public class WorkflowRequestDto {
     private String createdBy;
     private WorkflowState targetState;
 
+//    Getters and Setters
     public String getSourceType() {
         return sourceType;
     }

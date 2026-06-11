@@ -23,6 +23,8 @@ import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -45,6 +47,8 @@ import java.util.Set;
 
 @Service
 public class IngestionService {
+
+    private static final Logger log = LoggerFactory.getLogger(IngestionService.class);
 
     public record SaveSummary(int savedCount, int skippedDuplicateCount, int skippedInvalidCount) {
     }
@@ -101,6 +105,10 @@ public class IngestionService {
 
 //    Main Preview
     public IngestionResult processFileForPreview(MultipartFile file, String dataType) throws IOException {
+        log.info("Processing preview file: fileName={}, size={}, dataType={}",
+                file != null ? file.getOriginalFilename() : null,
+                file != null ? file.getSize() : null,
+                dataType);
         return switch (dataType.toUpperCase(Locale.ROOT)) {
             case "RECEIPT" -> previewReceipts(file);
             case "PAYROLL" -> previewPayroll(file);
@@ -199,15 +207,19 @@ public class IngestionService {
                 continue;
             }
 
-            Receipt entity = new Receipt();
-            entity.setReceiptId(receiptId);
-            entity.setReferenceNo(referenceNo);
-            entity.setPayerName(dto.getPayerName());
-            entity.setAmount(dto.getAmount());
-            entity.setReceiptDate(parseDate(dto.getDate()));
-            entity.setEnteredBy(dto.getEnteredBy());
-            entity.setCreatedAt(LocalDateTime.now());
-            entities.add(entity);
+            try {
+                Receipt entity = new Receipt();
+                entity.setReceiptId(receiptId);
+                entity.setReferenceNo(referenceNo);
+                entity.setPayerName(dto.getPayerName());
+                entity.setAmount(dto.getAmount());
+                entity.setReceiptDate(parseDate(dto.getDate()));
+                entity.setEnteredBy(dto.getEnteredBy());
+                entity.setCreatedAt(LocalDateTime.now());
+                entities.add(entity);
+            } catch (RuntimeException e) {
+                skippedInvalid++;
+            }
         }
         receiptRepository.saveAll(entities);
         return new SaveSummary(entities.size(), skippedDuplicates, skippedInvalid);
@@ -217,27 +229,35 @@ public class IngestionService {
         List<Payroll> entities = new ArrayList<>();
         int skippedDuplicates = 0;
         int skippedInvalid = 0;
+        Set<String> seenPayrollIds = new HashSet<>();
         for (PayrollDto dto : dtos) {
             if (!dto.isValid()) {
                 skippedInvalid++;
                 continue;
             }
-            if (payrollRepository.existsById(dto.getPayrollId())) {
+            String payrollId = dto.getPayrollId();
+            String referenceNo = dto.getReferenceNo();
+            if (!seenPayrollIds.add(payrollId)
+                    || payrollRepository.existsById(payrollId)) {
                 skippedDuplicates++;
                 continue;
             }
 
-            Payroll entity = new Payroll();
-            entity.setPayrollId(dto.getPayrollId());
-            entity.setEmployeeId(dto.getEmployeeId());
-            entity.setEmployeeName(dto.getEmployeeName());
-            entity.setSalary(dto.getSalary());
-            entity.setPaymentDate(dto.getPaymentDate());
-            entity.setReferenceNo(dto.getReferenceNo());
-            entity.setStatus(dto.getStatus());
-            entity.setCreatedAt(dto.getCreatedAt());
-            entity.setEnteredBy(dto.getEnteredBy());
-            entities.add(entity);
+            try {
+                Payroll entity = new Payroll();
+                entity.setPayrollId(payrollId);
+                entity.setEmployeeId(dto.getEmployeeId());
+                entity.setEmployeeName(dto.getEmployeeName());
+                entity.setSalary(dto.getSalary());
+                entity.setPaymentDate(dto.getPaymentDate());
+                entity.setReferenceNo(referenceNo);
+                entity.setStatus(dto.getStatus());
+                entity.setCreatedAt(dto.getCreatedAt());
+                entity.setEnteredBy(dto.getEnteredBy());
+                entities.add(entity);
+            } catch (RuntimeException e) {
+                skippedInvalid++;
+            }
         }
         payrollRepository.saveAll(entities);
         return new SaveSummary(entities.size(), skippedDuplicates, skippedInvalid);
@@ -264,15 +284,19 @@ public class IngestionService {
                 continue;
             }
 
-            StockPurchase entity = new StockPurchase();
-            entity.setPurchaseId(purchaseId);
-            entity.setVendorName(dto.getVendorName());
-            entity.setInvoiceNo(invoiceNo);
-            entity.setAmount(BigDecimal.valueOf(dto.getAmount()));
-            entity.setPurchaseDate(parseDate(dto.getPurchaseDate()));
-            entity.setEnteredBy(dto.getEnteredBy());
-            entity.setCreatedAt(parseDateTime(dto.getCreatedAt()));
-            entities.add(entity);
+            try {
+                StockPurchase entity = new StockPurchase();
+                entity.setPurchaseId(purchaseId);
+                entity.setVendorName(dto.getVendorName());
+                entity.setInvoiceNo(invoiceNo);
+                entity.setAmount(BigDecimal.valueOf(dto.getAmount()));
+                entity.setPurchaseDate(parseDate(dto.getPurchaseDate()));
+                entity.setEnteredBy(dto.getEnteredBy());
+                entity.setCreatedAt(parseDateTime(dto.getCreatedAt()));
+                entities.add(entity);
+            } catch (RuntimeException e) {
+                skippedInvalid++;
+            }
         }
         stockPurchaseRepository.saveAll(entities);
         return new SaveSummary(entities.size(), skippedDuplicates, skippedInvalid);
@@ -282,25 +306,33 @@ public class IngestionService {
         List<AccountingRecord> entities = new ArrayList<>();
         int skippedDuplicates = 0;
         int skippedInvalid = 0;
+        Set<String> seenRecordIds = new HashSet<>();
         for (AccountingRecordDto dto : dtos) {
             if (!dto.isValid()) {
                 skippedInvalid++;
                 continue;
             }
-            if (accountingRecordRepository.existsById(dto.getRecordId())) {
+            String recordId = dto.getRecordId();
+            String referenceNo = dto.getReferenceNo();
+            if (!seenRecordIds.add(recordId)
+                    || accountingRecordRepository.existsById(recordId)) {
                 skippedDuplicates++;
                 continue;
             }
 
-            AccountingRecord entity = new AccountingRecord();
-            entity.setRecordId(dto.getRecordId());
-            entity.setReferenceNo(dto.getReferenceNo());
-            entity.setModule(dto.getModule());
-            entity.setAmount(BigDecimal.valueOf(dto.getAmount()));
-            entity.setRecordDate(parseDate(dto.getRecordDate()));
-            entity.setCreatedAt(LocalDateTime.now());
-            entity.setEnteredBy(dto.getEnteredBy());
-            entities.add(entity);
+            try {
+                AccountingRecord entity = new AccountingRecord();
+                entity.setRecordId(recordId);
+                entity.setReferenceNo(referenceNo);
+                entity.setModule(dto.getModule());
+                entity.setAmount(BigDecimal.valueOf(dto.getAmount()));
+                entity.setRecordDate(parseDate(dto.getRecordDate()));
+                entity.setCreatedAt(LocalDateTime.now());
+                entity.setEnteredBy(dto.getEnteredBy());
+                entities.add(entity);
+            } catch (RuntimeException e) {
+                skippedInvalid++;
+            }
         }
         accountingRecordRepository.saveAll(entities);
         return new SaveSummary(entities.size(), skippedDuplicates, skippedInvalid);
@@ -308,18 +340,16 @@ public class IngestionService {
 
 //    Read CSV and XLSX
     private void readReceiptCsv(MultipartFile file, List<ReceiptDto> records) throws IOException {
-        try (BufferedReader reader = createReader(file)) {
-            String line;
-            boolean firstLine = true;
+        try (CSVParser parser = createDelimitedParser(file)) {
+            boolean firstRecord = true;
             Map<String, Integer> headerMap = null;
-            while ((line = reader.readLine()) != null) {
-                line = cleanLine(line);
-                if (line.isEmpty()) {
+            for (CSVRecord record : parser) {
+                String[] data = csvRecordValues(record);
+                if (isBlankRow(data)) {
                     continue;
                 }
-                String[] data = splitLine(line);
-                if (firstLine) {
-                    firstLine = false;
+                if (firstRecord) {
+                    firstRecord = false;
                     if (looksLikeHeader(data)) {
                         headerMap = buildHeaderMap(data);
                         continue;
@@ -360,20 +390,20 @@ public class IngestionService {
     }
 
     private void readPayrollCsv(MultipartFile file, List<PayrollDto> records) throws IOException {
-        try (BufferedReader reader = createReader(file)) {
-            String line;
-            int lineNumber = 0;
+        try (CSVParser parser = createDelimitedParser(file)) {
+            boolean firstRecord = true;
             Map<String, Integer> headerMap = null;
-            while ((line = reader.readLine()) != null) {
-                lineNumber++;
-                line = cleanLine(line);
-                if (line.isEmpty()) {
+            for (CSVRecord record : parser) {
+                String[] data = csvRecordValues(record);
+                if (isBlankRow(data)) {
                     continue;
                 }
-                String[] data = splitLine(line);
-                if (lineNumber == 1 && looksLikeHeader(data)) {
-                    headerMap = buildHeaderMap(data);
-                    continue;
+                if (firstRecord) {
+                    firstRecord = false;
+                    if (looksLikeHeader(data)) {
+                        headerMap = buildHeaderMap(data);
+                        continue;
+                    }
                 }
                 String[] canonical = extractPayrollRow(data, headerMap);
                 if (canonical.length < 9 || isHeaderValue(canonical[0], "payroll_id")) {
@@ -406,20 +436,20 @@ public class IngestionService {
     }
 
     private void readStockCsv(MultipartFile file, List<StockPurchaseDto> records) throws IOException {
-        try (BufferedReader reader = createReader(file)) {
-            String line;
-            int lineNumber = 0;
+        try (CSVParser parser = createDelimitedParser(file)) {
+            boolean firstRecord = true;
             Map<String, Integer> headerMap = null;
-            while ((line = reader.readLine()) != null) {
-                lineNumber++;
-                line = cleanLine(line);
-                if (line.isEmpty()) {
+            for (CSVRecord record : parser) {
+                String[] data = csvRecordValues(record);
+                if (isBlankRow(data)) {
                     continue;
                 }
-                String[] data = splitLine(line);
-                if (lineNumber == 1 && looksLikeHeader(data)) {
-                    headerMap = buildHeaderMap(data);
-                    continue;
+                if (firstRecord) {
+                    firstRecord = false;
+                    if (looksLikeHeader(data)) {
+                        headerMap = buildHeaderMap(data);
+                        continue;
+                    }
                 }
                 String[] canonical = extractStockRow(data, headerMap);
                 if (canonical.length < 7 || isHeaderValue(canonical[0], "purchase_id")) {
@@ -452,20 +482,20 @@ public class IngestionService {
     }
 
     private void readAccountingCsv(MultipartFile file, List<AccountingRecordDto> records) throws IOException {
-        try (BufferedReader reader = createReader(file)) {
-            String line;
-            int lineNumber = 0;
+        try (CSVParser parser = createDelimitedParser(file)) {
+            boolean firstRecord = true;
             Map<String, Integer> headerMap = null;
-            while ((line = reader.readLine()) != null) {
-                lineNumber++;
-                line = cleanLine(line);
-                if (line.isEmpty()) {
+            for (CSVRecord record : parser) {
+                String[] data = csvRecordValues(record);
+                if (isBlankRow(data)) {
                     continue;
                 }
-                String[] data = splitLine(line);
-                if (lineNumber == 1 && looksLikeHeader(data)) {
-                    headerMap = buildHeaderMap(data);
-                    continue;
+                if (firstRecord) {
+                    firstRecord = false;
+                    if (looksLikeHeader(data)) {
+                        headerMap = buildHeaderMap(data);
+                        continue;
+                    }
                 }
                 String[] canonical = extractAccountingRow(data, headerMap);
                 if (canonical.length < 6 || isHeaderValue(canonical[0], "record_id")) {
@@ -657,6 +687,28 @@ public class IngestionService {
         return new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
     }
 
+    private CSVParser createDelimitedParser(MultipartFile file) throws IOException {
+        BufferedReader reader = createReader(file);
+        reader.mark(65536);
+
+        String firstLine;
+        char delimiter = ',';
+        while ((firstLine = reader.readLine()) != null) {
+            firstLine = cleanLine(firstLine);
+            if (!firstLine.isBlank()) {
+                delimiter = firstLine.contains("\t") ? '\t' : ',';
+                break;
+            }
+        }
+        reader.reset();
+
+        return CSVFormat.DEFAULT.builder()
+                .setTrim(true)
+                .setDelimiter(delimiter)
+                .build()
+                .parse(reader);
+    }
+
     private boolean isXlsx(MultipartFile file) {
         String fileName = file.getOriginalFilename();
         return fileName != null && fileName.toLowerCase(Locale.ROOT).endsWith(".xlsx");
@@ -666,8 +718,21 @@ public class IngestionService {
         return line.replace("\uFEFF", "").trim();
     }
 
-    private String[] splitLine(String line) {
-        return line.split(line.contains("\t") ? "\t" : ",", -1);
+    private String[] csvRecordValues(CSVRecord record) {
+        String[] values = new String[record.size()];
+        for (int i = 0; i < record.size(); i++) {
+            values[i] = cleanLine(record.get(i));
+        }
+        return values;
+    }
+
+    private boolean isBlankRow(String[] values) {
+        for (String value : values) {
+            if (value != null && !value.isBlank()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private boolean isHeaderValue(String value, String expectedHeader) {
@@ -683,11 +748,14 @@ public class IngestionService {
             if (normalized.equals("receiptid") || normalized.equals("referenceno")
                     || normalized.equals("payername") || normalized.equals("receiptdate")
                     || normalized.equals("payrollid") || normalized.equals("employeeid")
-                    || normalized.equals("employeename") || normalized.equals("paymentdate")
+                    || normalized.equals("employeename") || normalized.equals("name")
+                    || normalized.equals("salary") || normalized.equals("paymentdate")
                     || normalized.equals("purchaseid") || normalized.equals("vendorname")
-                    || normalized.equals("invoiceno") || normalized.equals("purchasedate")
+                    || normalized.equals("vendor") || normalized.equals("invoiceno")
+                    || normalized.equals("invoice") || normalized.equals("purchasedate")
                     || normalized.equals("recordid") || normalized.equals("module")
-                    || normalized.equals("recorddate") || normalized.equals("enteredby")) {
+                    || normalized.equals("recorddate") || normalized.equals("date")
+                    || normalized.equals("enteredby") || normalized.equals("createdat")) {
                 return true;
             }
         }
@@ -715,38 +783,38 @@ public class IngestionService {
 
     private String[] extractPayrollRow(String[] row, Map<String, Integer> headerMap) {
         return new String[] {
-                resolveValue(row, headerMap, 0, "payroll_id", "payrollid"),
-                resolveValue(row, headerMap, 1, "employee_id", "employeeid"),
-                resolveValue(row, headerMap, 2, "employee_name", "employeename"),
-                resolveValue(row, headerMap, 3, "salary"),
-                resolveValue(row, headerMap, 4, "payment_date", "paymentdate"),
+                resolveValue(row, headerMap, 0, "payroll_id", "payrollid", "id"),
+                resolveValue(row, headerMap, 1, "employee_id", "employeeid", "emp_id", "empid"),
+                resolveValue(row, headerMap, 2, "employee_name", "employeename", "employee", "name"),
+                resolveValue(row, headerMap, 3, "salary", "amount"),
+                resolveValue(row, headerMap, 4, "payment_date", "paymentdate", "date"),
                 resolveValue(row, headerMap, 5, "reference_no", "referenceno", "reference"),
                 resolveValue(row, headerMap, 6, "status"),
-                resolveValue(row, headerMap, 7, "created_at", "createdat"),
-                resolveValue(row, headerMap, 8, "entered_by", "enteredby")
+                resolveValue(row, headerMap, 7, "created_at", "createdat", "createddate"),
+                resolveValue(row, headerMap, 8, "entered_by", "enteredby", "user")
         };
     }
 
     private String[] extractStockRow(String[] row, Map<String, Integer> headerMap) {
         return new String[] {
-                resolveValue(row, headerMap, 0, "purchase_id", "purchaseid"),
-                resolveValue(row, headerMap, 1, "vendor_name", "vendorname", "vendor"),
-                resolveValue(row, headerMap, 2, "invoice_no", "invoiceno", "invoice"),
-                resolveValue(row, headerMap, 3, "amount"),
+                resolveValue(row, headerMap, 0, "purchase_id", "purchaseid", "id"),
+                resolveValue(row, headerMap, 1, "vendor_name", "vendorname", "vendor", "supplier", "suppliername"),
+                resolveValue(row, headerMap, 2, "invoice_no", "invoiceno", "invoice", "invoiceid", "billno"),
+                resolveValue(row, headerMap, 3, "amount", "total"),
                 resolveValue(row, headerMap, 4, "purchase_date", "purchasedate", "date"),
-                resolveValue(row, headerMap, 5, "entered_by", "enteredby"),
-                resolveValue(row, headerMap, 6, "created_at", "createdat")
+                resolveValue(row, headerMap, 5, "entered_by", "enteredby", "user"),
+                resolveValue(row, headerMap, 6, "created_at", "createdat", "createddate")
         };
     }
 
     private String[] extractAccountingRow(String[] row, Map<String, Integer> headerMap) {
         return new String[] {
-                resolveValue(row, headerMap, 0, "record_id", "recordid"),
+                resolveValue(row, headerMap, 0, "record_id", "recordid", "id"),
                 resolveValue(row, headerMap, 1, "reference_no", "referenceno", "reference"),
-                resolveValue(row, headerMap, 2, "module"),
-                resolveValue(row, headerMap, 3, "amount"),
+                resolveValue(row, headerMap, 2, "module", "type", "category"),
+                resolveValue(row, headerMap, 3, "amount", "total"),
                 resolveValue(row, headerMap, 4, "record_date", "recorddate", "date"),
-                resolveValue(row, headerMap, 5, "entered_by", "enteredby")
+                resolveValue(row, headerMap, 5, "entered_by", "enteredby", "user")
         };
     }
 
@@ -879,8 +947,15 @@ public class IngestionService {
             dto.setValid(false);
             dto.setErrorMessage("Invalid amount");
         } else {
-            dto.setValid(true);
-            dto.setErrorMessage("");
+            try {
+                parseDate(dto.getPurchaseDate());
+                parseDateTime(dto.getCreatedAt());
+                dto.setValid(true);
+                dto.setErrorMessage("");
+            } catch (DateTimeParseException e) {
+                dto.setValid(false);
+                dto.setErrorMessage("Invalid date");
+            }
         }
     }
 
@@ -892,8 +967,14 @@ public class IngestionService {
             dto.setValid(false);
             dto.setErrorMessage("Invalid amount");
         } else {
-            dto.setValid(true);
-            dto.setErrorMessage("");
+            try {
+                parseDate(dto.getRecordDate());
+                dto.setValid(true);
+                dto.setErrorMessage("");
+            } catch (DateTimeParseException e) {
+                dto.setValid(false);
+                dto.setErrorMessage("Invalid date");
+            }
         }
     }
 }

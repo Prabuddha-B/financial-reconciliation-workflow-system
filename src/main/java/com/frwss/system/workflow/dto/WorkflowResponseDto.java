@@ -17,6 +17,8 @@ public class WorkflowResponseDto {
 
     private String message;
 
+//    Getters and Setters
+
     public Long getWorkflowId() {
         return workflowId;
     }
