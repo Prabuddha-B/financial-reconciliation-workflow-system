@@ -1,11 +1,14 @@
 package com.frwss.system.reconciliation.controller;
 
+import com.frwss.system.reconciliation.model.ReconciliationResult;
 import com.frwss.system.reconciliation.model.ReconciliationStatus;
 import com.frwss.system.reconciliation.service.ReconciliationService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/reconciliation")
@@ -18,8 +21,25 @@ public class ReconciliationController {
     }
 
     @GetMapping
-    public String showReconciliationDashboard(Model model){
-        model.addAttribute("results", reconciliationService.getAllResults());
+    public String showReconciliationDashboard(
+            @RequestParam(required = false) String status,
+            Model model
+    ){
+        List<ReconciliationResult> results;
+
+        if(status != null && !status.isBlank() && !status.equals("ALL")){
+            ReconciliationStatus selectedStatus = ReconciliationStatus.valueOf(status);
+            results = reconciliationService.getResultsByStatus(selectedStatus);
+        } else {
+            results = reconciliationService.getAllResults();
+        }
+
+        model.addAttribute("results", results);
+        model.addAttribute("selectedStatus", status == null ? "ALL" : status);
+        model.addAttribute("statuses", ReconciliationStatus.values());
+
+
+        model.addAttribute("allResults", reconciliationService.getAllResults());
         model.addAttribute("exactResults", reconciliationService.getResultsByStatus(ReconciliationStatus.EXACT));
         model.addAttribute("orphanResults", reconciliationService.getResultsByStatus(ReconciliationStatus.ORPHAN));
         model.addAttribute("partialResults", reconciliationService.getResultsByStatus(ReconciliationStatus.PARTIAL));
