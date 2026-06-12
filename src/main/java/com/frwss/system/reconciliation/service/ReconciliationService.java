@@ -636,4 +636,79 @@ public class ReconciliationService {
                         ". Justification: " + justification
         );
     }
+
+    @Transactional(readOnly = true)
+    public List<ReconciliationResult> getManualReviewRecords(){
+        return reconciliationResultRepository.findByStatusOrderByReconciledAtDesc(
+                ReconciliationStatus.MANUALLY_RESOLVED
+        );
+    }
+
+    @Transactional
+    public void approveManualResolution(
+            Long reconciliationResultId,
+            String reviewedBy
+    ){
+        ReconciliationResult result = reconciliationResultRepository.findById(reconciliationResultId)
+                .orElseThrow(() -> new RuntimeException("Reconciliation result not found"));
+
+        if(result.getStatus() != ReconciliationStatus.MANUALLY_RESOLVED){
+            throw new RuntimeException("Only manually resolved records can be approved");
+        }
+
+        result.setStatus(ReconciliationStatus.APPROVED);
+        result.setReconciledAt(LocalDateTime.now());
+        result.setReconciledBy(reviewedBy);
+        result.setRemarks(
+                result.getRemarks() + " Review decision: APPROVED by " + reviewedBy + "."
+        );
+
+        reconciliationResultRepository.save(result);
+
+        auditService.log(
+                AuditActionType.MANUAL_MODIFICATION,
+                "ReconciliationResult",
+                result.getAccountingRecordId(),
+                reviewedBy,
+                "Manual resolution approved for accounting record " +
+                        result.getAccountingRecordId() +
+                        ". Matched record: " + result.getMatchedRecordId()
+        );
+    }
+
+    @Transactional
+    public void rejectManualResolution(
+            Long reconciliationResultId,
+            String rejectionReason,
+            String reviewedBy
+    ){
+        ReconciliationResult result = reconciliationResultRepository.findById(reconciliationResultId)
+                .orElseThrow(() -> new RuntimeException("Reconciliation result not found"));
+
+        if(result.getStatus() != ReconciliationStatus.MANUALLY_RESOLVED){
+            throw new RuntimeException("Only manually resolved records can be rejected");
+        }
+
+        result.setStatus(ReconciliationStatus.REJECTED);
+        result.setReconciledAt(LocalDateTime.now());
+        result.setReconciledBy(reviewedBy);
+        result.setRemarks(
+                result.getRemarks() +
+                        " Review decision: REJECTED by " + reviewedBy +
+                        ". Reason: " + rejectionReason
+        );
+
+        reconciliationResultRepository.save(result);
+
+        auditService.log(
+                AuditActionType.MANUAL_MODIFICATION,
+                "ReconciliationResult",
+                result.getAccountingRecordId(),
+                reviewedBy,
+                "Manual resolution rejected for accounting record " +
+                        result.getAccountingRecordId() +
+                        ". Reason: " + rejectionReason
+        );
+
+    }
 }

@@ -35,6 +35,10 @@
       <a href="/reconciliation/orphans" class="btn btn-outline-warning ms-2">
         View Orphans
       </a>
+
+      <a href="/reconciliation/manual-review" class="btn btn-outline-primary ms-2">
+        Manual Review
+      </a>
     </div>
   </div>
 
@@ -134,10 +138,24 @@
                             MANUALLY_RESOLVED
                         </span>
 
+            <span th:if="${result.status.name() == 'APPROVED'}"
+                  class="badge bg-success"
+                  th:text="${result.status}">
+                            APPROVED
+                        </span>
+
+            <span th:if="${result.status.name() == 'REJECTED'}"
+                  class="badge bg-danger"
+                  th:text="${result.status}">
+                            REJECTED
+                        </span>
+
             <span th:if="${result.status.name() != 'EXACT'
                           and result.status.name() != 'ORPHAN'
                           and result.status.name() != 'PARTIAL'
-                          and result.status.name() != 'MANUALLY_RESOLVED'}"
+                          and result.status.name() != 'MANUALLY_RESOLVED'
+                          and result.status.name() != 'APPROVED'
+                          and result.status.name() != 'REJECTED'}"
                   class="badge bg-secondary"
                   th:text="${result.status}">
                             STATUS

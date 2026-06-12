@@ -44,6 +44,13 @@ public class ReconciliationController {
         return "reconciliation/candidates";
     }
 
+    @GetMapping("/manual-review")
+    public String showManualReviewPage(Model model){
+        model.addAttribute("reviewRecords", reconciliationService.getManualReviewRecords());
+
+        return "reconciliation/manual-review";
+    }
+
     @PostMapping("/run-exact")
     public String runExactReconciliation(RedirectAttributes redirectAttributes){
         // temporary user until Spring Security is fully integrated
@@ -93,5 +100,40 @@ public class ReconciliationController {
         );
 
         return "redirect:/reconciliation/orphans";
+    }
+
+    @PostMapping("/manual-review/{resultId}/approve")
+    public String approveManualResolution(
+            @PathVariable Long resultId,
+            RedirectAttributes redirectAttributes
+    ){
+        reconciliationService.approveManualResolution(resultId, "admin");
+
+        redirectAttributes.addFlashAttribute(
+                "successMessage",
+                "Manual resolultion approved successfully."
+        );
+
+        return "redirect:/reconciliation/manual-review";
+    }
+
+    @PostMapping("/manual-review/{resultId}/reject")
+    public String rejectManualResolution(
+            @PathVariable Long resultId,
+            @RequestParam String rejectionReason,
+            RedirectAttributes redirectAttributes
+    ){
+        reconciliationService.rejectManualResolution(
+                resultId,
+                rejectionReason,
+                "admin"
+        );
+
+        redirectAttributes.addFlashAttribute(
+                "successMessage",
+                "Manual resolution rejected successfully."
+        );
+
+        return "redirect:/reconciliation/manual-review";
     }
 }

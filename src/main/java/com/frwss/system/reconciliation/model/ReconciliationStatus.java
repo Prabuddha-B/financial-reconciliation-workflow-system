@@ -5,5 +5,7 @@ public enum ReconciliationStatus {
     PARTIAL,
     DUPLICATE,
     ORPHAN,
-    MANUALLY_RESOLVED
+    MANUALLY_RESOLVED,
+    APPROVED,
+    REJECTED
 }
