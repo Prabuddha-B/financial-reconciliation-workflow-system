@@ -82,6 +82,36 @@
       </div>
     </div>
 
+    <div class="col-md-4">
+      <div class="card shadow-sm border-primary">
+        <div class="card-body">
+          <h6 class="text-muted">Manually Resolved</h6>
+          <h3 class="text-primary" th:text="${#lists.size(manualResults)}">0</h3>
+          <small class="text-muted">Waiting for review</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card shadow-sm border-success">
+        <div class="card-body">
+          <h6 class="text-muted">Approved</h6>
+          <h3 class="text-success" th:text="${#lists.size(approvedResults)}">0</h3>
+          <small class="text-muted">Reviewed and accepted</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card shadow-sm border-danger">
+        <div class="card-body">
+          <h6 class="text-muted">Rejected</h6>
+          <h3 class="text-danger" th:text="${#lists.size(rejectedResults)}">0</h3>
+          <small class="text-muted">Reviewed and rejected</small>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <div class="card shadow-sm">
