@@ -14,18 +14,20 @@ public class AuditTestController {
         this.auditService = auditService;
     }
 
-    @GetMapping("/audit/test-log")
-    public String createTestLog(){
-        AuditLog log = auditService.log(
-                AuditActionType.RECONCILIATION_STARTED,
-                "Reconciliation",
-                "RUN-001",
-                "admin",
-                "Test audit log created for hash-chain verification"
-        );
+    // used for testing purposes only (that is why commented after testing)
 
-        return "Audit log created with ID: " + log.getId();
-    }
+//    @GetMapping("/audit/test-log")
+//    public String createTestLog(){
+//        AuditLog log = auditService.log(
+//                AuditActionType.RECONCILIATION_STARTED,
+//                "Reconciliation",
+//                "RUN-001",
+//                "admin",
+//                "Test audit log created for hash-chain verification"
+//        );
+//
+//        return "Audit log created with ID: " + log.getId();
+//    }
 
     @GetMapping("/audit/verify")
     public String verifyAuditChain(){
