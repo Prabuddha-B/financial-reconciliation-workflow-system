@@ -23,6 +23,7 @@ public class ReconciliationController {
     @GetMapping
     public String showReconciliationDashboard(
             @RequestParam(required = false) String status,
+            @RequestParam(required = false) String limit,
             Model model
     ){
         List<ReconciliationResult> results;
@@ -34,8 +35,11 @@ public class ReconciliationController {
             results = reconciliationService.getAllResults();
         }
 
+        results = applyDisplayLimit(results, limit);
+
         model.addAttribute("results", results);
         model.addAttribute("selectedStatus", status == null ? "ALL" : status);
+        model.addAttribute("selectedLimit", limit == null || limit.isBlank() ? "50" : limit);
         model.addAttribute("statuses", ReconciliationStatus.values());
 
 
@@ -47,6 +51,37 @@ public class ReconciliationController {
         model.addAttribute("approvedResults", reconciliationService.getResultsByStatus(ReconciliationStatus.APPROVED));
         model.addAttribute("rejectedResults", reconciliationService.getResultsByStatus(ReconciliationStatus.REJECTED));
         return "reconciliation/dashboard";
+    }
+
+    private List<ReconciliationResult> applyDisplayLimit(
+            List<ReconciliationResult> results,
+            String limit
+    ) {
+        int selectedLimit = parseLimit(limit);
+
+        if (selectedLimit == -1) {
+            return results;
+        }
+
+        return results.stream()
+                .limit(selectedLimit)
+                .toList();
+    }
+
+    private int parseLimit(String limit) {
+        if (limit == null || limit.isBlank()) {
+            return 50;
+        }
+
+        if (limit.equalsIgnoreCase("ALL")) {
+            return -1;
+        }
+
+        try {
+            return Integer.parseInt(limit);
+        } catch (NumberFormatException e) {
+            return 50;
+        }
     }
 
     @GetMapping("/orphans")

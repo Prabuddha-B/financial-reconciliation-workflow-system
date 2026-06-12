@@ -135,6 +135,16 @@
         </div>
 
         <div class="col-md-3">
+          <label class="form-label">Display Limit</label>
+          <select name="limit" class="form-select">
+            <option value="25" th:selected="${selectedLimit == '25'}">Latest 25</option>
+            <option value="50" th:selected="${selectedLimit == '50'}">Latest 50</option>
+            <option value="100" th:selected="${selectedLimit == '100'}">Latest 100</option>
+            <option value="ALL" th:selected="${selectedLimit == 'ALL'}">All Results</option>
+          </select>
+        </div>
+
+        <div class="col-md-3">
           <button type="submit" class="btn btn-primary">
             Apply Filter
           </button>
@@ -151,6 +161,11 @@
   <div class="card shadow-sm">
     <div class="card-header">
       <strong>Reconciliation Results</strong>
+
+      <span class="text-muted">
+        Showing <span th:text="${#lists.size(results)}">0</span>
+        of <span th:text="${#lists.size(allResults)}">0</span> total results
+      </span>
     </div>
 
     <div class="card-body p-0">
