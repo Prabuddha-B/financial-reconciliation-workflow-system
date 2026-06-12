@@ -21,12 +21,13 @@ public class AuditViewerController {
             @RequestParam(required = false) String actionType,
             @RequestParam(required = false) String entityType,
             @RequestParam(required = false) String performedBy,
+            @RequestParam(required = false) String limit,
             Model model
     ){
 
         model.addAttribute(
                 "logs",
-                auditService.getFilteredLogs(actionType, entityType, performedBy)
+                auditService.getFilteredLogs(actionType, entityType, performedBy, limit)
         );
 
         model.addAttribute("chainValid", auditService.verifyAuditChain());
@@ -42,6 +43,9 @@ public class AuditViewerController {
 
         model.addAttribute("selectedPerformedBy",
                 performedBy == null ? "" : performedBy);
+
+        model.addAttribute("selectedLimit",
+                limit == null || limit.isBlank() ? "50" : limit);
 
         return "audit/logs";
     }

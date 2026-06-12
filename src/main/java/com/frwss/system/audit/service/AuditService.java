@@ -131,15 +131,16 @@ public class AuditService {
     public List<AuditLog> getFilteredLogs(
             String actionType,
             String entityType,
-            String performedBy
-    ){
+            String performedBy,
+            String limit
+    ) {
         List<AuditLog> logs = auditLogRepository.findAllByOrderByTimestampDesc();
 
-        String cleanedActionType =  cleanFilterValue(actionType);
+        String cleanedActionType = cleanFilterValue(actionType);
         String cleanedEntityType = cleanFilterValue(entityType);
         String cleanedPerformedBy = cleanFilterValue(performedBy);
 
-        return logs.stream()
+        List<AuditLog> filteredLogs = logs.stream()
                 .filter(log -> cleanedActionType == null
                         || cleanedActionType.equals("ALL")
                         || log.getActionType().name().equals(cleanedActionType))
@@ -154,7 +155,17 @@ public class AuditService {
 
                 .toList();
 
+        int selectedLimit = parseLimit(limit);
+
+        if (selectedLimit == -1) {
+            return filteredLogs;
+        }
+
+        return filteredLogs.stream()
+                .limit(selectedLimit)
+                .toList();
     }
+
 
     private AuditActionType parseActionType(String actionType) {
         if (actionType == null || actionType.isBlank() || actionType.equals("ALL")) {
@@ -165,6 +176,21 @@ public class AuditService {
             return AuditActionType.valueOf(actionType);
         } catch (IllegalArgumentException e) {
             return null;
+        }
+    }
+
+    private int parseLimit(String limit){
+        if(limit == null || limit.isBlank()){
+            return 50;
+        }
+        if(limit.equalsIgnoreCase("ALL")){
+            return -1;
+        }
+
+        try{
+            return Integer.parseInt(limit);
+        } catch (NumberFormatException e){
+            return 50;
         }
     }
 
