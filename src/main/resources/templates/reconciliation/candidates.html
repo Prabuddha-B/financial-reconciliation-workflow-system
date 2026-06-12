@@ -76,9 +76,21 @@
                     <td th:text="${candidate.reason}">Same amount</td>
 
                     <td>
-                        <button class="btn btn-sm btn-outline-secondary" disabled>
-                            Select Later
-                        </button>
+                        <form th:action="@{/reconciliation/orphans/{id}/resolve(id=${resultId})}" method="post">
+                            <input type="hidden" name="sourceType" th:value="${candidate.sourceType}">
+                            <input type="hidden" name="matchedRecordId" th:value="${candidate.recordId}">
+                            <input type="hidden" name="confidenceScore" th:value="${candidate.suggestedConfidence}">
+
+                            <textarea name="justification"
+                                      class="form-control form-control-sm mb-2"
+                                      rows="2"
+                                      placeholder="Enter justification"
+                                      required></textarea>
+
+                            <button type="submit" class="btn btn-sm btn-success">
+                                Select Candidate
+                            </button>
+                        </form>
                     </td>
                 </tr>
 

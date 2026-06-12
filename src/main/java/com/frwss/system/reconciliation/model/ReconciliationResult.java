@@ -16,7 +16,7 @@ public class ReconciliationResult {
     private String accountingRecordId;
 
     // Matched record from payroll / receipts / stock_purchases
-    @Column(name = "match_record_id")
+    @Column(name = "matched_record_id")
     private String matchedRecordId;
 
     @Enumerated(EnumType.STRING)

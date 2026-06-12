@@ -4,10 +4,7 @@ import com.frwss.system.reconciliation.model.ReconciliationStatus;
 import com.frwss.system.reconciliation.service.ReconciliationService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -26,7 +23,7 @@ public class ReconciliationController {
         model.addAttribute("exactResults", reconciliationService.getResultsByStatus(ReconciliationStatus.EXACT));
         model.addAttribute("orphanResults", reconciliationService.getResultsByStatus(ReconciliationStatus.ORPHAN));
         model.addAttribute("partialResults", reconciliationService.getResultsByStatus(ReconciliationStatus.PARTIAL));
-
+        model.addAttribute("manualResults", reconciliationService.getResultsByStatus(ReconciliationStatus.MANUALLY_RESOLVED));
         return "reconciliation/dashboard";
     }
 
@@ -70,5 +67,31 @@ public class ReconciliationController {
         );
 
         return "redirect:/reconciliation";
+    }
+
+    @PostMapping("/orphans/{resultId}/resolve")
+    public String resolveOrphanManually(
+            @PathVariable Long resultId,
+            @RequestParam String sourceType,
+            @RequestParam String matchedRecordId,
+            @RequestParam Double confidenceScore,
+            @RequestParam String justification,
+            RedirectAttributes redirectAttributes
+    ){
+        reconciliationService.resolveOrphanManually(
+                resultId,
+                sourceType,
+                matchedRecordId,
+                confidenceScore,
+                justification,
+                "admin"
+        );
+
+        redirectAttributes.addFlashAttribute(
+                "successMessage",
+                "Orphan record manually resolved successfully"
+        );
+
+        return "redirect:/reconciliation/orphans";
     }
 }

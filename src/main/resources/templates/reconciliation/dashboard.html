@@ -128,11 +128,22 @@
                             PARTIAL
                         </span>
 
-            <span th:if="${result.status.name() != 'EXACT' and result.status.name() != 'ORPHAN' and result.status.name() != 'PARTIAL'}"
+            <span th:if="${result.status.name() == 'MANUALLY_RESOLVED'}"
+                  class="badge bg-primary"
+                  th:text="${result.status}">
+                            MANUALLY_RESOLVED
+                        </span>
+
+            <span th:if="${result.status.name() != 'EXACT'
+                          and result.status.name() != 'ORPHAN'
+                          and result.status.name() != 'PARTIAL'
+                          and result.status.name() != 'MANUALLY_RESOLVED'}"
                   class="badge bg-secondary"
                   th:text="${result.status}">
                             STATUS
                         </span>
+
+
           </td>
 
           <td th:text="${result.confidenceScore + '%'}">100%</td>

@@ -593,4 +593,47 @@ public class ReconciliationService {
 
         return Math.min(confidence, 95.0);
     }
+
+    @Transactional
+    public void resolveOrphanManually(
+            Long reconciliationResultId,
+            String sourceType,
+            String matchedRecordId,
+            Double confidenceScore,
+            String justification,
+            String performedBy
+    ){
+        ReconciliationResult result = reconciliationResultRepository.findById(reconciliationResultId)
+                .orElseThrow(() -> new RuntimeException("Reconciliation result not found"));
+
+        if(result.getStatus() !=  ReconciliationStatus.ORPHAN){
+            throw new RuntimeException("Only orphan records can be manually resolved");
+        }
+
+        MatchedSourceType matchedSourceType = MatchedSourceType.valueOf(sourceType);
+
+        result.setMatchedRecordId(matchedRecordId);
+        result.setMatchedSourceType(matchedSourceType);
+        result.setStatus(ReconciliationStatus.MANUALLY_RESOLVED);
+        result.setConfidenceScore(confidenceScore);
+        result.setReconciledAt(LocalDateTime.now());
+        result.setReconciledBy(performedBy);
+        result.setRemarks(
+                "Manually resolved with " + sourceType +
+                        " record: " + matchedRecordId +
+                        ". Justification: " + justification
+        );
+
+        reconciliationResultRepository.save(result);
+
+        auditService.log(
+                AuditActionType.MANUAL_MODIFICATION,
+                "ReconciliationResult",
+                result.getAccountingRecordId(),
+                performedBy,
+                "Manual orphan resolution completed. Matched with " +
+                        sourceType + " record " + matchedRecordId +
+                        ". Justification: " + justification
+        );
+    }
 }
