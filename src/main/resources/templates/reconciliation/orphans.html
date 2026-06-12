@@ -13,36 +13,39 @@
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2>Orphan Resolution Workspace</h2>
+            <h2>Orphan Reconciliation Records</h2>
             <p class="text-muted mb-0">
-                Review accounting records that could not be matched automatically.
+                These accounting records could not be matched automatically and may require manual review.
             </p>
         </div>
 
         <a href="/reconciliation" class="btn btn-outline-primary">
-            Back to Reconciliation Dashboard
+            Back to Dashboard
         </a>
     </div>
 
     <div class="row mb-4">
-
         <div class="col-md-4">
             <div class="card shadow-sm border-warning">
                 <div class="card-body">
-                    <h6 class="text-muted">Total Orphan Records</h6>
+                    <h6 class="text-muted">Pending Orphan Records</h6>
                     <h3 class="text-warning" th:text="${#lists.size(orphans)}">0</h3>
                     <p class="mb-0 text-muted">
-                        Records requiring manual review.
+                        Records waiting for candidate review.
                     </p>
                 </div>
             </div>
         </div>
-
     </div>
 
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+
     <div class="card shadow-sm">
-        <div class="card-header">
-            <strong>Unresolved Orphan Records</strong>
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <strong>Orphan Records</strong>
+            <span class="text-muted">
+                Showing <span th:text="${#lists.size(orphans)}">0</span> records
+            </span>
         </div>
 
         <div class="card-body p-0">
@@ -66,10 +69,17 @@
                     <td th:text="${orphan.reconciliationResultId}">1</td>
                     <td th:text="${orphan.accountingRecordId}">ACC001</td>
                     <td th:text="${orphan.referenceNo}">REF001</td>
-                    <td th:text="${orphan.module}">PAYROLL</td>
-                    <td th:text="${orphan.amount}">10000.00</td>
-                    <td th:text="${orphan.recordDate}">2026-06-10</td>
-                    <td th:text="${orphan.remarks}">No exact match found</td>
+                    <td>
+                        <span class="badge bg-secondary" th:text="${orphan.module}">
+                            MODULE
+                        </span>
+                    </td>
+                    <td th:text="${orphan.amount}">0.00</td>
+                    <td th:text="${orphan.recordDate}">2026-06-12</td>
+                    <td style="max-width: 320px; white-space: normal;"
+                        th:text="${orphan.remarks}">
+                        Remarks
+                    </td>
                     <td>
                         <a th:href="@{/reconciliation/orphans/{id}/candidates(id=${orphan.reconciliationResultId})}"
                            class="btn btn-sm btn-outline-primary">
@@ -80,7 +90,7 @@
 
                 <tr th:if="${#lists.isEmpty(orphans)}">
                     <td colspan="8" class="text-center text-muted p-4">
-                        No orphan records available.
+                        No orphan records found. All available records have either been matched, resolved, or reviewed.
                     </td>
                 </tr>
                 </tbody>

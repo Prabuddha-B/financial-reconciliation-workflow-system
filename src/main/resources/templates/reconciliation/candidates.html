@@ -15,29 +15,49 @@
         <div>
             <h2>Candidate Matches</h2>
             <p class="text-muted mb-0">
-                Suggested possible matches for orphan reconciliation result
-                <strong th:text="${resultId}">1</strong>
+                Review possible matches for the selected orphan record before applying manual resolution.
             </p>
         </div>
 
-        <a href="/reconciliation/orphans" class="btn btn-outline-primary">
-            Back to Orphans
-        </a>
-    </div>
+        <div>
+            <a href="/reconciliation/orphans" class="btn btn-outline-secondary me-2">
+                Back to Orphans
+            </a>
 
-    <div class="card shadow-sm mb-4">
-        <div class="card-body">
-            <h6 class="text-muted">Candidate Match Rule</h6>
-            <p class="mb-0">
-                Candidates are suggested using same amount and a wider date range of ±7 days.
-                These are not automatically resolved and require manual review.
-            </p>
+            <a href="/reconciliation" class="btn btn-outline-primary">
+                Dashboard
+            </a>
         </div>
     </div>
+
+    <div class="alert alert-info shadow-sm">
+        <strong>Candidate Rule:</strong>
+        Candidates are suggested using the same amount and a nearby transaction date.
+        The confidence score is only a guide. A manual justification is required before selecting a candidate.
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm border-primary">
+                <div class="card-body">
+                    <h6 class="text-muted">Suggested Candidates</h6>
+                    <h3 class="text-primary" th:text="${#lists.size(candidates)}">0</h3>
+                    <p class="mb-0 text-muted">
+                        Candidate records found for manual review.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
 
     <div class="card shadow-sm">
-        <div class="card-header">
-            <strong>Suggested Candidate Records</strong>
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <strong>Candidate Match Results</strong>
+            <span class="text-muted">
+                Showing <span th:text="${#lists.size(candidates)}">0</span> candidates
+            </span>
         </div>
 
         <div class="card-body p-0">
@@ -51,40 +71,67 @@
                     <th>Amount</th>
                     <th>Date</th>
                     <th>Description</th>
-                    <th>Suggested Confidence</th>
+                    <th>Confidence</th>
                     <th>Reason</th>
-                    <th>Action</th>
+                    <th>Manual Resolution</th>
                 </tr>
                 </thead>
 
                 <tbody>
                 <tr th:each="candidate : ${candidates}">
-                    <td th:text="${candidate.sourceType}">PAYROLL</td>
-                    <td th:text="${candidate.recordId}">PAY001</td>
-                    <td th:text="${candidate.referenceNo}">REF001</td>
-                    <td th:text="${candidate.amount}">10000.00</td>
-                    <td th:text="${candidate.recordDate}">2026-06-10</td>
-                    <td th:text="${candidate.description}">Description</td>
-
                     <td>
-                        <span class="badge bg-info text-dark"
-                              th:text="${candidate.suggestedConfidence + '%'}">
-                            80%
+                        <span class="badge bg-secondary" th:text="${candidate.sourceType}">
+                            SOURCE
                         </span>
                     </td>
 
-                    <td th:text="${candidate.reason}">Same amount</td>
+                    <td th:text="${candidate.recordId}">REC001</td>
+                    <td th:text="${candidate.referenceNo}">REF001</td>
+                    <td th:text="${candidate.amount}">0.00</td>
+                    <td th:text="${candidate.recordDate}">2026-06-12</td>
+
+                    <td style="max-width: 260px; white-space: normal;"
+                        th:text="${candidate.description}">
+                        Description
+                    </td>
 
                     <td>
-                        <form th:action="@{/reconciliation/orphans/{id}/resolve(id=${resultId})}" method="post">
+                        <span th:if="${candidate.suggestedConfidence >= 80}"
+                              class="badge bg-success"
+                              th:text="${candidate.suggestedConfidence + '%'}">
+                            90%
+                        </span>
+
+                        <span th:if="${candidate.suggestedConfidence >= 70 and candidate.suggestedConfidence < 80}"
+                              class="badge bg-warning text-dark"
+                              th:text="${candidate.suggestedConfidence + '%'}">
+                            70%
+                        </span>
+
+                        <span th:if="${candidate.suggestedConfidence < 70}"
+                              class="badge bg-danger"
+                              th:text="${candidate.suggestedConfidence + '%'}">
+                            60%
+                        </span>
+                    </td>
+
+                    <td style="max-width: 280px; white-space: normal;"
+                        th:text="${candidate.reason}">
+                        Reason
+                    </td>
+
+                    <td style="min-width: 280px;">
+                        <form th:action="@{/reconciliation/orphans/{id}/resolve(id=${resultId})}"
+                              method="post">
+
                             <input type="hidden" name="sourceType" th:value="${candidate.sourceType}">
                             <input type="hidden" name="matchedRecordId" th:value="${candidate.recordId}">
                             <input type="hidden" name="confidenceScore" th:value="${candidate.suggestedConfidence}">
 
                             <textarea name="justification"
                                       class="form-control form-control-sm mb-2"
-                                      rows="2"
-                                      placeholder="Enter justification"
+                                      rows="3"
+                                      placeholder="Enter justification before selecting this candidate"
                                       required></textarea>
 
                             <button type="submit" class="btn btn-sm btn-success">
@@ -96,7 +143,7 @@
 
                 <tr th:if="${#lists.isEmpty(candidates)}">
                     <td colspan="9" class="text-center text-muted p-4">
-                        No candidate matches found for this orphan record.
+                        No candidate matches were found for this orphan record.
                     </td>
                 </tr>
                 </tbody>
