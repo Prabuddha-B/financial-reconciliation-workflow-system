@@ -127,4 +127,58 @@ public class AuditService {
         return auditLogRepository.findAllByOrderByTimestampDesc();
     }
 
+    @Transactional(readOnly = true)
+    public List<AuditLog> getFilteredLogs(
+            String actionType,
+            String entityType,
+            String performedBy
+    ){
+        List<AuditLog> logs = auditLogRepository.findAllByOrderByTimestampDesc();
+
+        String cleanedActionType =  cleanFilterValue(actionType);
+        String cleanedEntityType = cleanFilterValue(entityType);
+        String cleanedPerformedBy = cleanFilterValue(performedBy);
+
+        return logs.stream()
+                .filter(log -> cleanedActionType == null
+                        || cleanedActionType.equals("ALL")
+                        || log.getActionType().name().equals(cleanedActionType))
+
+                .filter(log -> cleanedEntityType == null
+                        || (log.getEntityType() != null
+                        && log.getEntityType().toLowerCase().contains(cleanedEntityType.toLowerCase())))
+
+                .filter(log -> cleanedPerformedBy == null
+                        || (log.getPerformedBy() != null
+                        && log.getPerformedBy().toLowerCase().contains(cleanedPerformedBy.toLowerCase())))
+
+                .toList();
+
+    }
+
+    private AuditActionType parseActionType(String actionType) {
+        if (actionType == null || actionType.isBlank() || actionType.equals("ALL")) {
+            return null;
+        }
+
+        try {
+            return AuditActionType.valueOf(actionType);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    private String cleanFilterValue(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+
+        return value.trim();
+    }
+
+    @Transactional(readOnly = true)
+    public long getTotalLogCount(){
+        return auditLogRepository.count();
+    }
+
 }

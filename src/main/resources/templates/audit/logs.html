@@ -55,7 +55,7 @@
       <div class="card shadow-sm">
         <div class="card-body">
           <h6 class="text-muted">Total Audit Entries</h6>
-          <h3 th:text="${#lists.size(logs)}">0</h3>
+          <h3 th:text="${totalLogCount}">0</h3>
           <p class="mb-0 text-muted">
             Stored audit records in the system.
           </p>
@@ -65,9 +65,68 @@
 
   </div>
 
+  <div class="card shadow-sm mb-3">
+    <div class="card-header">
+      <strong>Filter Audit Logs</strong>
+    </div>
+
+    <div class="card-body">
+      <form method="get" th:action="@{/audit/logs}" class="row g-3 align-items-end">
+
+        <div class="col-md-3">
+          <label class="form-label">Action Type</label>
+          <select name="actionType" class="form-select">
+            <option value="ALL" th:selected="${selectedActionType == 'ALL'}">
+              All Actions
+            </option>
+
+            <option th:each="type : ${actionTypes}"
+                    th:value="${type.name()}"
+                    th:text="${type.name()}"
+                    th:selected="${selectedActionType == type.name()}">
+              ACTION_TYPE
+            </option>
+          </select>
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">Entity Type</label>
+          <input type="text"
+                 name="entityType"
+                 class="form-control"
+                 placeholder="Example: ReconciliationResult"
+                 th:value="${selectedEntityType}">
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">Performed By</label>
+          <input type="text"
+                 name="performedBy"
+                 class="form-control"
+                 placeholder="Example: admin"
+                 th:value="${selectedPerformedBy}">
+        </div>
+
+        <div class="col-md-3">
+          <button type="submit" class="btn btn-primary">
+            Apply Filter
+          </button>
+
+          <a href="/audit/logs" class="btn btn-outline-secondary ms-2">
+            Reset
+          </a>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
   <div class="card shadow-sm">
     <div class="card-header">
       <strong>Audit Logs</strong>
+      <span class="text-muted ms-2">
+          Showing <span th:text="${#lists.size(logs)}">0</span> entries
+      </span>
     </div>
 
     <div class="card-body p-0">
