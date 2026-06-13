@@ -121,7 +121,12 @@ public class ReconciliationService {
                 "Partial reconciliation process started with date tolerance ±" + toleranceDays + " days"
         );
 
-        List<ReconciliationResult> orphanResults = reconciliationResultRepository.findByStatusOrderByReconciledAtDesc(ReconciliationStatus.ORPHAN);
+
+        List<ReconciliationResult> orphanResults =
+                reconciliationResultRepository.findByStatusOrderByReconciledAtDesc(
+                        ReconciliationStatus.ORPHAN,
+                        PageRequest.of(0,10)
+                );
         int partialCount = 0;
 
         for(ReconciliationResult orphanResult : orphanResults){
@@ -154,7 +159,8 @@ public class ReconciliationService {
                 "ReconciliationRun",
                 "PARTIAL_MATCH_RUN",
                 performedBy,
-                "Partial reconciliation completed. Partial matches found: " + partialCount
+                "Partial reconciliation completed for latest " + orphanResults.size() +
+                        " orphan records. Partial matches found : " + partialCount
         );
     }
 
