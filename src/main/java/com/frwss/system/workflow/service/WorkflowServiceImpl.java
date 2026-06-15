@@ -4,8 +4,11 @@ package com.frwss.system.workflow.service;
 
 import com.frwss.system.workflow.dto.WorkflowRequestDto;
 import com.frwss.system.workflow.dto.WorkflowResponseDto;
+import com.frwss.system.workflow.dto.WorkflowStateUpdateRequestDto;
+import com.frwss.system.workflow.validation.WorkflowTransitionValidator;
 import com.frwss.system.workflow.model.WorkflowRecord;
 import com.frwss.system.workflow.model.WorkflowState;
+import com.frwss.system.workflow.model.WorkflowTransitionLog;
 import com.frwss.system.workflow.repository.WorkflowRecordRepository;
 import com.frwss.system.workflow.repository.WorkflowTransitionLogRepository;
 import org.springframework.stereotype.Service;
@@ -13,7 +16,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 
 @Service
-public class WorkflowServiceImpl implements WorkflowService{
+public class WorkflowServiceImpl implements WorkflowService {
     private final WorkflowRecordRepository workflowRecordRepository;
     private final WorkflowTransitionLogRepository workflowTransitionLogRepository;
 
@@ -22,7 +25,7 @@ public class WorkflowServiceImpl implements WorkflowService{
         this.workflowTransitionLogRepository = workflowTransitionLogRepository;
     }
 
-// Creates a new workflow record
+//    Creates a new workflow record
     @Override
     public WorkflowResponseDto createWorkflow(WorkflowRequestDto request) {
 
@@ -35,10 +38,10 @@ public class WorkflowServiceImpl implements WorkflowService{
         workflowRecord.setCreatedAt(LocalDateTime.now());
         workflowRecord.setUpdatedAt(LocalDateTime.now());
 
-//        Saving to DB
+        // Saving to DB
         WorkflowRecord savedRecord = workflowRecordRepository.save(workflowRecord);
 
-//        Prepare response Object
+        // Prepare response Object
         WorkflowResponseDto response = new WorkflowResponseDto();
 
         response.setWorkflowId(savedRecord.getWorkflowId());
@@ -49,4 +52,44 @@ public class WorkflowServiceImpl implements WorkflowService{
 
         return response;
     }
+
+//    Updates workflow state
+    @Override
+    public WorkflowResponseDto updateWorkflowState(Long workflowId, WorkflowStateUpdateRequestDto request) {
+
+        WorkflowRecord workflowRecord = workflowRecordRepository.findById(workflowId).get();
+
+        WorkflowState oldState = workflowRecord.getCurrentState();
+
+        if(!WorkflowTransitionValidator.isValidTransition(oldState, request.getNewState())){
+            throw new RuntimeException("Invalid Workflow Transition");
+        }
+
+        workflowRecord.setCurrentState(request.getNewState());
+        workflowRecord.setUpdatedAt(LocalDateTime.now());
+
+        WorkflowRecord updatedRecord = workflowRecordRepository.save(workflowRecord);
+
+        WorkflowTransitionLog log = new WorkflowTransitionLog();
+
+        log.setWorkflowId(updatedRecord.getWorkflowId());
+        log.setFromState(oldState.name());
+        log.setToState(updatedRecord.getCurrentState().name());
+        log.setPerformedBy("Prabuddha");
+        log.setJustification("Workflow state updated");
+        log.setTransitionTime(LocalDateTime.now());
+
+        workflowTransitionLogRepository.save(log);
+
+        WorkflowResponseDto response = new WorkflowResponseDto();
+
+        response.setWorkflowId(updatedRecord.getWorkflowId());
+        response.setSourceType(updatedRecord.getSourceType());
+        response.setSourceRecordId(updatedRecord.getSourceRecordId());
+        response.setCurrentState(updatedRecord.getCurrentState());
+        response.setMessage("Workflow State Updated Successfully");
+
+        return response;
+    }
+
 }

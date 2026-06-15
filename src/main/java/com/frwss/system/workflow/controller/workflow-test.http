@@ -1,8 +1,6 @@
-POST http://localhost:8080/api/workflows
+PUT http://localhost:8080/api/workflows/5/state
 Content-Type: application/json
 
 {
-  "sourceType":"STOCK",
-  "sourceRecordId":"STK-1001",
-  "createdBy":"Prabuddha"
+  "newState":"VERIFIED"
 }
