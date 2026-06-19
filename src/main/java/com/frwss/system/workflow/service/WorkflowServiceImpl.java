@@ -12,6 +12,9 @@ import com.frwss.system.workflow.model.WorkflowTransitionLog;
 import com.frwss.system.workflow.repository.WorkflowRecordRepository;
 import com.frwss.system.workflow.repository.WorkflowTransitionLogRepository;
 import org.springframework.stereotype.Service;
+import com.frwss.system.workflow.dto.WorkflowHistoryResponseDto;
+import java.util.*;
+import com.frwss.system.workflow.exception.InvalidWorkflowTransitionException;
 
 import java.time.LocalDateTime;
 
@@ -62,7 +65,7 @@ public class WorkflowServiceImpl implements WorkflowService {
         WorkflowState oldState = workflowRecord.getCurrentState();
 
         if(!WorkflowTransitionValidator.isValidTransition(oldState, request.getNewState())){
-            throw new RuntimeException("Invalid Workflow Transition");
+            throw new InvalidWorkflowTransitionException("Invalid Workflow Transition");
         }
 
         workflowRecord.setCurrentState(request.getNewState());
@@ -92,4 +95,24 @@ public class WorkflowServiceImpl implements WorkflowService {
         return response;
     }
 
+//    Retrieves Workflow History
+    @Override
+    public List<WorkflowHistoryResponseDto> getWorkflowHistory(Long workflowId) {
+
+        List<WorkflowTransitionLog> logs = workflowTransitionLogRepository.findByWorkflowId(workflowId);
+        List<WorkflowHistoryResponseDto> history = new java.util.ArrayList<>();
+
+        for(WorkflowTransitionLog log : logs){
+            WorkflowHistoryResponseDto dto = new WorkflowHistoryResponseDto();
+            dto.setFromState(log.getFromState());
+            dto.setToState(log.getToState());
+            dto.setPerformedBy(log.getPerformedBy());
+            dto.setJustification(log.getJustification());
+            dto.setTransitionTime(log.getTransitionTime());
+
+            history.add(dto);
+        }
+
+        return history;
+    }
 }

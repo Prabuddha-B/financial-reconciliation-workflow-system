@@ -8,6 +8,8 @@ import com.frwss.system.workflow.dto.WorkflowStateUpdateRequestDto;
 import com.frwss.system.workflow.service.WorkflowService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import com.frwss.system.workflow.dto.WorkflowHistoryResponseDto;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/workflows")
@@ -35,5 +37,11 @@ public class WorkflowController {
             @RequestBody WorkflowStateUpdateRequestDto request) {
 
         return workflowService.updateWorkflowState(workflowId, request);
+    }
+
+//    Retrieves  Workflow History
+    @GetMapping("/{workflowId}/history")
+    public List<WorkflowHistoryResponseDto> getWorkflowHistory(@PathVariable Long workflowId) {
+        return workflowService.getWorkflowHistory(workflowId);
     }
 }
