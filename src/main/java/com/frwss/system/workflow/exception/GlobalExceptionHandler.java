@@ -15,7 +15,17 @@ public class GlobalExceptionHandler {
     // Handles invalid workflow transitions
     @ExceptionHandler(InvalidWorkflowTransitionException.class)
     public ResponseEntity<Map<String, String>> handleInvalidWorkflowTransition(InvalidWorkflowTransitionException ex) {
-
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
+    }
+
+    // Handles missing justification
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(WorkflowNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleWorkflowNotFound(WorkflowNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
     }
 }

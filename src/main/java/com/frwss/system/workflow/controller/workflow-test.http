@@ -1,7 +1,8 @@
-PUT http://localhost:8080/api/workflows/5/state
+PUT http://localhost:8080/api/workflows/7/state
 Content-Type: application/json
 
 {
-  "newState":"VERIFIED"
+  "newState":"REVIEWED",
+  "performedBy":"reviewer01",
+  "justification":"Reviewed workflow"
 }
-

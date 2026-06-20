@@ -5,6 +5,7 @@ package com.frwss.system.workflow.service;
 import com.frwss.system.workflow.dto.WorkflowRequestDto;
 import com.frwss.system.workflow.dto.WorkflowResponseDto;
 import com.frwss.system.workflow.dto.WorkflowStateUpdateRequestDto;
+import com.frwss.system.workflow.exception.WorkflowNotFoundException;
 import com.frwss.system.workflow.validation.WorkflowTransitionValidator;
 import com.frwss.system.workflow.model.WorkflowRecord;
 import com.frwss.system.workflow.model.WorkflowState;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import com.frwss.system.workflow.dto.WorkflowHistoryResponseDto;
 import java.util.*;
 import com.frwss.system.workflow.exception.InvalidWorkflowTransitionException;
+
 
 import java.time.LocalDateTime;
 
@@ -60,12 +62,20 @@ public class WorkflowServiceImpl implements WorkflowService {
     @Override
     public WorkflowResponseDto updateWorkflowState(Long workflowId, WorkflowStateUpdateRequestDto request) {
 
-        WorkflowRecord workflowRecord = workflowRecordRepository.findById(workflowId).get();
+        WorkflowRecord workflowRecord = workflowRecordRepository.findById(workflowId).orElseThrow(() -> new WorkflowNotFoundException("Workflow not found"));
 
         WorkflowState oldState = workflowRecord.getCurrentState();
 
         if(!WorkflowTransitionValidator.isValidTransition(oldState, request.getNewState())){
             throw new InvalidWorkflowTransitionException("Invalid Workflow Transition");
+        }
+
+        if (request.getJustification() == null || request.getJustification().trim().isEmpty()) {
+            throw new RuntimeException("Justification is required");
+        }
+
+        if(workflowRecord.getCreatedBy().equals(request.getPerformedBy())){
+            throw new RuntimeException("Creator cannot review or approve their own workflow");
         }
 
         workflowRecord.setCurrentState(request.getNewState());
@@ -78,8 +88,8 @@ public class WorkflowServiceImpl implements WorkflowService {
         log.setWorkflowId(updatedRecord.getWorkflowId());
         log.setFromState(oldState.name());
         log.setToState(updatedRecord.getCurrentState().name());
-        log.setPerformedBy("Prabuddha");
-        log.setJustification("Workflow state updated");
+        log.setPerformedBy(request.getPerformedBy());
+        log.setJustification(request.getJustification());
         log.setTransitionTime(LocalDateTime.now());
 
         workflowTransitionLogRepository.save(log);
