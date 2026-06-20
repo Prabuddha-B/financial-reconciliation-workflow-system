@@ -1,8 +1,3 @@
-PUT http://localhost:8080/api/workflows/9/state
-Content-Type: application/json
+GET http://localhost:8080/api/workflows
 
-{
-  "newState":"REVIEWED",
-  "performedBy":"reviewer01",
-  "justification":"Workflow audit integration test"
-}
+

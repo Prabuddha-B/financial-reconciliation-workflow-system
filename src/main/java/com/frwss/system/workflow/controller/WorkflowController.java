@@ -44,4 +44,16 @@ public class WorkflowController {
     public List<WorkflowHistoryResponseDto> getWorkflowHistory(@PathVariable Long workflowId) {
         return workflowService.getWorkflowHistory(workflowId);
     }
+
+//    Retrieves a single workflow
+    @GetMapping("/{workflowId}")
+    public WorkflowResponseDto getWorkflowById(@PathVariable Long workflowId) {
+        return workflowService.getWorkflowById(workflowId);
+    }
+
+//    Retrieves all workflows
+    @GetMapping
+    public List<WorkflowResponseDto> getAllWorkflows() {
+        return workflowService.getAllWorkflows();
+    }
 }

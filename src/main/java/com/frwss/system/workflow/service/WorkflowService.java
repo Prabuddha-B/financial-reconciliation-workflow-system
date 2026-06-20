@@ -19,4 +19,9 @@ public interface WorkflowService {
 //    Retrieves  workflow Transition History
     List<WorkflowHistoryResponseDto> getWorkflowHistory(Long workflowId);
 
+//    Retrieves a single workflow
+    WorkflowResponseDto getWorkflowById(Long workflowId);
+
+//    Retrieves all workflows
+    List<WorkflowResponseDto> getAllWorkflows();
 }

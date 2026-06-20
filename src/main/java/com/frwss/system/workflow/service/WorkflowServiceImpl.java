@@ -139,4 +139,43 @@ public class WorkflowServiceImpl implements WorkflowService {
 
         return history;
     }
+
+//    Retrieves a single workflow
+    @Override
+    public WorkflowResponseDto getWorkflowById(Long workflowId) {
+
+        WorkflowRecord workflowRecord = workflowRecordRepository.findById(workflowId).orElseThrow(() -> new WorkflowNotFoundException("Workflow not found"));
+
+        WorkflowResponseDto response = new WorkflowResponseDto();
+
+        response.setWorkflowId(workflowRecord.getWorkflowId());
+        response.setSourceType(workflowRecord.getSourceType());
+        response.setSourceRecordId(workflowRecord.getSourceRecordId());
+        response.setCurrentState(workflowRecord.getCurrentState());
+
+        return response;
+    }
+
+//    Retrieves all workflows
+    @Override
+    public List<WorkflowResponseDto> getAllWorkflows() {
+
+        List<WorkflowRecord> workflowRecords = workflowRecordRepository.findAll();
+
+        List<WorkflowResponseDto> workflows = new ArrayList<>();
+
+        for (WorkflowRecord workflowRecord : workflowRecords) {
+
+            WorkflowResponseDto dto = new WorkflowResponseDto();
+
+            dto.setWorkflowId(workflowRecord.getWorkflowId());
+            dto.setSourceType(workflowRecord.getSourceType());
+            dto.setSourceRecordId(workflowRecord.getSourceRecordId());
+            dto.setCurrentState(workflowRecord.getCurrentState());
+
+            workflows.add(dto);
+        }
+
+        return workflows;
+    }
 }
