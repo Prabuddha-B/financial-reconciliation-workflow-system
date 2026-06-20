@@ -84,6 +84,12 @@ public class WorkflowServiceImpl implements WorkflowService {
             throw new RuntimeException("Creator cannot review or approve their own workflow");
         }
 
+        WorkflowTransitionLog latestTransition = workflowTransitionLogRepository.findTopByWorkflowIdOrderByTransitionTimeDesc(workflowId);
+
+        if (latestTransition != null && latestTransition.getPerformedBy().equals(request.getPerformedBy())) {
+            throw new RuntimeException("Same user cannot perform consecutive workflow transitions");
+        }
+
         workflowRecord.setCurrentState(request.getNewState());
         workflowRecord.setUpdatedAt(LocalDateTime.now());
 

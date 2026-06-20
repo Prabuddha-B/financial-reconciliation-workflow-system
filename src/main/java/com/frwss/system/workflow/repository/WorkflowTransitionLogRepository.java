@@ -9,4 +9,6 @@ import java.util.*;
 public interface WorkflowTransitionLogRepository extends JpaRepository<WorkflowTransitionLog, Long> {
 
     List<WorkflowTransitionLog> findByWorkflowId(Long workflowId);
+
+    WorkflowTransitionLog findTopByWorkflowIdOrderByTransitionTimeDesc(Long workflowId);
 }
