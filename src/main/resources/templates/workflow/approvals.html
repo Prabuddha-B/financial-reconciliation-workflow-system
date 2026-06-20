@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Workflow Approvals</title>
+</head>
+
+<body>
+    <h1>Workflow Approvals</h1>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Workflow ID</th>
+                <th>Source Type</th>
+                <th>Source Record ID</th>
+                <th>Current State</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <tr th:each="workflow : ${workflows}">
+                <td th:text="${workflow.workflowId}"></td>
+                <td th:text="${workflow.sourceType}"></td>
+                <td th:text="${workflow.sourceRecordId}"></td>
+                <td th:text="${workflow.currentState}"></td>
+                <td><a th:href="@{/workflow/status/{id}(id=${workflow.workflowId})}"> View Status</a></td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+
+</html>

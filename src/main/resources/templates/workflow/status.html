@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <title>Workflow Status</title>
+</head>
+
+<body>
+
+  <h1>Workflow Status</h1>
+
+  <h2>Workflow Details</h2>
+
+  <table border="1">
+    <tr>
+      <td><b>Workflow ID</b></td>
+      <td th:text="${workflow.workflowId}"></td>
+    </tr>
+
+    <tr>
+      <td><b>Source Type</b></td>
+      <td th:text="${workflow.sourceType}"></td>
+    </tr>
+
+    <tr>
+      <td><b>Source Record ID</b></td>
+      <td th:text="${workflow.sourceRecordId}"></td>
+    </tr>
+
+    <tr>
+      <td><b>Current State</b></td>
+      <td th:text="${workflow.currentState}"></td>
+    </tr>
+  </table>
+
+  <br>
+
+  <h2>Update Workflow State</h2>
+
+  <form th:action="@{/workflow/{id}/transition(id=${workflow.workflowId})}" method="post">
+    <label>New State:</label>
+
+    <select name="newState">
+      <option value="REVIEWED"> REVIEWED </option>
+      <option value="VERIFIED"> VERIFIED </option>
+      <option value="REJECTED"> REJECTED </option>
+    </select>
+
+    <br><br>
+
+    <label>Performed By:</label>
+    <input type="text" name="performedBy" required>
+
+    <br><br>
+
+    <label>Justification:</label>
+    <br>
+    <textarea name="justification" rows="4" cols="50" required></textarea>
+    <br><br>
+
+    <button type="submit">Update Workflow</button>
+
+  </form>
+
+  <br>
+
+  <h2>Workflow History</h2>
+
+  <table border="1">
+    <thead>
+    <tr>
+      <th>From State</th>
+      <th>To State</th>
+      <th>Performed By</th>
+      <th>Justification</th>
+      <th>Transition Time</th>
+    </tr>
+    </thead>
+
+    <tbody>
+      <tr th:each="log : ${history}">
+      <td th:text="${log.fromState}"></td>
+      <td th:text="${log.toState}"></td>
+      <td th:text="${log.performedBy}"></td>
+      <td th:text="${log.justification}"></td>
+      <td th:text="${log.transitionTime}"></td>
+    </tr>
+    </tbody>
+  </table>
+
+  <br>
+
+  <a th:href="@{/workflow/approvals}"> Back to Workflow Approvals </a>
+
+</body>
+
+</html>
