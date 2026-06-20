@@ -16,18 +16,24 @@ import org.springframework.stereotype.Service;
 import com.frwss.system.workflow.dto.WorkflowHistoryResponseDto;
 import java.util.*;
 import com.frwss.system.workflow.exception.InvalidWorkflowTransitionException;
+import com.frwss.system.audit.service.AuditService;
+import com.frwss.system.audit.model.AuditActionType;
 
 
 import java.time.LocalDateTime;
 
 @Service
 public class WorkflowServiceImpl implements WorkflowService {
+
     private final WorkflowRecordRepository workflowRecordRepository;
     private final WorkflowTransitionLogRepository workflowTransitionLogRepository;
 
-    public WorkflowServiceImpl(WorkflowRecordRepository workflowRecordRepository, WorkflowTransitionLogRepository workflowTransitionLogRepository) {
+    private final AuditService auditService;
+
+    public WorkflowServiceImpl(WorkflowRecordRepository workflowRecordRepository, WorkflowTransitionLogRepository workflowTransitionLogRepository, AuditService auditService) {
         this.workflowRecordRepository = workflowRecordRepository;
         this.workflowTransitionLogRepository = workflowTransitionLogRepository;
+        this.auditService = auditService;
     }
 
 //    Creates a new workflow record
@@ -93,6 +99,14 @@ public class WorkflowServiceImpl implements WorkflowService {
         log.setTransitionTime(LocalDateTime.now());
 
         workflowTransitionLogRepository.save(log);
+
+        auditService.log(
+                AuditActionType.WORKFLOW_STATE_CHANGED,
+                "WorkflowRecord",
+                updatedRecord.getWorkflowId().toString(),
+                request.getPerformedBy(),
+                "Workflow moved from " + oldState + " to " + updatedRecord.getCurrentState()
+        );
 
         WorkflowResponseDto response = new WorkflowResponseDto();
 
