@@ -24,4 +24,6 @@ public interface WorkflowService {
 
 //    Retrieves all workflows
     List<WorkflowResponseDto> getAllWorkflows();
+
+    WorkflowHistoryResponseDto getLatestWorkflowActivity(Long workflowId);
 }

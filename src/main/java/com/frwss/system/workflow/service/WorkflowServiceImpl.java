@@ -168,6 +168,13 @@ public class WorkflowServiceImpl implements WorkflowService {
 
         List<WorkflowRecord> workflowRecords = workflowRecordRepository.findAll();
 
+        // Sort workflows so records requiring reviewer action
+        workflowRecords.sort((w1, w2) -> {
+            int priority1 = getWorkflowPriority(w1.getCurrentState());
+            int priority2 = getWorkflowPriority(w2.getCurrentState());
+            return Integer.compare(priority1, priority2);
+        });
+
         List<WorkflowResponseDto> workflows = new ArrayList<>();
 
         for (WorkflowRecord workflowRecord : workflowRecords) {
@@ -183,5 +190,33 @@ public class WorkflowServiceImpl implements WorkflowService {
         }
 
         return workflows;
+    }
+
+    // Determines workflow display priority for approval dashboard
+    private int getWorkflowPriority(WorkflowState state) {
+        return switch (state) {
+            case REVIEWED -> 1;   // Needs reviewer decision
+            case ENTERED -> 2;    // Waiting for first review
+            case VERIFIED -> 3;   // Completed successfully
+            case REJECTED -> 4;   // Closed without approval
+        };
+    }
+
+    //    Retrieves Latest Workflow Activity
+    @Override
+    public WorkflowHistoryResponseDto getLatestWorkflowActivity(Long workflowId) {
+
+        WorkflowTransitionLog latestLog = workflowTransitionLogRepository.findTopByWorkflowIdOrderByTransitionTimeDesc(workflowId);
+
+        if (latestLog == null) return null;
+
+        WorkflowHistoryResponseDto dto = new WorkflowHistoryResponseDto();
+
+        dto.setFromState(latestLog.getFromState());
+        dto.setToState(latestLog.getToState());
+        dto.setPerformedBy(latestLog.getPerformedBy());
+        dto.setJustification(latestLog.getJustification());
+        dto.setTransitionTime(latestLog.getTransitionTime());
+        return dto;
     }
 }
