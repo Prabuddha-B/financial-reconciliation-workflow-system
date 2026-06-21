@@ -37,7 +37,7 @@
           </h3>
 
           <h3 th:if="${!chainValid}" class="text-danger">
-            Broken
+            Broken at Log ID: <span th:text="${chainResult.brokenAtId}">?</span>
           </h3>
 
           <p class="mb-0 text-muted" th:if="${chainValid}">
@@ -45,7 +45,8 @@
           </p>
 
           <p class="mb-0 text-muted" th:if="${!chainValid}">
-            Hash mismatch detected. Audit trail may have been modified.
+            Hash mismatch detected. Reason :
+            <span th:text="${chainResult.reason}">Mismatch</span>
           </p>
         </div>
       </div>
@@ -158,7 +159,8 @@
         </thead>
 
         <tbody>
-        <tr th:each="log : ${logs}">
+        <tr th:each="log : ${logs}"
+            th:classappend="${!chainValid and log.id == chainResult.brokenAtId} ? 'table-danger'">
           <td th:text="${log.id}">1</td>
 
           <td>

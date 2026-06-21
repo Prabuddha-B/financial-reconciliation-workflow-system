@@ -1,6 +1,7 @@
 package com.frwss.system.audit.controller;
 
 import com.frwss.system.audit.model.AuditActionType;
+import com.frwss.system.audit.service.AuditChainResult;
 import com.frwss.system.audit.service.AuditService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -30,7 +31,9 @@ public class AuditViewerController {
                 auditService.getFilteredLogs(actionType, entityType, performedBy, limit)
         );
 
-        model.addAttribute("chainValid", auditService.verifyAuditChain());
+        AuditChainResult chainResult = auditService.verifyAuditChainDetailed();
+        model.addAttribute("chainResult", chainResult);
+        model.addAttribute("chainValid", chainResult.isValid());
         model.addAttribute("totalLogCount", auditService.getTotalLogCount());
 
         model.addAttribute("actionTypes", AuditActionType.values());

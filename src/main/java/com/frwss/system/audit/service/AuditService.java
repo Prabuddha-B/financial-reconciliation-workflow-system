@@ -64,13 +64,13 @@ public class AuditService {
     }
 
     @Transactional(readOnly = true)
-    public boolean verifyAuditChain(){
+    public AuditChainResult verifyAuditChainDetailed(){
         List<AuditLog> logs = auditLogRepository.findAllByOrderByIdAsc();
         String expectedPreviousHash = GENESIS_HASH;
 
         for(AuditLog log : logs){
             if(!Objects.equals(log.getPreviousHash(), expectedPreviousHash)){
-                return false;
+                return new AuditChainResult(false, log.getId(), "Previous hash mismatch");
             }
 
             String recalculatedHash = generateHash(
@@ -84,12 +84,12 @@ public class AuditService {
             );
 
             if (!Objects.equals(log.getCurrentHash(), recalculatedHash)){
-                return false;
+                return new AuditChainResult(false, log.getId(), "Current hash mismatch");
             }
 
             expectedPreviousHash = log.getCurrentHash();
         }
-        return true;
+        return new AuditChainResult(true, null, null);
 
     }
 
