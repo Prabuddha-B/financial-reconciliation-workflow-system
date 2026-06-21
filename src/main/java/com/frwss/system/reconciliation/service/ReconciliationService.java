@@ -16,9 +16,12 @@ import com.frwss.system.repository.AccountingRecordRepository;
 import com.frwss.system.repository.PayrollRepository;
 import com.frwss.system.repository.ReceiptRepository;
 import com.frwss.system.repository.StockPurchaseRepository;
+import com.frwss.system.workflow.dto.WorkflowRequestDto;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.frwss.system.workflow.service.WorkflowService;
 
 import org.springframework.data.domain.Pageable;
 
@@ -38,13 +41,16 @@ public class ReconciliationService {
     private final ReconciliationResultRepository reconciliationResultRepository;
     private final AuditService auditService;
 
+    private final WorkflowService workflowService;
+
     public ReconciliationService(
             AccountingRecordRepository accountingRecordRepository,
             PayrollRepository payrollRepository,
             ReceiptRepository receiptRepository,
             StockPurchaseRepository stockPurchaseRepository,
             ReconciliationResultRepository reconciliationResultRepository,
-            AuditService auditService
+            AuditService auditService,
+            WorkflowService workflowService
     ) {
         this.accountingRecordRepository = accountingRecordRepository;
         this.payrollRepository = payrollRepository;
@@ -52,6 +58,7 @@ public class ReconciliationService {
         this.stockPurchaseRepository = stockPurchaseRepository;
         this.reconciliationResultRepository = reconciliationResultRepository;
         this.auditService = auditService;
+        this.workflowService = workflowService;
     }
 
     @Transactional
@@ -631,6 +638,14 @@ public class ReconciliationService {
         );
 
         reconciliationResultRepository.save(result);
+
+        WorkflowRequestDto workflowRequest = new WorkflowRequestDto();
+
+        workflowRequest.setSourceType("RECONCILIATION");
+        workflowRequest.setSourceRecordId(result.getId().toString());
+        workflowRequest.setCreatedBy(performedBy);
+
+        workflowService.createWorkflow(workflowRequest);
 
         auditService.log(
                 AuditActionType.MANUAL_MODIFICATION,

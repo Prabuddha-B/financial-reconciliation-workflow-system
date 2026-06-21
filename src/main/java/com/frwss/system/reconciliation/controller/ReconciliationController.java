@@ -8,6 +8,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.frwss.system.workflow.service.WorkflowService;
+import com.frwss.system.workflow.dto.WorkflowRequestDto;
+import com.frwss.system.workflow.repository.WorkflowRecordRepository;
+
 import java.util.List;
 
 @Controller
@@ -15,9 +19,15 @@ import java.util.List;
 public class ReconciliationController {
 
     private final ReconciliationService reconciliationService;
+    private final WorkflowService workflowService;
+    private final WorkflowRecordRepository workflowRecordRepository;
 
-    public ReconciliationController(ReconciliationService reconciliationService){
+    public ReconciliationController(ReconciliationService reconciliationService,
+                                    WorkflowService workflowService,
+                                    WorkflowRecordRepository workflowRecordRepository) {
         this.reconciliationService = reconciliationService;
+        this.workflowService = workflowService;
+        this.workflowRecordRepository = workflowRecordRepository;
     }
 
     @GetMapping
@@ -189,6 +199,44 @@ public class ReconciliationController {
         redirectAttributes.addFlashAttribute(
                 "successMessage",
                 "Manual resolution rejected successfully."
+        );
+
+        return "redirect:/reconciliation/manual-review";
+    }
+
+    @PostMapping("/manual-review/{resultId}/send-to-workflow")
+    public String sendToWorkflowReview(
+            @PathVariable Long resultId,
+            RedirectAttributes redirectAttributes
+    ){
+
+        // Prevent duplicate workflow creation for the same reconciliation record
+        if (workflowRecordRepository
+                .findBySourceTypeAndSourceRecordId(
+                        "RECONCILIATION",
+                        resultId.toString()
+                )
+                .isPresent()) {
+
+            redirectAttributes.addFlashAttribute(
+                    "errorMessage",
+                    "This record has already been submitted for workflow review."
+            );
+
+            return "redirect:/reconciliation/manual-review";
+        }
+
+        WorkflowRequestDto workflowRequest = new WorkflowRequestDto();
+
+        workflowRequest.setSourceType("RECONCILIATION");
+        workflowRequest.setSourceRecordId(resultId.toString());
+        workflowRequest.setCreatedBy("admin");
+
+        workflowService.createWorkflow(workflowRequest);
+
+        redirectAttributes.addFlashAttribute(
+                "successMessage",
+                "Record sent to workflow review successfully."
         );
 
         return "redirect:/reconciliation/manual-review";

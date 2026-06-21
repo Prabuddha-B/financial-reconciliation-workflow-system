@@ -6,6 +6,7 @@ public enum ReconciliationStatus {
     DUPLICATE,
     ORPHAN,
     MANUALLY_RESOLVED,
+    SUBMITTED_FOR_REVIEW,             // For Workflow Integration
     APPROVED,
     REJECTED
 }
