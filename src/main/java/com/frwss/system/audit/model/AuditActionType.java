@@ -20,7 +20,9 @@ public enum AuditActionType {
     ACCESS_DENIED,
 
     REPORT_EXPORTED,
-    AUDIT_CHAIN_VERIFIED
+    AUDIT_CHAIN_VERIFIED,
+
+    AUDIT_CHAIN_CORRECTED
 
 
 }

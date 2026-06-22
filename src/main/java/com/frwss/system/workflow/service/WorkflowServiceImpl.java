@@ -18,8 +18,9 @@ import java.util.*;
 import com.frwss.system.workflow.exception.InvalidWorkflowTransitionException;
 import com.frwss.system.audit.service.AuditService;
 import com.frwss.system.audit.model.AuditActionType;
-
-
+import com.frwss.system.reconciliation.service.ReconciliationService;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.context.annotation.Lazy;
 import java.time.LocalDateTime;
 
 @Service
@@ -29,11 +30,16 @@ public class WorkflowServiceImpl implements WorkflowService {
     private final WorkflowTransitionLogRepository workflowTransitionLogRepository;
 
     private final AuditService auditService;
+    private final ReconciliationService reconciliationService;
 
-    public WorkflowServiceImpl(WorkflowRecordRepository workflowRecordRepository, WorkflowTransitionLogRepository workflowTransitionLogRepository, AuditService auditService) {
+    public WorkflowServiceImpl(WorkflowRecordRepository workflowRecordRepository,
+                               WorkflowTransitionLogRepository workflowTransitionLogRepository,
+                               AuditService auditService,
+                               @Lazy ReconciliationService reconciliationService) {
         this.workflowRecordRepository = workflowRecordRepository;
         this.workflowTransitionLogRepository = workflowTransitionLogRepository;
         this.auditService = auditService;
+        this.reconciliationService = reconciliationService;
     }
 
 //    Creates a new workflow record
@@ -66,6 +72,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 
 //    Updates workflow state
     @Override
+    @Transactional
     public WorkflowResponseDto updateWorkflowState(Long workflowId, WorkflowStateUpdateRequestDto request) {
 
         WorkflowRecord workflowRecord = workflowRecordRepository.findById(workflowId).orElseThrow(() -> new WorkflowNotFoundException("Workflow not found"));
@@ -73,7 +80,7 @@ public class WorkflowServiceImpl implements WorkflowService {
         WorkflowState oldState = workflowRecord.getCurrentState();
 
         if(!WorkflowTransitionValidator.isValidTransition(oldState, request.getNewState())){
-            throw new InvalidWorkflowTransitionException("Invalid Workflow Transition");
+            throw new InvalidWorkflowTransitionException("Segregation of Duties Violation: Users cannot verify records they previously reviewed.");
         }
 
         if (request.getJustification() == null || request.getJustification().trim().isEmpty()) {
@@ -105,6 +112,17 @@ public class WorkflowServiceImpl implements WorkflowService {
         log.setTransitionTime(LocalDateTime.now());
 
         workflowTransitionLogRepository.save(log);
+
+        if ("RECONCILIATION".equals(updatedRecord.getSourceType())) {
+
+            Long reconciliationResultId = Long.parseLong(updatedRecord.getSourceRecordId());
+
+            if (updatedRecord.getCurrentState() == WorkflowState.VERIFIED) {
+                reconciliationService.approveManualResolution(reconciliationResultId,request.getPerformedBy());
+            } else if (updatedRecord.getCurrentState() == WorkflowState.REJECTED) {
+                reconciliationService.rejectManualResolution(reconciliationResultId,request.getJustification(),request.getPerformedBy());
+            }
+        }
 
         auditService.log(
                 AuditActionType.WORKFLOW_STATE_CHANGED,

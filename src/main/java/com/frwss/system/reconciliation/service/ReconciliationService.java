@@ -16,14 +16,13 @@ import com.frwss.system.repository.AccountingRecordRepository;
 import com.frwss.system.repository.PayrollRepository;
 import com.frwss.system.repository.ReceiptRepository;
 import com.frwss.system.repository.StockPurchaseRepository;
-import com.frwss.system.workflow.dto.WorkflowRequestDto;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.frwss.system.workflow.service.WorkflowService;
 
-import org.springframework.data.domain.Pageable;
+
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -606,7 +605,6 @@ public class ReconciliationService {
 
         return Math.min(confidence, 95.0);
     }
-
     @Transactional
     public void resolveOrphanManually(
             Long reconciliationResultId,
@@ -619,7 +617,7 @@ public class ReconciliationService {
         ReconciliationResult result = reconciliationResultRepository.findById(reconciliationResultId)
                 .orElseThrow(() -> new RuntimeException("Reconciliation result not found"));
 
-        if(result.getStatus() !=  ReconciliationStatus.ORPHAN){
+        if(result.getStatus() != ReconciliationStatus.ORPHAN){
             throw new RuntimeException("Only orphan records can be manually resolved");
         }
 
@@ -639,14 +637,6 @@ public class ReconciliationService {
 
         reconciliationResultRepository.save(result);
 
-        WorkflowRequestDto workflowRequest = new WorkflowRequestDto();
-
-        workflowRequest.setSourceType("RECONCILIATION");
-        workflowRequest.setSourceRecordId(result.getId().toString());
-        workflowRequest.setCreatedBy(performedBy);
-
-        workflowService.createWorkflow(workflowRequest);
-
         auditService.log(
                 AuditActionType.MANUAL_MODIFICATION,
                 "ReconciliationResult",
@@ -657,7 +647,6 @@ public class ReconciliationService {
                         ". Justification: " + justification
         );
     }
-
     @Transactional(readOnly = true)
     public List<ReconciliationResult> getManualReviewRecords(){
         return reconciliationResultRepository.findByStatusOrderByReconciledAtDesc(
