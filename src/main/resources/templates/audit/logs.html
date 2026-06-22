@@ -164,29 +164,38 @@
             th:classappend="${!chainValid and log.id == chainResult.brokenAtId} ? 'table-danger'">
           <td th:text="${log.id}">1</td>
 
-          <td>
-                        <span class="badge bg-primary" th:text="${log.actionType}">
-                            ACTION
-                        </span>
+          <td th:classappend="${!chainValid and chainResult.fieldName == 'actionType' and log.id == chainResult.brokenAtId} ? 'table-warning'">
+    <span class="badge bg-primary" th:text="${log.actionType}">
+      ACTION
+    </span>
           </td>
 
-          <td th:text="${log.entityType}">Entity</td>
-          <td th:text="${log.entityId}">ID</td>
-          <td th:text="${log.performedBy}">admin</td>
+          <td th:classappend="${!chainValid and chainResult.fieldName == 'entityType' and log.id == chainResult.brokenAtId} ? 'table-warning'"
+              th:text="${log.entityType}">Entity</td>
 
-          <td th:text="${log.timestamp}">timestamp</td>
+          <td th:classappend="${!chainValid and chainResult.fieldName == 'entityId' and log.id == chainResult.brokenAtId} ? 'table-warning'"
+              th:text="${log.entityId}">ID</td>
 
-          <td style="max-width: 280px; white-space: normal;"
+          <td th:classappend="${!chainValid and chainResult.fieldName == 'performedBy' and log.id == chainResult.brokenAtId} ? 'table-warning'"
+              th:text="${log.performedBy}">admin</td>
+
+          <td th:classappend="${!chainValid and chainResult.fieldName == 'timestamp' and log.id == chainResult.brokenAtId} ? 'table-warning'"
+              th:text="${log.timestamp}">timestamp</td>
+
+          <td th:classappend="${!chainValid and chainResult.fieldName == 'details' and log.id == chainResult.brokenAtId} ? 'table-warning'"
+              style="max-width: 280px; white-space: normal;"
               th:text="${log.details}">
             Details
           </td>
 
-          <td style="max-width: 220px; word-break: break-all; font-size: 0.8rem;"
+          <td th:classappend="${!chainValid and chainResult.fieldName == 'previousHash' and log.id == chainResult.brokenAtId} ? 'table-warning'"
+              style="max-width: 220px; word-break: break-all; font-size: 0.8rem;"
               th:text="${log.previousHash}">
             previous hash
           </td>
 
-          <td style="max-width: 220px; word-break: break-all; font-size: 0.8rem;"
+          <td th:classappend="${!chainValid and chainResult.fieldName == 'currentHash' and log.id == chainResult.brokenAtId} ? 'table-warning'"
+              style="max-width: 220px; word-break: break-all; font-size: 0.8rem;"
               th:text="${log.currentHash}">
             current hash
           </td>

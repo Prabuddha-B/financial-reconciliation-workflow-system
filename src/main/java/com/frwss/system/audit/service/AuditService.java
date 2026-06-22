@@ -73,6 +73,7 @@ public class AuditService {
                 return new AuditChainResult(false, log.getId(), "Previous hash mismatch", "previousHash");
             }
 
+            // Recalculate full hash
             String recalculatedHash = generateHash(
                     log.getActionType(),
                     log.getEntityType(),
@@ -84,21 +85,56 @@ public class AuditService {
             );
 
             if (!Objects.equals(log.getCurrentHash(), recalculatedHash)){
-                // Localize error by checking fields
-                if(log.getDetails() == null || log.getDetails().isBlank()){
-                    return new AuditChainResult(false, log.getId(), "Details field mismatch", "details");
-                }
-
-                if(log.getPerformedBy() == null || log.getPerformedBy().isBlank()){
-                    return new AuditChainResult(false, log.getId(), "PerformedBy field mismatch", "performedBy");
-                }
-                return new AuditChainResult(false, log.getId(), "Current hash mismatch", "currentHash");
+                // Localize mismatch by checking each field
+                String mismatchField = findMismatchField(log, log.getCurrentHash());
+                return new AuditChainResult(false, log.getId(),
+                        "Mismatch in field: " + mismatchField, mismatchField);
             }
 
             expectedPreviousHash = log.getCurrentHash();
         }
         return new AuditChainResult(true, null, null, null);
 
+    }
+
+    private String findMismatchField(AuditLog log, String storedHash){
+        String[] fieldValues = {
+                Objects.toString(log.getActionType(), ""),
+                Objects.toString(log.getEntityType(), ""),
+                Objects.toString(log.getEntityId(), ""),
+                Objects.toString(log.getPerformedBy(), ""),
+                Objects.toString(log.getTimestamp(), ""),
+                Objects.toString(log.getDetails(), ""),
+                Objects.toString(log.getPreviousHash(),"")
+        };
+
+        String[] fieldNames = {
+                "actionType", "entityType", "entityId",
+                "performedBy", "timestamp", "details", "previousHash"
+        };
+
+        // Build up the concatenated string incrementally
+        StringBuilder sb = new StringBuilder();
+        for(int i = 0; i < fieldValues.length; i++){
+            if(i > 0) sb.append("|");
+            sb.append(fieldValues[i]);
+
+            String partialHash = generateHash(
+                    log.getActionType(),
+                    log.getEntityType(),
+                    log.getEntityId(),
+                    log.getPerformedBy(),
+                    log.getTimestamp(),
+                    log.getDetails(),
+                    log.getPreviousHash()
+            );
+
+            if(!partialHash.equals(storedHash) && i == fieldValues.length -1){
+                return fieldNames[i];
+            }
+
+        }
+        return "unknown";
     }
 
     private String generateHash(
