@@ -39,7 +39,8 @@ public class AuditTestController {
         } else {
             return "Audit chain is broken at log ID: "
                     + result.getBrokenAtId()
-                    + " (" + result.getReason() + ")";
+                    + " (" + result.getReason()
+                    + " in field: " + result.getFieldName() + ")";
         }
     }
 }

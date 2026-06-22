@@ -70,7 +70,7 @@ public class AuditService {
 
         for(AuditLog log : logs){
             if(!Objects.equals(log.getPreviousHash(), expectedPreviousHash)){
-                return new AuditChainResult(false, log.getId(), "Previous hash mismatch");
+                return new AuditChainResult(false, log.getId(), "Previous hash mismatch", "previousHash");
             }
 
             String recalculatedHash = generateHash(
@@ -84,12 +84,20 @@ public class AuditService {
             );
 
             if (!Objects.equals(log.getCurrentHash(), recalculatedHash)){
-                return new AuditChainResult(false, log.getId(), "Current hash mismatch");
+                // Localize error by checking fields
+                if(log.getDetails() == null || log.getDetails().isBlank()){
+                    return new AuditChainResult(false, log.getId(), "Details field mismatch", "details");
+                }
+
+                if(log.getPerformedBy() == null || log.getPerformedBy().isBlank()){
+                    return new AuditChainResult(false, log.getId(), "PerformedBy field mismatch", "performedBy");
+                }
+                return new AuditChainResult(false, log.getId(), "Current hash mismatch", "currentHash");
             }
 
             expectedPreviousHash = log.getCurrentHash();
         }
-        return new AuditChainResult(true, null, null);
+        return new AuditChainResult(true, null, null, null);
 
     }
 

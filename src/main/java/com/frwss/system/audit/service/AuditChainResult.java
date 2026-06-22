@@ -4,11 +4,21 @@ public class AuditChainResult {
     private boolean valid;
     private Long brokenAtId;
     private String reason;
+    private String fieldName;
 
-    public AuditChainResult(boolean valid, Long brokenAtId, String reason){
+    public AuditChainResult(boolean valid, Long brokenAtId, String reason, String fieldName){
         this.valid = valid;
         this.brokenAtId = brokenAtId;
         this.reason = reason;
+        this.fieldName = fieldName;
+    }
+
+    public String getFieldName() {
+        return fieldName;
+    }
+
+    public void setFieldName(String fieldName) {
+        this.fieldName = fieldName;
     }
 
     public boolean isValid() {

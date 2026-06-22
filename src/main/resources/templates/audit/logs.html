@@ -47,6 +47,7 @@
           <p class="mb-0 text-muted" th:if="${!chainValid}">
             Hash mismatch detected. Reason :
             <span th:text="${chainResult.reason}">Mismatch</span>
+            (Field: <span th:text="${chainResult.fieldName}">field</span>)
           </p>
         </div>
       </div>
