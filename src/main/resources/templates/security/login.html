@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>FRWSS Login</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+</head>
+
+<body class="bg-light">
+<div class="container min-vh-100 d-flex align-items-center justify-content-center">
+    <div class="card shadow-sm border-0" style="width: 100%; max-width: 430px;">
+        <div class="card-body p-4">
+            <h3 class="mb-1 text-center">FRWSS Login</h3>
+            <p class="text-muted text-center mb-4">Sign in to continue</p>
+
+            <div th:if="${alertMessage != null}"
+                 th:class="'alert alert-' + ${alertType}"
+                 th:text="${alertMessage}">
+            </div>
+
+            <form th:action="@{/login}" method="post">
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <input id="username" name="username" class="form-control" autocomplete="username" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input id="password" name="password" type="password" class="form-control" autocomplete="current-password" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">
+                    Login
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>
