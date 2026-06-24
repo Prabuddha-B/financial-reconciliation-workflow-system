@@ -33,21 +33,27 @@
           <h6 class="text-muted">Audit Chain Status</h6>
 
           <h3 th:if="${chainValid}" class="text-success">
-            Valid
+            <span class="badge bg-success">Valid</span>
           </h3>
 
           <h3 th:if="${!chainValid}" class="text-danger">
-            Broken at Log ID: <span th:text="${chainResult.brokenAtId}">?</span>
+            <span class="badge bg-danger">Broken</span> at Log ID:
+            <strong th:text="${chainResult.brokenAtId}">?</strong>
           </h3>
 
-          <p class="mb-0 text-muted" th:if="${chainValid}">
-            All audit entries match their stored SHA-256 hash chain.
+          <p th:if="${chainValid}" class="mt-2">
+            <span class="badge bg-success">✔ All entries valid</span>
+            <br>
+            <small class="text-muted">
+              Every audit record matches its stored SHA‑256 hash chain.
+            </small>
           </p>
 
-          <p class="mb-0 text-muted" th:if="${!chainValid}">
-            Hash mismatch detected. Reason :
-            <span th:text="${chainResult.reason}">Mismatch</span>
-            (Field: <span th:text="${chainResult.fieldName}">field</span>)
+          <p th:if="${!chainValid}" class="mt-2">
+            Reason:
+            <span class="badge bg-warning text-dark" th:text="${chainResult.reason}">Mismatch</span>
+            Field:
+            <span class="badge bg-info text-dark" th:text="${chainResult.fieldName}">field</span>
           </p>
         </div>
       </div>
@@ -140,6 +146,12 @@
           Showing <span th:text="${#lists.size(logs)}">0</span>
           of <span th:text="${totalLogCount}">0</span> total audit entries
       </span>
+    </div>
+
+    <div class = "alert alert-secondary mb-4">
+      <strong>Legend: </strong>
+      <span class="badge bg-danger">Red row</span> = Broken log entry,
+      <span class="badge bg-warning text-dark">Yellow cell</span> = Mismatched field
     </div>
 
     <div class="card-body p-0">
