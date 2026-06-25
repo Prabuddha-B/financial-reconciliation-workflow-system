@@ -475,6 +475,28 @@ public class ReconciliationService {
         return orphanViews;
     }
 
+    // Used in Side by Side UI
+    @Transactional(readOnly = true)
+    public OrphanRecordView getOrphanRecordView(Long reconciliationResultId) {
+
+        ReconciliationResult result = reconciliationResultRepository.findById(reconciliationResultId)
+                .orElseThrow(() -> new RuntimeException("Reconciliation result not found"));
+
+        AccountingRecord accountingRecord = accountingRecordRepository
+                .findById(result.getAccountingRecordId())
+                .orElseThrow(() -> new RuntimeException("Accounting record not found"));
+
+        return new OrphanRecordView(
+                result.getId(),
+                accountingRecord.getRecordId(),
+                accountingRecord.getReferenceNo(),
+                accountingRecord.getModule(),
+                accountingRecord.getAmount(),
+                accountingRecord.getRecordDate(),
+                result.getRemarks()
+        );
+    }
+
     @Transactional(readOnly = true)
     public List<CandidateMatchView> getCandidateMatchesForOrphan(Long reconciliationResultId){
         Optional<ReconciliationResult> optionalResult = reconciliationResultRepository.findById(reconciliationResultId);

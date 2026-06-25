@@ -106,6 +106,7 @@ public class ReconciliationController {
             Model model
     ){
         model.addAttribute("candidates", reconciliationService.getCandidateMatchesForOrphan(resultId));
+        model.addAttribute("orphanRecord",reconciliationService.getOrphanRecordView(resultId));
         model.addAttribute("resultId", resultId);
 
         return "reconciliation/candidates";
