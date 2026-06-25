@@ -23,10 +23,9 @@
         </div>
 
         <form th:action="@{/ingestion/upload}"
-              action="/ingestion/upload"
               method="post"
               enctype="multipart/form-data"
-              onsubmit="return handleUpload()">
+              onsubmit="return handleUpload();">
 
             <div class="mb-3">
                 <label for="dataType">Select Data Type</label>

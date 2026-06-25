@@ -3,9 +3,13 @@ package com.frwss.system.controller;
 import com.frwss.system.dto.IngestionResult;
 import com.frwss.system.service.IngestionService;
 import jakarta.servlet.http.HttpSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -13,6 +17,8 @@ import java.util.List;
 
 @Controller
 public class IngestionController {
+
+    private static final Logger log = LoggerFactory.getLogger(IngestionController.class);
 
     private final IngestionService ingestionService;
 
@@ -43,7 +49,18 @@ public class IngestionController {
             @RequestParam("dataType") String dataType,
             Model model,
             HttpSession session) {
+
+        log.info("Upload request received: fileName={}, size={}, dataType={}",
+                file != null ? file.getOriginalFilename() : null,
+                file != null ? file.getSize() : null,
+                dataType);
+
         try {
+            if (file == null || file.isEmpty()) {
+                model.addAttribute("error", "Please select a file before uploading.");
+                return "ingestion/upload";
+            }
+
             IngestionResult result = ingestionService.processFileForPreview(file, dataType);
 
             model.addAttribute("dataType", dataType);
@@ -59,9 +76,19 @@ public class IngestionController {
             return "ingestion/result";
 
         } catch (Exception e) {
+            log.error("Preview failed for fileName={}, dataType={}",
+                    file != null ? file.getOriginalFilename() : null,
+                    dataType, e);
             model.addAttribute("error", "Preview failed: " + e.getMessage());
             return "ingestion/upload";
         }
+    }
+
+    @ExceptionHandler({MultipartException.class, MaxUploadSizeExceededException.class})
+    public String handleMultipartFailure(Exception e, Model model) {
+        log.error("Multipart upload failed", e);
+        model.addAttribute("error", "Upload failed: " + e.getMessage());
+        return "ingestion/upload";
     }
 
     @PostMapping("/ingestion/save")
