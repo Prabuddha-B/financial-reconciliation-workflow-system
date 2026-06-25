@@ -14,14 +14,18 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 
 import java.util.Comparator;
 import java.util.List;
+import com.frwss.system.security.SecurityContextAdapter;
 
 @Controller
 @RequestMapping("/workflow")
 public class WorkflowViewController {
     private final WorkflowService workflowService;
+    private final SecurityContextAdapter securityContextAdapter;
 
-    public WorkflowViewController(WorkflowService workflowService) {
+
+    public WorkflowViewController(WorkflowService workflowService, SecurityContextAdapter securityContextAdapter) {
         this.workflowService = workflowService;
+        this.securityContextAdapter = securityContextAdapter;
     }
 
     //    Displays Workflow Approval Page
@@ -44,7 +48,9 @@ public class WorkflowViewController {
         List<WorkflowHistoryResponseDto> history = workflowService.getWorkflowHistory(workflowId);
 
         model.addAttribute("workflow", workflowService.getWorkflowById(workflowId));
+        model.addAttribute("currentUser",securityContextAdapter.getCurrentUsername());
         model.addAttribute("history", history);
+        model.addAttribute("userRole", securityContextAdapter.getCurrentUserRole());
         model.addAttribute("latestTransition", workflowService.getLatestWorkflowActivity(workflowId));
         model.addAttribute("lastUpdated", history.stream()
                 .map(WorkflowHistoryResponseDto::getTransitionTime)
@@ -56,23 +62,47 @@ public class WorkflowViewController {
 
 //    Handles Workflow State Transitions
     @PostMapping("/{workflowId}/transition")
-    public String updateWorkflowState(@PathVariable Long workflowId, @ModelAttribute WorkflowStateUpdateRequestDto request, Model model) {
-        try {
-            workflowService.updateWorkflowState(workflowId, request);
-            return "redirect:/workflow/status/" + workflowId;
-        } catch ( RuntimeException ex ) {
-            List<WorkflowHistoryResponseDto> history = workflowService.getWorkflowHistory(workflowId);
+    public String updateWorkflowState(
+            @PathVariable Long workflowId,
+            @ModelAttribute WorkflowStateUpdateRequestDto request,
+            Model model) {
+        {
+            try {
+                request.setPerformedBy(securityContextAdapter.getCurrentUsername());
 
-            model.addAttribute("workflow",workflowService.getWorkflowById(workflowId));
-            model.addAttribute("history", history);
-            model.addAttribute("latestTransition", workflowService.getLatestWorkflowActivity(workflowId));
-            model.addAttribute("lastUpdated", history.stream()
-                    .map(WorkflowHistoryResponseDto::getTransitionTime)
-                    .filter(java.util.Objects::nonNull)
-                    .max(Comparator.naturalOrder())
-                    .orElse(null));
-            model.addAttribute("errorMessage",ex.getMessage());
-            return "workflow/status";
+                String role = securityContextAdapter.getCurrentUserRole();
+
+                if (request.getNewState().name().equals("REVIEWED")
+                        && !role.equals("APPROVER")
+                        && !role.equals("ADMIN")) {
+
+                    throw new RuntimeException("Only Approvers can review workflows.");
+                }
+
+                if ((request.getNewState().name().equals("VERIFIED")
+                        || request.getNewState().name().equals("REJECTED"))
+                        && !role.equals("AUDITOR")
+                        && !role.equals("ADMIN")) {
+
+                    throw new RuntimeException("Only Auditors can verify or reject workflows.");
+                }
+
+                workflowService.updateWorkflowState(workflowId, request);
+                return "redirect:/workflow/status/" + workflowId;
+            } catch ( RuntimeException ex ) {
+                List<WorkflowHistoryResponseDto> history = workflowService.getWorkflowHistory(workflowId);
+
+                model.addAttribute("workflow", workflowService.getWorkflowById(workflowId));
+                model.addAttribute("history", history);
+                model.addAttribute("latestTransition", workflowService.getLatestWorkflowActivity(workflowId));
+                model.addAttribute("lastUpdated", history.stream()
+                        .map(WorkflowHistoryResponseDto::getTransitionTime)
+                        .filter(java.util.Objects::nonNull)
+                        .max(Comparator.naturalOrder())
+                        .orElse(null));
+                model.addAttribute("errorMessage", ex.getMessage());
+                return "workflow/status";
+            }
         }
     }
 }

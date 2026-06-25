@@ -201,28 +201,43 @@
           <!-- New State -->
           <div class="col-12 col-md-4">
             <label class="form-label">New State</label>
+
             <select name="newState" class="form-select" required>
               <option value="" selected disabled>Select next state</option>
 
-              <option th:if="${workflow.currentState.name() == 'ENTERED'}" value="REVIEWED">
+              <option
+                      th:if="${workflow.currentState.name() == 'ENTERED'
+                                and (userRole == 'APPROVER' or userRole == 'ADMIN')}"
+                      value="REVIEWED">
                 REVIEWED
               </option>
 
-              <option th:if="${workflow.currentState.name() == 'REVIEWED'}" value="VERIFIED">
+              <option
+                      th:if="${workflow.currentState.name() == 'REVIEWED'
+                                and (userRole == 'AUDITOR' or userRole == 'ADMIN')}"
+                      value="VERIFIED">
                 VERIFIED
               </option>
 
-              <option th:if="${workflow.currentState.name() == 'REVIEWED'}" value="REJECTED">
+              <option
+                      th:if="${workflow.currentState.name() == 'REVIEWED'
+                          and (userRole == 'AUDITOR' or userRole == 'ADMIN')}"
+                      value="REJECTED">
                 REJECTED
               </option>
+
             </select>
+
             <div class="form-text">Only valid next states are shown for the current workflow state</div>
           </div>
 
           <!-- Performed By -->
           <div class="col-12 col-md-4">
             <label class="form-label">Performed By</label>
-            <input type="text" name="performedBy" class="form-control" required placeholder="Enter reviewer name">
+            <input type="text" class="form-control" th:value="${currentUser}" readonly>
+            <div class="form-text">
+              The authenticated user performing this action will be recorded automatically.
+            </div>
           </div>
 
           <!-- Justification -->

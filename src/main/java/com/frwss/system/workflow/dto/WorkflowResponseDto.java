@@ -17,6 +17,8 @@ public class WorkflowResponseDto {
 
     private String message;
 
+    private String createdBy;
+
 //    Getters and Setters
 
     public Long getWorkflowId() {
@@ -57,5 +59,13 @@ public class WorkflowResponseDto {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
     }
 }

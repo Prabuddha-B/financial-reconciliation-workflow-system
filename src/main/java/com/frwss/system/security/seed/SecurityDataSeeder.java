@@ -31,9 +31,14 @@ public class SecurityDataSeeder implements CommandLineRunner {
         Role entry = createRole("ROLE_ENTRY_STAFF", "Data entry staff");
         Role auditor = createRole("ROLE_AUDITOR", "Audit user");
 
+        Role approver = createRole("ROLE_APPROVER","Workflow approver");
+
+
         createUser(1, "admin", "admin123", admin);
         createUser(2, "entry", "entry123", entry);
         createUser(3, "auditor", "auditor123", auditor);
+
+        createUser(4, "approver", "approver123", approver);
     }
 
     private Role createRole(String name, String description) {

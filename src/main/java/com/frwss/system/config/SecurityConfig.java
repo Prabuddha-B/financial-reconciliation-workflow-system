@@ -27,6 +27,8 @@ public class SecurityConfig {
                         .requestMatchers("/ingestion/upload", "/ingestion/save", "/ingestion/manual/**")
                         .hasAnyRole("ENTRY_STAFF", "ADMIN")
                         .requestMatchers("/audit/**").hasAnyRole("AUDITOR", "ADMIN")
+                        .requestMatchers("/workflow/**")
+                        .hasAnyRole("APPROVER", "AUDITOR", "ADMIN")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
