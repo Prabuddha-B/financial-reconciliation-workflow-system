@@ -27,7 +27,9 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ReconciliationService {
@@ -449,21 +451,29 @@ public class ReconciliationService {
     public List<OrphanRecordView> getOrphanRecordViews(){
         List<ReconciliationResult> orphanResults = reconciliationResultRepository.findByStatusOrderByReconciledAtDesc(ReconciliationStatus.ORPHAN);
 
+        List<String> accountingRecordsIds = orphanResults.stream()
+                .map(ReconciliationResult::getAccountingRecordId)
+                .toList();
+
+        Map<String, AccountingRecord> recordMap = accountingRecordRepository.findAllById(accountingRecordsIds)
+                .stream()
+                .collect(Collectors.toMap(AccountingRecord::getRecordId, r -> r));
+
         List<OrphanRecordView> orphanViews = new ArrayList<>();
 
         for(ReconciliationResult result : orphanResults){
-            accountingRecordRepository.findById(result.getAccountingRecordId())
-                    .ifPresent(accountingRecord -> orphanViews.add(
-                            new OrphanRecordView(
-                                    result.getId(),
-                                    accountingRecord.getRecordId(),
-                                    accountingRecord.getReferenceNo(),
-                                    accountingRecord.getModule(),
-                                    accountingRecord.getAmount(),
-                                    accountingRecord.getRecordDate(),
-                                    result.getRemarks()
-                            )
-                    ));
+            AccountingRecord accountingRecord = recordMap.get(result.getAccountingRecordId());
+            if(accountingRecord != null){
+                orphanViews.add(new OrphanRecordView(
+                   result.getId(),
+                   accountingRecord.getRecordId(),
+                   accountingRecord.getReferenceNo(),
+                   accountingRecord.getModule(),
+                   accountingRecord.getAmount(),
+                   accountingRecord.getRecordDate(),
+                   result.getRemarks()
+                ));
+            }
         }
 
         return orphanViews;
