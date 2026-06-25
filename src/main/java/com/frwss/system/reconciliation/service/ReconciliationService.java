@@ -20,7 +20,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import org.springframework.data.domain.Pageable;
+import com.frwss.system.workflow.service.WorkflowService;
+
+
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -38,13 +40,16 @@ public class ReconciliationService {
     private final ReconciliationResultRepository reconciliationResultRepository;
     private final AuditService auditService;
 
+    private final WorkflowService workflowService;
+
     public ReconciliationService(
             AccountingRecordRepository accountingRecordRepository,
             PayrollRepository payrollRepository,
             ReceiptRepository receiptRepository,
             StockPurchaseRepository stockPurchaseRepository,
             ReconciliationResultRepository reconciliationResultRepository,
-            AuditService auditService
+            AuditService auditService,
+            WorkflowService workflowService
     ) {
         this.accountingRecordRepository = accountingRecordRepository;
         this.payrollRepository = payrollRepository;
@@ -52,6 +57,7 @@ public class ReconciliationService {
         this.stockPurchaseRepository = stockPurchaseRepository;
         this.reconciliationResultRepository = reconciliationResultRepository;
         this.auditService = auditService;
+        this.workflowService = workflowService;
     }
 
     @Transactional
@@ -599,7 +605,6 @@ public class ReconciliationService {
 
         return Math.min(confidence, 95.0);
     }
-
     @Transactional
     public void resolveOrphanManually(
             Long reconciliationResultId,
@@ -612,7 +617,7 @@ public class ReconciliationService {
         ReconciliationResult result = reconciliationResultRepository.findById(reconciliationResultId)
                 .orElseThrow(() -> new RuntimeException("Reconciliation result not found"));
 
-        if(result.getStatus() !=  ReconciliationStatus.ORPHAN){
+        if(result.getStatus() != ReconciliationStatus.ORPHAN){
             throw new RuntimeException("Only orphan records can be manually resolved");
         }
 
@@ -642,7 +647,6 @@ public class ReconciliationService {
                         ". Justification: " + justification
         );
     }
-
     @Transactional(readOnly = true)
     public List<ReconciliationResult> getManualReviewRecords(){
         return reconciliationResultRepository.findByStatusOrderByReconciledAtDesc(

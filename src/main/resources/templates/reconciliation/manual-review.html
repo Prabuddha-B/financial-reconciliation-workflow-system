@@ -25,6 +25,7 @@
   </div>
 
   <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+  <div th:if="${errorMessage}" class="alert alert-warning" th:text="${errorMessage}"></div>
 
   <div class="row mb-4">
     <div class="col-md-4">
@@ -58,8 +59,7 @@
           <th>Resolved By</th>
           <th>Resolved At</th>
           <th>Remarks / Justification</th>
-          <th>Approve</th>
-          <th>Reject</th>
+          <th>Workflow Review</th>
         </tr>
         </thead>
 
@@ -79,33 +79,21 @@
           </td>
 
           <td>
-            <form th:action="@{/reconciliation/manual-review/{id}/approve(id=${record.id})}"
+            <form th:action="@{/reconciliation/manual-review/{id}/send-to-workflow(id=${record.id})}"
                   method="post">
-              <button type="submit" class="btn btn-sm btn-success">
-                Approve
+
+              <button type="submit"
+                      class="btn btn-sm btn-primary">
+                Send To Workflow Review
               </button>
+
             </form>
           </td>
 
-          <td>
-            <form th:action="@{/reconciliation/manual-review/{id}/reject(id=${record.id})}"
-                  method="post">
-
-                            <textarea name="rejectionReason"
-                                      class="form-control form-control-sm mb-2"
-                                      rows="2"
-                                      placeholder="Reason"
-                                      required></textarea>
-
-              <button type="submit" class="btn btn-sm btn-danger">
-                Reject
-              </button>
-            </form>
-          </td>
         </tr>
 
         <tr th:if="${#lists.isEmpty(reviewRecords)}">
-          <td colspan="10" class="text-center text-muted p-4">
+          <td colspan="9" class="text-center text-muted p-4">
             No manually resolved records pending review.
           </td>
         </tr>
