@@ -16,6 +16,8 @@ import com.frwss.system.repository.AccountingRecordRepository;
 import com.frwss.system.repository.PayrollRepository;
 import com.frwss.system.repository.ReceiptRepository;
 import com.frwss.system.repository.StockPurchaseRepository;
+import com.frwss.system.workflow.dto.WorkflowRequestDto;
+import com.frwss.system.workflow.dto.WorkflowResponseDto;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -752,5 +754,50 @@ public class ReconciliationService {
                         ". Reason: " + rejectionReason
         );
 
+    }
+
+    @Transactional
+    public ReconciliationResult sendToWorkflowReview(
+            Long reconciliationResultId,
+            String performedBy,
+            String comments
+    ){
+        ReconciliationResult result = reconciliationResultRepository.findById(reconciliationResultId)
+                .orElseThrow(() -> new RuntimeException("Reconciliation result not found"));
+
+        // Only allow MANUALLY_RESOLVED or PENDING_APPROVAL records
+        if(result.getStatus() != ReconciliationStatus.MANUALLY_RESOLVED){
+            throw new RuntimeException("Only manually resolved records can be send to workflow");
+        }
+
+        // create workflow request
+        WorkflowRequestDto workflowRequest = new WorkflowRequestDto();
+        workflowRequest.setSourceType("RECONCILIATION");
+        workflowRequest.setSourceRecordId(reconciliationResultId.toString());
+        workflowRequest.setCreatedBy(performedBy);
+        workflowRequest.setComments(comments);
+
+        // Call workflow service
+        WorkflowResponseDto workflowResponse =workflowService.createWorkflow(workflowRequest);
+
+        // Update reconciliation result
+        result.setStatus(ReconciliationStatus.PENDING_APPROVAL);
+        result.setWorkflowId(workflowResponse.getWorkflowId());
+        result.setSubmittedToWorkflowAt(LocalDateTime.now());
+        result.setSubmittedBy(performedBy);
+
+        // Save and return
+        reconciliationResultRepository.save(result);
+
+        // Audit log
+        auditService.log(
+                AuditActionType.WORKFLOW_STATE_CHANGED,
+                "ReconciliationResult",
+                result.getAccountingRecordId(),
+                performedBy,
+                "Submitted to workflow review with ID: " + workflowResponse.getWorkflowId()
+        );
+
+        return result;
     }
 }

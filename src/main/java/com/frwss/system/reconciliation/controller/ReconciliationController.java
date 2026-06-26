@@ -3,6 +3,7 @@ package com.frwss.system.reconciliation.controller;
 import com.frwss.system.reconciliation.model.ReconciliationResult;
 import com.frwss.system.reconciliation.model.ReconciliationStatus;
 import com.frwss.system.reconciliation.service.ReconciliationService;
+import com.frwss.system.security.SecurityContextAdapter;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -21,13 +22,15 @@ public class ReconciliationController {
     private final ReconciliationService reconciliationService;
     private final WorkflowService workflowService;
     private final WorkflowRecordRepository workflowRecordRepository;
+    private final SecurityContextAdapter securityContextAdapter;
 
     public ReconciliationController(ReconciliationService reconciliationService,
                                     WorkflowService workflowService,
-                                    WorkflowRecordRepository workflowRecordRepository) {
+                                    WorkflowRecordRepository workflowRecordRepository, SecurityContextAdapter securityContextAdapter) {
         this.reconciliationService = reconciliationService;
         this.workflowService = workflowService;
         this.workflowRecordRepository = workflowRecordRepository;
+        this.securityContextAdapter = securityContextAdapter;
     }
 
     @GetMapping
@@ -57,6 +60,7 @@ public class ReconciliationController {
         model.addAttribute("exactResults", reconciliationService.getResultsByStatus(ReconciliationStatus.EXACT));
         model.addAttribute("orphanResults", reconciliationService.getResultsByStatus(ReconciliationStatus.ORPHAN));
         model.addAttribute("partialResults", reconciliationService.getResultsByStatus(ReconciliationStatus.PARTIAL));
+        model.addAttribute("pendingApprovalResults", reconciliationService.getResultsByStatus(ReconciliationStatus.PENDING_APPROVAL));
         model.addAttribute("manualResults", reconciliationService.getResultsByStatus(ReconciliationStatus.MANUALLY_RESOLVED));
         model.addAttribute("approvedResults", reconciliationService.getResultsByStatus(ReconciliationStatus.APPROVED));
         model.addAttribute("rejectedResults", reconciliationService.getResultsByStatus(ReconciliationStatus.REJECTED));
@@ -208,37 +212,44 @@ public class ReconciliationController {
     @PostMapping("/manual-review/{resultId}/send-to-workflow")
     public String sendToWorkflowReview(
             @PathVariable Long resultId,
+            @RequestParam(required = false) String comments,
             RedirectAttributes redirectAttributes
     ){
 
-        // Prevent duplicate workflow creation for the same reconciliation record
-        if (workflowRecordRepository
-                .findBySourceTypeAndSourceRecordId(
-                        "RECONCILIATION",
-                        resultId.toString()
-                )
-                .isPresent()) {
+        try{
+            // Get current user from security adapter
+            String performedBy = securityContextAdapter.getCurrentUsername();
+
+            // Check if already in workflow
+            // Prevent duplicate workflow creation for the same reconciliation record
+            if (workflowRecordRepository
+                    .findBySourceTypeAndSourceRecordId(
+                            "RECONCILIATION",
+                            resultId.toString()
+                    )
+                    .isPresent()) {
+
+                redirectAttributes.addFlashAttribute(
+                        "errorMessage",
+                        "This record has already been submitted for workflow review."
+                );
+
+                return "redirect:/reconciliation/manual-review";
+            }
+
+            // Submit to workflow
+            reconciliationService.sendToWorkflowReview(resultId, performedBy,comments);
 
             redirectAttributes.addFlashAttribute(
-                    "errorMessage",
-                    "This record has already been submitted for workflow review."
+                    "successMessage",
+                    "Record submitted to workflow review successfully"
             );
-
-            return "redirect:/reconciliation/manual-review";
+        } catch (Exception e){
+            redirectAttributes.addFlashAttribute(
+                    "errorMessage",
+                    "Failed to submit to workflow: " + e.getMessage()
+            );
         }
-
-        WorkflowRequestDto workflowRequest = new WorkflowRequestDto();
-
-        workflowRequest.setSourceType("RECONCILIATION");
-        workflowRequest.setSourceRecordId(resultId.toString());
-        workflowRequest.setCreatedBy("admin");
-
-        workflowService.createWorkflow(workflowRequest);
-
-        redirectAttributes.addFlashAttribute(
-                "successMessage",
-                "Record sent to workflow review successfully."
-        );
 
         return "redirect:/reconciliation/manual-review";
     }

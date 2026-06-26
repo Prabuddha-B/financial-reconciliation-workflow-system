@@ -112,6 +112,17 @@
       </div>
     </div>
 
+    <!-- Add to reconciliation/dashboard.html -->
+    <div class="col-md-4">
+      <div class="card shadow-sm border-warning">
+        <div class="card-body">
+          <h6 class="text-muted">Pending Approval</h6>
+          <h3 class="text-warning" th:text="${#lists.size(pendingApprovalResults)}">0</h3>
+          <small class="text-muted">Awaiting workflow verification</small>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <div class="card shadow-sm mb-3">
@@ -179,6 +190,7 @@
           <th>Source</th>
           <th>Status</th>
           <th>Confidence</th>
+          <th>Workflow ID</th>
           <th>Reconciled By</th>
           <th>Reconciled At</th>
           <th>Remarks</th>
@@ -211,6 +223,12 @@
                             PARTIAL
                         </span>
 
+            <span th:if="${result.status.name() == 'PENDING_APPROVAL'}"
+                  class="badge bg-warning"
+                  th:text="${result.status}">
+                            PENDING_APPROVAL
+                        </span>
+
             <span th:if="${result.status.name() == 'MANUALLY_RESOLVED'}"
                   class="badge bg-primary"
                   th:text="${result.status}">
@@ -233,6 +251,7 @@
                           and result.status.name() != 'ORPHAN'
                           and result.status.name() != 'PARTIAL'
                           and result.status.name() != 'MANUALLY_RESOLVED'
+                          and result.status.name() != 'PENDING_APPROVAL'
                           and result.status.name() != 'APPROVED'
                           and result.status.name() != 'REJECTED'}"
                   class="badge bg-secondary"
@@ -244,6 +263,7 @@
           </td>
 
           <td th:text="${result.confidenceScore + '%'}">100%</td>
+          <td th:text="${result.workflowId ?: '-'}">-</td>
           <td th:text="${result.reconciledBy}">admin</td>
           <td th:text="${result.reconciledAt}">date</td>
           <td th:text="${result.remarks}">remarks</td>
