@@ -38,6 +38,7 @@ public class WorkflowViewController {
 
         model.addAttribute("workflows", workflows);
         model.addAttribute("needsAttentionCount", needsAttentionCount);
+        model.addAttribute("currentUser", securityContextAdapter.getCurrentUsername());
 
         return "workflow/approvals";
     }
