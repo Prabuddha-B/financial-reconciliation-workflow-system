@@ -9,7 +9,8 @@
 </head>
 
 <body class="container mt-5">
-
+    <!-- Nav Bar -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
     <!--Header-->
     <div class="mb-4">
         <h2> Data Ingestion Dashboard</h2>
@@ -87,5 +88,8 @@
     </div>
 
 </body>
+
+<!-- Footer -->
+<div th:replace="~{fragments/footer :: footer}"></div>
 
 </html>

@@ -9,6 +9,9 @@
 
 <body class="container mt-5">
 
+    <!-- Nav Bar -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
     <h2>Upload Data File</h2>
 
     <div class="container mt-5">
@@ -145,5 +148,9 @@
             return true;
         }
     </script>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
 </body>
 </html>
