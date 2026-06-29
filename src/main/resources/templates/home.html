@@ -1,10 +1,207 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>FRWSS - Home</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+            color: white;
+            padding: 3rem 0;
+            border-radius: 0 0 2rem 2rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            transition: transform 0.2s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
 </head>
 <body>
+<!-- Nav Bar -->
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold">Welcome to FRWSS</h1>
+        <p class="lead">Financial Reconciliation & Workflow Support System</p>
+        <div class="mt-3">
+                <span class="badge bg-light text-dark px-3 py-2">
+                    <i class="bi bi-shield-check me-1"></i>
+                    System Status: Online
+                </span>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Statistics Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card stat-card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-database fs-2 text-primary"></i>
+                    <h6 class="text-muted mt-2">Total Records</h6>
+                    <h2 class="text-primary" th:text="${totalRecords != null ? totalRecords : '0'}">0</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-check-circle fs-2 text-success"></i>
+                    <h6 class="text-muted mt-2">Reconciled</h6>
+                    <h2 class="text-success" th:text="${reconciledCount != null ? reconciledCount : '0'}">0</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-clock fs-2 text-warning"></i>
+                    <h6 class="text-muted mt-2">Pending Approval</h6>
+                    <h2 class="text-warning" th:text="${pendingApprovalCount != null ? pendingApprovalCount : '0'}">0</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-shield-lock fs-2 text-info"></i>
+                    <h6 class="text-muted mt-2">Audit Entries</h6>
+                    <h2 class="text-info" th:text="${auditCount != null ? auditCount : '0'}">0</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feature Cards -->
+    <div class="row g-3">
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-upload fs-1 text-primary"></i>
+                    <h5 class="mt-2">Ingestion</h5>
+                    <p class="text-muted small">Upload financial records</p>
+                    <a href="/ingestion" class="btn btn-primary btn-sm">Go</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-check2-all fs-1 text-success"></i>
+                    <h5 class="mt-2">Reconciliation</h5>
+                    <p class="text-muted small">Match records automatically</p>
+                    <a href="/reconciliation" class="btn btn-success btn-sm">Go</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-check2-square fs-1 text-warning"></i>
+                    <h5 class="mt-2">Workflow</h5>
+                    <p class="text-muted small">Review approvals</p>
+                    <a href="/workflow/approvals" class="btn btn-warning btn-sm">Go</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-clipboard-data fs-1 text-info"></i>
+                    <h5 class="mt-2">Audit</h5>
+                    <p class="text-muted small">View audit trail</p>
+                    <a href="/audit/logs" class="btn btn-info btn-sm">Go</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Status -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="bi bi-info-circle me-2"></i>
+                            <span class="fw-semibold">System Status</span>
+                        </div>
+                        <div>
+                            <span class="badge bg-success">Operational</span>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row small text-muted">
+                        <div class="col-md-3">Database: <span class="text-success">Connected</span></div>
+                        <div class="col-md-3">Audit Chain: <span th:if="${chainValid != null and chainValid}" class="text-success">Valid</span>
+                            <span th:if="${chainValid != null and !chainValid}" class="text-danger">Broken</span>
+                            <span th:if="${chainValid == null}">Unknown</span>
+                        </div>
+                        <div class="col-md-3">Version: <span>1.0.0</span></div>
+                        <div class="col-md-3">
+                                <span th:if="${#authentication != null and #authentication.authenticated}">
+                                    <i class="bi bi-person-circle me-1"></i>
+                                    <span th:text="${#authentication.name}">User</span>
+                                </span>
+                            <span th:if="${#authentication == null or !#authentication.authenticated}">
+                                    <a href="/login" class="btn btn-sm btn-outline-primary">Login</a>
+                                </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add this after the System Status card and before closing container -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="fw-semibold"><i class="bi bi-clock-history me-2"></i>Recent Activity</span>
+                        <a href="/audit/logs" class="btn btn-sm btn-outline-primary">View All</a>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                            <tr>
+                                <th>Time</th>
+                                <th>Action</th>
+                                <th>User</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="log : ${recentLogs}" th:if="${log != null}">
+                                <td class="small" th:text="${#temporals.format(log.timestamp, 'HH:mm:ss')}">10:30</td>
+                                <td>
+                                    <span class="badge bg-secondary" th:text="${log.actionType}">ACTION</span>
+                                </td>
+                                <td th:text="${log.performedBy}">admin</td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(recentLogs)}">
+                                <td colspan="3" class="text-center text-muted p-3">
+                                    No recent activity
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Footer -->
 <div th:replace="~{fragments/footer :: footer}"></div>
