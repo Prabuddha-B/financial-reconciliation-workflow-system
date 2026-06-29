@@ -1,6 +1,9 @@
 package com.frwss.system.security;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 /**
@@ -23,6 +26,7 @@ public class SecurityContextAdapter {
     @Value("${security.dev.role:REVIEWER}")
     private String devRole;
 
+    // Returns the currently logged-in username
     public String getCurrentUsername(){
         if(useRealSecurity){
             // when security is enabled, get user from Spring Security context
@@ -32,6 +36,7 @@ public class SecurityContextAdapter {
         return devUsername;
     }
 
+    // Returns the current user's role (without the ROLE_ prefix)
     public String getCurrentUserRole(){
         if(useRealSecurity){
             // when security is enabled, get role from Spring Security context
@@ -41,63 +46,71 @@ public class SecurityContextAdapter {
         return devRole;
     }
 
+    // Checks whether the current user has a specific role
     public boolean hasRole(String role){
+
         // If security is not enabled, always return true for development
-        if(!useRealSecurity){
-            return true;
-        }
+        if (!useRealSecurity)  return true;
 
         // Real security logic
         try{
-            // this will be replaced with actual Spring Security role check
-            // return SecurityContextHolder.getContext().getAuthentication()
-            //      .getAuthorities().stream()
-            //      .anyMatch(a -> a.getAuthority().equals("ROLE_" + role));
-
-            // Placeholder - will be implemented when security module is integrated
-
-            return getCurrentUserRole().equals(role) || getCurrentUserRole().equals("ADMIN");
-        } catch(Exception e){
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null) return false;
+            return authentication.getAuthorities()
+                    .stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_" + role));
+        } catch (Exception e){
             // if something goes wrong, default to false for security
             return false;
         }
     }
 
-    public boolean hasAnyRole(String... roles){
-        for (String role: roles){
-            if(hasRole(role)){
+
+//     Checks multiple roles.
+    public boolean hasAnyRole(String... roles) {
+        for (String role : roles) {
+            if (hasRole(role)) {
                 return true;
             }
         }
         return false;
     }
 
-    public boolean isDevelopmentMode(){
+    public boolean isDevelopmentMode() {
         return !useRealSecurity;
     }
 
-    public boolean isSecurityEnabled(){
+    public boolean isSecurityEnabled() {
         return useRealSecurity;
     }
 
     // these methods will be replaced when the security module is integrated
 
-    private String getRealUsername(){
-        // TODO: Replace with actual Spring Security implementation
-        // return SecurityContextHolder.getContext().getAuthentication().getName();
+//     Gets username from Spring Security.
+    private String getRealUsername() {
 
-        // For now, fall back to dev username when security is enabled but not integrated
-        // this prevents NPE during gradual integration
-        return devUsername;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return devUsername;
+        }
+
+        return authentication.getName();
     }
 
-    private String getRealUserRole(){
-        // TODO: Replace with actual Spring Security implementation
-        // return SecurityContextHolder.getContext().getAuthentication()
-        //         .getAuthorities().iterator().next().getAuthority();
+//    Gets the first role from Spring Security
+    private String getRealUserRole() {
 
-        // For now, fall back to dev role when security is enabled but not integrated
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
 
-        return devRole;
+        if (authentication == null || authentication.getAuthorities().isEmpty()) {
+            return devRole;
+        }
+
+        GrantedAuthority authority =
+                authentication.getAuthorities().iterator().next();
+
+        return authority.getAuthority().replace("ROLE_", "");
     }
 }

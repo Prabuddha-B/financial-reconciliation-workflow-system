@@ -1,15 +1,13 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<head>
-  <title>Workflow Status</title>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-</head>
+
+<head th:replace="~{fragments/header :: header('Workflow Status')}"></head>
 
 <body class="bg-light">
+
+  <!-- Nav Bar -->
+  <div th:replace="~{fragments/navbar :: navbar}"></div>
 
   <div class="container py-4 py-lg-5">
 
@@ -25,66 +23,93 @@
 
 
     <!-- ===================== Workflow Header Section ===================== -->
-    <div class="card shadow-sm border-0 bg-white mb-4">
-      <div class="card-body p-4 p-lg-5">
-        <div class="row align-items-center g-4">
+    <div class="d-flex justify-content-between align-items-start mb-5 mt-2">
 
-          <div class="col-12 col-lg-8">
-            <h1 class="display-6 fw-semibold mb-2">Workflow Status</h1>
-            <p class="text-muted mb-0">
-              Review workflow progress, perform state transitions, and track approval history with full audit visibility.
-            </p>
+      <!-- Left Section -->
+      <div>
 
-            <!-- Round Status Badges -->
-            <div class="d-flex flex-wrap gap-2 mt-3">
-          <span class="badge rounded-pill bg-light text-dark border">
-            <span class="text-muted me-1">Workflow ID:</span>
-            <span th:text="${workflow.workflowId}">1</span>
-          </span>
+        <h1 class="display-6 fw-bold mb-2">
+          Workflow Status
+        </h1>
 
-              <span class="badge rounded-pill bg-light text-dark border">
-            <span class="text-muted me-1">Transitions:</span>
-            <span th:text="${#lists.size(history)}">0</span>
-          </span>
+        <p class="text-secondary fs-5 mb-3">
+          Review workflow progress, perform state transitions, and track approval history with full audit visibility.
+        </p>
 
-              <span class="badge rounded-pill bg-light text-dark border">
-            <span class="text-muted me-1">Last updated:</span>
-            <span th:if="${lastUpdated != null}"
-                  th:text="${#temporals.format(lastUpdated, 'dd MMM yyyy, HH:mm')}">
-              21 Jun 2026, 10:32
+        <!-- Workflow Information Badges -->
+        <div class="d-flex flex-wrap gap-2">
+
+            <span class="badge rounded-pill bg-light text-dark border px-3 py-2">
+                <span class="text-muted me-1">Workflow ID:</span>
+                <span th:text="${workflow.workflowId}">1</span>
             </span>
-            <span th:if="${lastUpdated == null}" class="text-muted">
-              No transitions yet
-            </span>
-          </span>
-            </div>
-          </div>
 
-          <div class="col-12 col-lg-4 text-lg-end">
-            <div class="mb-3">
-              <div class="d-grid d-lg-inline-flex gap-2">
-                <a th:href="@{/workflow/approvals}"
-                   class="btn btn-outline-primary">
-                  Back to Workflow Approvals
-                </a>
-              </div>
-            </div>
-          </div>
+            <span class="badge rounded-pill bg-light text-dark border px-3 py-2">
+                  <span class="text-muted me-1">Transitions:</span>
+                  <span th:text="${#lists.size(history)}">0</span>
+            </span>
+
+            <span class="badge rounded-pill bg-light text-dark border px-3 py-2">
+
+                <span class="text-muted me-1">Last Updated:</span>
+
+                <span th:if="${lastUpdated != null}"
+                      th:text="${#temporals.format(lastUpdated, 'dd MMM yyyy, HH:mm')}">
+                    21 Jun 2026, 10:32
+                </span>
+
+                <span th:if="${lastUpdated == null}">
+                    No transitions yet
+                </span>
+
+            </span>
 
         </div>
-      </div>
-    </div>
 
+      </div>
+
+      <!-- Right Section -->
+      <div class="text-end">
+
+        <a th:href="@{/workflow/approvals}"
+           class="btn btn-outline-primary rounded-pill px-4 py-2">
+          <i class="bi bi-arrow-left me-2"></i>
+          Back to Workflow Approvals
+        </a>
+
+      </div>
+
+    </div>
 
     <!-- ===================== Workflow Overview Dashboard ===================== -->
     <div class="row g-3 g-xl-4 mb-4">
 
       <!-- Current Workflow Record -->
       <div class="col-12 col-md-6 col-xl-2">
-        <div class="card shadow-sm h-100 border-0">
-          <div class="card-body">
-            <div class="h3 mb-1 fw-semibold" th:text="${workflow.workflowId}">1</div>
-            <div class="text-muted small">Current workflow record</div>
+
+        <div class="card shadow-sm h-100 border-primary-subtle">
+          <div class="card-body d-flex gap-3">
+
+            <div class="flex-shrink-0 rounded-3 bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center"
+                 style="width:3rem;height:3rem;">
+              <i class="bi bi-diagram-3 fs-4"></i>
+            </div>
+
+            <div>
+
+              <div class="text-muted small text-uppercase fw-semibold mb-1">
+                Workflow ID
+              </div>
+
+              <div class="h3 fw-semibold mb-1" th:text="${workflow.workflowId}">
+                1
+              </div>
+
+              <div class="text-muted small">
+                Current workflow record
+              </div>
+
+            </div>
           </div>
         </div>
       </div>
@@ -92,59 +117,113 @@
       <!-- Source Type -->
       <div class="col-12 col-md-6 col-xl-3">
         <div class="card shadow-sm h-100 border-primary-subtle">
-          <div class="card-body">
-            <div class="text-muted small text-uppercase fw-semibold mb-1">Source Type</div>
-            <div class="h4 mb-1 fw-semibold text-primary text-break" th:text="${workflow.sourceType}">SOURCE</div>
-            <div class="text-muted small">Originating record category</div>
+          <div class="card-body d-flex gap-3">
+
+            <div class="flex-shrink-0 rounded-3 bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center"
+                 style="width:3rem;height:3rem;">
+              <i class="bi bi-folder2-open fs-4"></i>
+            </div>
+
+            <div>
+
+              <div class="text-muted small text-uppercase fw-semibold mb-1">
+                Source Type
+              </div>
+
+              <div class="h4 fw-semibold text-primary mb-1 text-break" th:text="${workflow.sourceType}">
+                RECEIPT
+              </div>
+
+              <div class="text-muted small">
+                Originating record category
+              </div>
+
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Source Record ID -->
       <div class="col-12 col-md-6 col-xl-3">
-        <div class="card shadow-sm h-100 border-info-subtle">
-          <div class="card-body">
-            <div class="text-muted small text-uppercase fw-semibold mb-1">Source Record ID</div>
-            <div class="h4 mb-1 fw-semibold text-info text-break" th:text="${workflow.sourceRecordId}">0001</div>
-            <div class="text-muted small">Linked source record</div>
+
+        <div class="card shadow-sm h-100 border-primary-subtle">
+          <div class="card-body d-flex gap-3">
+
+            <!-- Icon -->
+            <div class="flex-shrink-0 rounded-3 bg-info-subtle text-info d-inline-flex align-items-center justify-content-center"
+                 style="width:3rem;height:3rem;">
+              <i class="bi bi-file-earmark-text fs-4"></i>
+            </div>
+
+            <!-- Content -->
+            <div>
+
+              <div class="text-muted small text-uppercase fw-semibold mb-1">
+                Source Record ID
+              </div>
+
+              <div class="h4 fw-semibold text-info mb-1 text-break" th:text="${workflow.sourceRecordId}">
+                ACC-1001
+              </div>
+
+              <div class="text-muted small">
+                Linked source record
+              </div>
+
+            </div>
           </div>
         </div>
       </div>
 
-      <!--  Current Workflow Stage  -->
+      <!-- Current Workflow Stage -->
       <div class="col-12 col-md-6 col-xl-2">
-        <div class="card shadow-sm h-100">
-          <div class="card-header">
-            <strong>Current Stage</strong>
-          </div>
-          <div class="card-body text-center">
 
-            <div th:if="${workflow.currentState.name() == 'ENTERED'}">
-              <span class="badge bg-secondary fs-6">ENTERED</span>
-              <p class="small text-muted mt-2 mb-0">
-                Record has been created.
-              </p>
+        <div class="card shadow-sm h-100 border-primary-subtle">
+          <div class="card-body d-flex gap-3">
+
+            <!-- Icon -->
+            <div class="flex-shrink-0 rounded-3 bg-warning-subtle text-warning-emphasis d-inline-flex align-items-center justify-content-center"
+                 style="width:3rem;height:3rem;">
+              <i class="bi bi-arrow-repeat fs-4"></i>
             </div>
 
-            <div th:if="${workflow.currentState.name() == 'REVIEWED'}">
-              <span class="badge bg-warning text-dark fs-6">REVIEWED</span>
-              <p class="small text-muted mt-2 mb-0">
-                Waiting for final decision.
-              </p>
-            </div>
+            <div>
+              <div class="text-muted small text-uppercase fw-semibold mb-2">
+                Current Stage
+              </div>
 
-            <div th:if="${workflow.currentState.name() == 'VERIFIED'}">
-              <span class="badge bg-success fs-6">VERIFIED</span>
-              <p class="small text-muted mt-2 mb-0">
-                Workflow approved and completed.
-              </p>
-            </div>
+              <!-- ENTERED -->
+              <div th:if="${workflow.currentState.name() == 'ENTERED'}">
+                <span class="badge bg-secondary">ENTERED</span>
+                <div class="small text-muted mt-2">
+                  Record has been created.
+                </div>
+              </div>
 
-            <div th:if="${workflow.currentState.name() == 'REJECTED'}">
-              <span class="badge bg-danger fs-6">REJECTED</span>
-              <p class="small text-muted mt-2 mb-0">
-                Workflow rejected and closed.
-              </p>
+              <!-- REVIEWED -->
+              <div th:if="${workflow.currentState.name() == 'REVIEWED'}">
+                <span class="badge bg-warning text-dark">REVIEWED</span>
+                <div class="small text-muted mt-2">
+                  Waiting for final decision.
+                </div>
+              </div>
+
+              <!-- VERIFIED -->
+              <div th:if="${workflow.currentState.name() == 'VERIFIED'}">
+                <span class="badge bg-success">VERIFIED</span>
+                <div class="small text-muted mt-2">
+                  Workflow approved and completed.
+                </div>
+              </div>
+
+              <!-- REJECTED -->
+              <div th:if="${workflow.currentState.name() == 'REJECTED'}">
+                <span class="badge bg-danger">REJECTED</span>
+                <div class="small text-muted mt-2">
+                  Workflow rejected and closed.
+                </div>
+              </div>
+
             </div>
           </div>
         </div>
@@ -152,11 +231,32 @@
 
       <!-- History Entries -->
       <div class="col-12 col-md-6 col-xl-2">
-        <div class="card shadow-sm h-100 border-success-subtle">
-          <div class="card-body">
-            <div class="text-muted small text-uppercase fw-semibold mb-1">History Entries</div>
-            <div class="h3 mb-1 fw-semibold text-success" th:text="${#lists.size(history)}">0</div>
-            <div class="text-muted small">Recorded transitions</div>
+
+        <div class="card shadow-sm h-100 border-primary-subtle">
+          <div class="card-body d-flex gap-3">
+
+            <!-- Icon -->
+            <div class="flex-shrink-0 rounded-3 bg-success-subtle text-success d-inline-flex align-items-center justify-content-center"
+                 style="width:3rem;height:3rem;">
+              <i class="bi bi-clock-history fs-4"></i>
+            </div>
+
+            <div>
+
+              <div class="text-muted small text-uppercase fw-semibold mb-1">
+                History Entries
+              </div>
+
+              <div class="h3 fw-semibold text-success mb-1"
+                   th:text="${#lists.size(history)}">
+                0
+              </div>
+
+              <div class="text-muted small">
+                Recorded transitions
+              </div>
+
+            </div>
           </div>
         </div>
       </div>
@@ -201,28 +301,43 @@
           <!-- New State -->
           <div class="col-12 col-md-4">
             <label class="form-label">New State</label>
+
             <select name="newState" class="form-select" required>
               <option value="" selected disabled>Select next state</option>
 
-              <option th:if="${workflow.currentState.name() == 'ENTERED'}" value="REVIEWED">
+              <option
+                      th:if="${workflow.currentState.name() == 'ENTERED'
+                                and (userRole == 'APPROVER' or userRole == 'ADMIN')}"
+                      value="REVIEWED">
                 REVIEWED
               </option>
 
-              <option th:if="${workflow.currentState.name() == 'REVIEWED'}" value="VERIFIED">
+              <option
+                      th:if="${workflow.currentState.name() == 'REVIEWED'
+                                and (userRole == 'AUDITOR' or userRole == 'ADMIN')}"
+                      value="VERIFIED">
                 VERIFIED
               </option>
 
-              <option th:if="${workflow.currentState.name() == 'REVIEWED'}" value="REJECTED">
+              <option
+                      th:if="${workflow.currentState.name() == 'REVIEWED'
+                          and (userRole == 'AUDITOR' or userRole == 'ADMIN')}"
+                      value="REJECTED">
                 REJECTED
               </option>
+
             </select>
+
             <div class="form-text">Only valid next states are shown for the current workflow state</div>
           </div>
 
           <!-- Performed By -->
           <div class="col-12 col-md-4">
             <label class="form-label">Performed By</label>
-            <input type="text" name="performedBy" class="form-control" required placeholder="Enter reviewer name">
+            <input type="text" class="form-control" th:value="${currentUser}" readonly>
+            <div class="form-text">
+              The authenticated user performing this action will be recorded automatically.
+            </div>
           </div>
 
           <!-- Justification -->
@@ -466,6 +581,10 @@
 
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
   </div>
+  <!-- Footer -->
+  <div th:replace="~{fragments/footer :: footer}"></div>
+
 </body>
 </html>

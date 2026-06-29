@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import com.frwss.system.security.SecurityContextAdapter;
 
 import java.util.List;
 
@@ -21,25 +22,31 @@ public class IngestionController {
     private static final Logger log = LoggerFactory.getLogger(IngestionController.class);
 
     private final IngestionService ingestionService;
+    private final SecurityContextAdapter securityContextAdapter;
 
-    public IngestionController(IngestionService ingestionService) {
+    public IngestionController(IngestionService ingestionService,
+                               SecurityContextAdapter securityContextAdapter) {
         this.ingestionService = ingestionService;
+        this.securityContextAdapter = securityContextAdapter;
     }
 
     @GetMapping("/ingestion")
     public String ingestionPage(Model model) {
+        populateUser(model);
         populateDashboardStats(model);
         return "ingestion/dashboard";
     }
 
     @GetMapping("/ingestion/dashboard")
     public String dashboard(Model model) {
+        populateUser(model);
         populateDashboardStats(model);
         return "ingestion/dashboard";
     }
 
     @GetMapping("/ingestion/upload")
-    public String showUploadPage() {
+    public String showUploadPage(Model model) {
+        populateUser(model);
         return "ingestion/upload";
     }
 
@@ -58,6 +65,7 @@ public class IngestionController {
         try {
             if (file == null || file.isEmpty()) {
                 model.addAttribute("error", "Please select a file before uploading.");
+                populateUser(model);
                 return "ingestion/upload";
             }
 
@@ -73,6 +81,7 @@ public class IngestionController {
             session.setAttribute("pendingType", dataType);
             session.setAttribute("pendingRecords", result.getRecords());
 
+            populateUser(model);
             return "ingestion/result";
 
         } catch (Exception e) {
@@ -80,6 +89,7 @@ public class IngestionController {
                     file != null ? file.getOriginalFilename() : null,
                     dataType, e);
             model.addAttribute("error", "Preview failed: " + e.getMessage());
+            populateUser(model);
             return "ingestion/upload";
         }
     }
@@ -88,6 +98,7 @@ public class IngestionController {
     public String handleMultipartFailure(Exception e, Model model) {
         log.error("Multipart upload failed", e);
         model.addAttribute("error", "Upload failed: " + e.getMessage());
+        populateUser(model);
         return "ingestion/upload";
     }
 
@@ -139,5 +150,13 @@ public class IngestionController {
         model.addAttribute("total", summary.totalCount());
         model.addAttribute("validCount", summary.validCount());
         model.addAttribute("invalidCount", summary.invalidCount());
+    }
+
+    private void populateUser(Model model) {
+        model.addAttribute("currentUser",
+                securityContextAdapter.getCurrentUsername());
+
+        model.addAttribute("userRole",
+                securityContextAdapter.getCurrentUserRole());
     }
 }

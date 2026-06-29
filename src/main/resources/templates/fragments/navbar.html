@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<body>
+
+    <nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm border-bottom">
+
+            <div class="container-xl">
+
+                <!-- Brand -->
+                <a class="navbar-brand fw-bold d-flex align-items-center" href="/">
+                    <i class="bi bi-bank2 fs-4 me-2"></i>
+                    <span class="fs-3">FRWSS</span>
+                </a>
+
+                <!-- Right Side -->
+                <div class="d-flex align-items-center">
+
+                    <!-- User Information -->
+                    <div class="d-flex align-items-center border rounded-pill px-2 py-1">
+
+                        <!-- Avatar -->
+                        <div class="rounded-circle bg-primary d-flex justify-content-center align-items-center me-3"
+                             style="width:40px;height:40px;">
+                            <i class="bi bi-person-fill text-white fs-5"></i>
+                        </div>
+
+                        <!-- Username -->
+                        <div class="me-3 text-end">
+
+                            <div class="fw-semibold text-white" th:text="${currentUser}">
+                                admin
+                            </div>
+
+                            <small class="text-white-50" th:text="${userRole}">
+                                Administrator
+                            </small>
+
+                        </div>
+
+                        <!-- Divider -->
+                        <div class="vr text-secondary me-3"></div>
+
+                        <!-- Logout -->
+                        <form th:action="@{/logout}" method="post" class="mb-0">
+
+                            <button type="submit" class="btn btn-outline-light btn-sm rounded-pill px-3">
+                                <i class="bi bi-box-arrow-right me-1"></i>
+                                Logout
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </div>
+    </nav>
+</body>
+</html>

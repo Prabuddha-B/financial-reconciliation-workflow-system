@@ -10,6 +10,10 @@
     </style>
 </head>
 <body>
+
+<!-- Nav Bar -->
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
 <!--/* @thymesVar id="record" type="com.frwss.system.dto.ManualEntryForm" */-->
 <div class="container py-5" style="max-width: 1050px;">
     <div class="card shadow-sm">
@@ -378,4 +382,8 @@
 </script>
 
 </body>
+
+<!-- Footer -->
+<div th:replace="~{fragments/footer :: footer}"></div>
+
 </html>

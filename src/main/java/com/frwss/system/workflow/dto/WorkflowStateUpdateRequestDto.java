@@ -29,8 +29,4 @@ public class WorkflowStateUpdateRequestDto {
     public void setJustification(String justification) {
         this.justification = justification;
     }
-
-
-
-
 }

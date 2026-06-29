@@ -10,6 +10,10 @@
 
 <body class="bg-light">
 
+  <!-- Nav Bar -->
+  <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+
 <div class="container py-4 py-lg-5">
 
   <!-- ===================== Page Header ===================== -->
@@ -441,7 +445,11 @@
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Footer -->
+  <div th:replace="~{fragments/footer :: footer}"></div>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>

@@ -139,6 +139,7 @@ public class WorkflowServiceImpl implements WorkflowService {
         response.setSourceRecordId(updatedRecord.getSourceRecordId());
         response.setCurrentState(updatedRecord.getCurrentState());
         response.setMessage("Workflow State Updated Successfully");
+        response.setCreatedBy(updatedRecord.getCreatedBy());
 
         return response;
     }
@@ -176,6 +177,7 @@ public class WorkflowServiceImpl implements WorkflowService {
         response.setSourceType(workflowRecord.getSourceType());
         response.setSourceRecordId(workflowRecord.getSourceRecordId());
         response.setCurrentState(workflowRecord.getCurrentState());
+        response.setCreatedBy(workflowRecord.getCreatedBy());
 
         return response;
     }
