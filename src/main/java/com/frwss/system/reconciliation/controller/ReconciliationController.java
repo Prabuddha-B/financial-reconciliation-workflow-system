@@ -1,5 +1,6 @@
 package com.frwss.system.reconciliation.controller;
 
+import com.frwss.system.reconciliation.model.BulkReconciliation;
 import com.frwss.system.reconciliation.model.ReconciliationResult;
 import com.frwss.system.reconciliation.model.ReconciliationStatus;
 import com.frwss.system.reconciliation.service.ReconciliationService;
@@ -64,6 +65,14 @@ public class ReconciliationController {
         model.addAttribute("manualResults", reconciliationService.getResultsByStatus(ReconciliationStatus.MANUALLY_RESOLVED));
         model.addAttribute("approvedResults", reconciliationService.getResultsByStatus(ReconciliationStatus.APPROVED));
         model.addAttribute("rejectedResults", reconciliationService.getResultsByStatus(ReconciliationStatus.REJECTED));
+
+        try {
+            List<BulkReconciliation> bulkResults = reconciliationService.getAllBulkReconciliationResults();
+            model.addAttribute("bulkResults", bulkResults != null ? bulkResults : java.util.Collections.emptyList());
+        } catch (Exception e) {
+            // If the method or table doesn't exist yet, use empty list
+            model.addAttribute("bulkResults", java.util.Collections.emptyList());
+        }
         return "reconciliation/dashboard";
     }
 
@@ -253,4 +262,38 @@ public class ReconciliationController {
 
         return "redirect:/reconciliation/manual-review";
     }
+
+    // Run One-to-Many Reconciliation
+    @PostMapping("/run-one-to-many")
+    public String runOneToManyReconciliation(
+            @RequestParam(defaultValue = "5") int tolerancePercent,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            String performedBy = securityContextAdapter.getCurrentUsername();
+            reconciliationService.runOneToManyReconciliation(performedBy, tolerancePercent);
+
+            redirectAttributes.addFlashAttribute(
+                    "successMessage",
+                    "One-to-many reconciliation completed successfully with ±" +
+                            tolerancePercent + "% tolerance."
+            );
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute(
+                    "errorMessage",
+                    "One-to-many reconciliation failed: " + e.getMessage()
+            );
+        }
+
+        return "redirect:/reconciliation";
+    }
+
+    // View Bulk Reconciliation Results
+    @GetMapping("/bulk-results")
+    public String showBulkResults(Model model) {
+        model.addAttribute("bulkResults", reconciliationService.getAllBulkReconciliationResults());
+        return "reconciliation/bulk-results";
+    }
+
+
 }

@@ -38,6 +38,18 @@
         </button>
       </form>
 
+      <!-- One-to-Many Button -->
+      <form th:action="@{/reconciliation/run-one-to-many}" method="post" class="d-inline">
+        <div class="input-group">
+          <input type="number" name="tolerancePercent" value="5"
+                 class="form-control form-control-sm" style="width: 60px;"
+                 min="1" max="20" placeholder="%">
+          <button type="submit" class="btn btn-info">
+            <i class="bi bi-diagram-3 me-1"></i>Run One-to-Many
+          </button>
+        </div>
+      </form>
+
       <a href="/reconciliation/orphans" class="btn btn-outline-warning">
         <i class="bi bi-search me-1"></i>View Orphans
       </a>
@@ -49,6 +61,11 @@
         <i class="bi bi-check2-square me-1"></i>Workflow Approvals
         <span class="badge bg-success text-white ms-1"
         th:text="${#lists.size(pendingApprovalResults)}">0</span>
+      </a>
+
+      <!--View Bulk Results -->
+      <a href="/reconciliation/bulk-results" class="btn btn-outline-info">
+        <i class="bi bi-diagram-3 me-1"></i>Bulk Results
       </a>
     </div>
   </div>
@@ -132,6 +149,17 @@
                  th:text="${#lists.size(partialResults)}">0</div>
             <div class="text-muted small">Matched with tolerance</div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bulk Results Card  -->
+    <div class="col-md-3">
+      <div class="card shadow-sm border-info">
+        <div class="card-body">
+          <h6 class="text-muted">Bulk Matches</h6>
+          <h3 class="text-info" th:text="${bulkResults != null ? #lists.size(bulkResults) : 0}">0</h3>
+          <small class="text-muted">One-to-many reconciled</small>
         </div>
       </div>
     </div>

@@ -28,6 +28,39 @@ public class AccountingRecord{
     @Column(name = "entered_by")
     private String enteredBy;
 
+    @Column(name = "parent_record_id")
+    private String parentRecordId;
+
+    @Column(name = "is_bulk_transaction")
+    private Boolean isBulkTransaction = false;
+
+    @Column(name = "bulk_reference_prefix")
+    private String bulkReferencePrefix;
+
+    public String getParentRecordId() {
+        return parentRecordId;
+    }
+
+    public void setParentRecordId(String parentRecordId) {
+        this.parentRecordId = parentRecordId;
+    }
+
+    public Boolean getBulkTransaction() {
+        return isBulkTransaction;
+    }
+
+    public void setBulkTransaction(Boolean bulkTransaction) {
+        isBulkTransaction = bulkTransaction;
+    }
+
+    public String getBulkReferencePrefix() {
+        return bulkReferencePrefix;
+    }
+
+    public void setBulkReferencePrefix(String bulkReferencePrefix) {
+        this.bulkReferencePrefix = bulkReferencePrefix;
+    }
+
     public String getRecordId() {
         return recordId;
     }
