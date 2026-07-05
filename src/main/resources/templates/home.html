@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>FRWSS - Home</title>
@@ -40,6 +40,13 @@
 </div>
 
 <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2 class="h4 fw-bold mb-1">System Overview</h2>
+            <p class="text-muted mb-0">Key reconciliation and audit indicators across FRWSS</p>
+        </div>
+    </div>
+
     <!-- Statistics Cards -->
     <div class="row g-3 mb-4">
         <div class="col-md-3">
@@ -80,6 +87,13 @@
         </div>
     </div>
 
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2 class="h4 fw-bold mb-1">Modules</h2>
+            <p class="text-muted mb-0">Access core financial processing, review, and audit tools</p>
+        </div>
+    </div>
+
     <!-- Feature Cards -->
     <div class="row g-3">
 
@@ -89,7 +103,7 @@
                     <i class="bi bi-upload fs-1 text-primary"></i>
                     <h5 class="mt-2">Ingestion</h5>
                     <p class="text-muted small">Upload financial records</p>
-                    <a href="/ingestion" class="btn btn-primary btn-sm">Go</a>
+                    <a href="/ingestion" class="btn btn-primary btn-sm">Upload Records</a>
                 </div>
             </div>
         </div>
@@ -100,7 +114,35 @@
                     <i class="bi bi-check2-all fs-1 text-success"></i>
                     <h5 class="mt-2">Reconciliation</h5>
                     <p class="text-muted small">Match records automatically</p>
-                    <a href="/reconciliation" class="btn btn-success btn-sm">Go</a>
+                    <a href="/reconciliation" class="btn btn-success btn-sm">Open Dashboard</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-cash-stack fs-1 text-primary"></i>
+
+                    <h5 class="mt-2">
+                        Tax Estimation
+                    </h5>
+
+                    <p class="text-muted small mb-2">
+                        Estimate reference tax
+                        for financial records
+                    </p>
+
+                    <div class="mb-3">
+                        <span class="badge rounded-pill bg-warning-subtle text-warning-emphasis border border-warning-subtle">
+                            Reference Only
+                        </span>
+                    </div>
+
+                    <a th:href="@{/tax}" class="btn btn-primary btn-sm">
+                        <i class="bi bi-calculator me-1"></i>
+                        Estimate Tax
+                    </a>
                 </div>
             </div>
         </div>
@@ -111,7 +153,7 @@
                     <i class="bi bi-check2-square fs-1 text-warning"></i>
                     <h5 class="mt-2">Workflow</h5>
                     <p class="text-muted small">Review approvals</p>
-                    <a href="/workflow/approvals" class="btn btn-warning btn-sm">Go</a>
+                    <a href="/workflow/approvals" class="btn btn-warning btn-sm">Review Approvals</a>
                 </div>
             </div>
         </div>
@@ -122,29 +164,7 @@
                     <i class="bi bi-clipboard-data fs-1 text-info"></i>
                     <h5 class="mt-2">Audit</h5>
                     <p class="text-muted small">View audit trail</p>
-                    <a href="/audit/logs" class="btn btn-info btn-sm">Go</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-4 col-md-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-body text-center">
-                    <i class="bi bi-cash-stack fs-1 text-danger"></i>
-
-                    <h5 class="mt-2">
-                        Tax Estimation
-                    </h5>
-
-                    <p class="text-muted small">
-                        Estimate reference tax
-                        for financial records
-                    </p>
-
-                    <a th:href="@{/tax}" class="btn btn-danger btn-sm">
-                        <i class="bi bi-arrow-right-circle me-1"></i>
-                        Go
-                    </a>
+                    <a href="/audit/logs" class="btn btn-info btn-sm">View Audit Logs</a>
                 </div>
             </div>
         </div>
@@ -154,6 +174,10 @@
     <!-- System Status -->
     <div class="row mt-4">
         <div class="col-12">
+            <div class="mb-3">
+                <h2 class="h4 fw-bold mb-1">System Health</h2>
+                <p class="text-muted mb-0">Operational status and integrity indicators</p>
+            </div>
             <div class="card shadow-sm">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
@@ -191,6 +215,10 @@
     <!-- Add this after the System Status card and before closing container -->
     <div class="row mt-4">
         <div class="col-12">
+            <div class="mb-3">
+                <h2 class="h4 fw-bold mb-1">Recent Activity</h2>
+                <p class="text-muted mb-0">Latest audit events recorded by the system</p>
+            </div>
             <div class="card shadow-sm">
                 <div class="card-header bg-white">
                     <div class="d-flex justify-content-between align-items-center">
