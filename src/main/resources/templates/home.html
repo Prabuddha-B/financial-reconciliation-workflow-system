@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>FRWSS - Home</title>
@@ -97,46 +99,50 @@
     <!-- Feature Cards -->
     <div class="row g-3">
 
+        <!-- Ingestion -->
         <div class="col-lg-4 col-md-6">
             <div class="card shadow-sm h-100">
                 <div class="card-body text-center">
                     <i class="bi bi-upload fs-1 text-primary"></i>
                     <h5 class="mt-2">Ingestion</h5>
                     <p class="text-muted small">Upload financial records</p>
-                    <a href="/ingestion" class="btn btn-primary btn-sm">Upload Records</a>
+                    <a href="/ingestion" class="btn btn-primary btn-sm">
+                        Upload Records
+                    </a>
                 </div>
             </div>
         </div>
 
+        <!-- Reconciliation -->
         <div class="col-lg-4 col-md-6">
             <div class="card shadow-sm h-100">
                 <div class="card-body text-center">
                     <i class="bi bi-check2-all fs-1 text-success"></i>
                     <h5 class="mt-2">Reconciliation</h5>
                     <p class="text-muted small">Match records automatically</p>
-                    <a href="/reconciliation" class="btn btn-success btn-sm">Open Dashboard</a>
+                    <a href="/reconciliation" class="btn btn-success btn-sm">
+                        Open Dashboard
+                    </a>
                 </div>
             </div>
         </div>
 
+        <!-- Tax Estimation -->
         <div class="col-lg-4 col-md-6">
             <div class="card shadow-sm h-100">
                 <div class="card-body text-center">
                     <i class="bi bi-cash-stack fs-1 text-primary"></i>
 
-                    <h5 class="mt-2">
-                        Tax Estimation
-                    </h5>
+                    <h5 class="mt-2">Tax Estimation</h5>
 
                     <p class="text-muted small mb-2">
-                        Estimate reference tax
-                        for financial records
+                        Estimate reference tax for financial records
                     </p>
 
                     <div class="mb-3">
-                        <span class="badge rounded-pill bg-warning-subtle text-warning-emphasis border border-warning-subtle">
-                            Reference Only
-                        </span>
+                    <span class="badge rounded-pill bg-warning-subtle text-warning-emphasis border border-warning-subtle">
+                        Reference Only
+                    </span>
                     </div>
 
                     <a th:href="@{/tax}" class="btn btn-primary btn-sm">
@@ -147,29 +153,67 @@
             </div>
         </div>
 
+        <!-- Workflow -->
         <div class="col-lg-4 col-md-6">
             <div class="card shadow-sm h-100">
                 <div class="card-body text-center">
                     <i class="bi bi-check2-square fs-1 text-warning"></i>
                     <h5 class="mt-2">Workflow</h5>
                     <p class="text-muted small">Review approvals</p>
-                    <a href="/workflow/approvals" class="btn btn-warning btn-sm">Review Approvals</a>
+                    <a href="/workflow/approvals" class="btn btn-warning btn-sm">
+                        Review Approvals
+                    </a>
                 </div>
             </div>
         </div>
 
+        <!-- Audit -->
         <div class="col-lg-4 col-md-6">
             <div class="card shadow-sm h-100">
                 <div class="card-body text-center">
                     <i class="bi bi-clipboard-data fs-1 text-info"></i>
                     <h5 class="mt-2">Audit</h5>
                     <p class="text-muted small">View audit trail</p>
-                    <a href="/audit/logs" class="btn btn-info btn-sm">View Audit Logs</a>
+                    <a href="/audit/logs" class="btn btn-info btn-sm">
+                        View Audit Logs
+                    </a>
                 </div>
             </div>
         </div>
 
+        <!-- Manage Tax Rates (Admin Only) -->
+        <div class="col-lg-4 col-md-6"
+             sec:authorize="hasRole('ADMIN')">
+
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+
+                    <i class="bi bi-sliders fs-1 text-primary"></i>
+
+                    <h5 class="mt-2">Manage Tax Rates</h5>
+
+                    <p class="text-muted small">
+                        Configure reference tax rates
+                    </p>
+
+                    <div class="mb-3">
+                    <span class="badge rounded-pill bg-primary-subtle text-primary border border-primary-subtle">
+                        Admin
+                    </span>
+                    </div>
+
+                    <a th:href="@{/admin/tax-configurations}"
+                       class="btn btn-primary btn-sm">
+                        <i class="bi bi-gear me-1"></i>
+                        Manage Rates
+                    </a>
+
+                </div>
+            </div>
+
+        </div>
     </div>
+
 
     <!-- System Status -->
     <div class="row mt-4">

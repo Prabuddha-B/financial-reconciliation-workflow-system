@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/header :: header('Manage Tax Configurations')}"></head>
+
+<body class="d-flex flex-column min-vh-100">
+
+<!-- Navbar -->
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<!-- Main Content -->
+<main class="flex-grow-1">
+
+    <div class="container py-4">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+
+            <div>
+                <h2 class="fw-bold">
+                    <i class="bi bi-cash-stack me-2"></i>
+                    Manage Tax Configurations
+                </h2>
+
+                <p class="text-muted mb-0">
+                    Update reference tax rates used by the estimation module.
+                </p>
+            </div>
+
+            <a th:href="@{/tax}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i>
+                Back to Tax Estimation
+            </a>
+
+        </div>
+
+        <div class="card shadow-sm">
+
+            <div class="card-body">
+
+                <table class="table table-hover align-middle">
+
+                    <thead class="table-light">
+                    <tr>
+                        <th>Module</th>
+                        <th>Category</th>
+                        <th>Tax Rate (%)</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+
+                    <tr th:each="config : ${configurations}">
+
+                        <td th:text="${config.module}"></td>
+
+                        <td th:text="${config.category}"></td>
+
+                        <td>
+                                <span class="badge bg-primary"
+                                      th:text="${config.taxRate + '%'}">
+                                </span>
+                        </td>
+
+                        <td th:text="${config.description}"></td>
+
+                        <td>
+
+                                <span th:if="${config.isActive}"
+                                      class="badge bg-success">
+                                    Active
+                                </span>
+
+                            <span th:unless="${config.isActive}"
+                                  class="badge bg-secondary">
+                                    Inactive
+                                </span>
+
+                        </td>
+
+                        <td>
+
+                            <a class="btn btn-sm btn-primary"
+                               th:href="@{/admin/tax-configurations/{id}/edit(id=${config.id})}">
+
+                                <i class="bi bi-pencil-square me-1"></i>
+                                Edit
+
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</main>
+
+<!-- Footer -->
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+</body>
+
+</html>
