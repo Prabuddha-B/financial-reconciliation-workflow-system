@@ -12,7 +12,7 @@ public class TaxConfiguration {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "category", nullable = false, unique = true)
+    @Column(name = "category", nullable = false)
     private String category;
 
     @Column(name = "module", nullable = false)
