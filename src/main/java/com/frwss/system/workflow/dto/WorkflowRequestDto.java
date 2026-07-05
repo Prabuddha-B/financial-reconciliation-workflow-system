@@ -8,6 +8,7 @@ public class WorkflowRequestDto {
     private String sourceType;
     private String sourceRecordId;
     private String createdBy;
+    private String comments;
     private WorkflowState targetState;
 
 //    Getters and Setters
@@ -41,5 +42,13 @@ public class WorkflowRequestDto {
 
     public void setTargetState(WorkflowState targetState) {
         this.targetState = targetState;
+    }
+
+    public String getComments() {
+        return comments;
+    }
+
+    public void setComments(String comments) {
+        this.comments = comments;
     }
 }

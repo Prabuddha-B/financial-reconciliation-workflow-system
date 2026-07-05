@@ -24,5 +24,4 @@ public enum AuditActionType {
 
     AUDIT_CHAIN_CORRECTED
 
-
 }

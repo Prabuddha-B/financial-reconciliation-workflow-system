@@ -6,48 +6,63 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+/**
+ * This adapter class provides current user information
+ * It supports both development mode (hardcoded values) and production mode (real security).
+ * The mode is controlled via application.properties
+ */
+
 @Component
 public class SecurityContextAdapter {
 
+    // Configurable via application.properties: security.enabled=true/false
     @Value("${security.enabled:false}")
     private boolean useRealSecurity;
 
+    // Hardcoded fallback values for development
     @Value("${security.dev.username:admin}")
     private String devUsername;
 
     @Value("${security.dev.role:REVIEWER}")
     private String devRole;
 
-
-//    Returns the currently logged-in username
-    public String getCurrentUsername() {
-        if (useRealSecurity) {
+    // Returns the currently logged-in username
+    public String getCurrentUsername(){
+        if(useRealSecurity){
+            // when security is enabled, get user from Spring Security context
             return getRealUsername();
         }
+        // Development mode - return hardcoded user
         return devUsername;
     }
 
-
-//     Returns the current user's role (without the ROLE_ prefix)
-    public String getCurrentUserRole() {
-        if (useRealSecurity) {
+    // Returns the current user's role (without the ROLE_ prefix)
+    public String getCurrentUserRole(){
+        if(useRealSecurity){
+            // when security is enabled, get role from Spring Security context
             return getRealUserRole();
         }
+        // Development mode - return hardcoded role
         return devRole;
     }
 
-//    Checks whether the current user has a specific role
-    public boolean hasRole(String role) {
+    // Checks whether the current user has a specific role
+    public boolean hasRole(String role){
 
+        // If security is not enabled, always return true for development
         if (!useRealSecurity)  return true;
 
-        Authentication authentication =  SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null) return false;
-
-        return authentication.getAuthorities()
-                .stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_" + role));
+        // Real security logic
+        try{
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null) return false;
+            return authentication.getAuthorities()
+                    .stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_" + role));
+        } catch (Exception e){
+            // if something goes wrong, default to false for security
+            return false;
+        }
     }
 
 
@@ -69,6 +84,7 @@ public class SecurityContextAdapter {
         return useRealSecurity;
     }
 
+    // these methods will be replaced when the security module is integrated
 
 //     Gets username from Spring Security.
     private String getRealUsername() {

@@ -39,6 +39,15 @@ public class ReconciliationResult {
     @Column(name = "reconciled_by")
     private String reconciledBy;
 
+    @Column(name = "workflow_id")
+    private Long workflowId;
+
+    @Column(name = "submitted_to_workflow_at")
+    private LocalDateTime submittedToWorkflowAt;
+
+    @Column(name = "submitted_by")
+    private String submittedBy;
+
     public Long getId() {
         return id;
     }
@@ -109,5 +118,29 @@ public class ReconciliationResult {
 
     public void setReconciledBy(String reconciledBy) {
         this.reconciledBy = reconciledBy;
+    }
+
+    public Long getWorkflowId() {
+        return workflowId;
+    }
+
+    public void setWorkflowId(Long workflowId) {
+        this.workflowId = workflowId;
+    }
+
+    public LocalDateTime getSubmittedToWorkflowAt() {
+        return submittedToWorkflowAt;
+    }
+
+    public void setSubmittedToWorkflowAt(LocalDateTime submittedToWorkflowAt) {
+        this.submittedToWorkflowAt = submittedToWorkflowAt;
+    }
+
+    public String getSubmittedBy() {
+        return submittedBy;
+    }
+
+    public void setSubmittedBy(String submittedBy) {
+        this.submittedBy = submittedBy;
     }
 }

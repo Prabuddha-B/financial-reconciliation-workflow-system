@@ -2,6 +2,7 @@ package com.frwss.system.audit.controller;
 
 import com.frwss.system.audit.model.AuditActionType;
 import com.frwss.system.audit.model.AuditLog;
+import com.frwss.system.audit.service.AuditChainResult;
 import com.frwss.system.audit.service.AuditService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,14 +30,17 @@ public class AuditTestController {
 //        return "Audit log created with ID: " + log.getId();
 //    }
 
-    @GetMapping("/audit/verify")
-    public String verifyAuditChain(){
-        boolean valid = auditService.verifyAuditChain();
+    @GetMapping("/audit/verify-detailed")
+    public String verifyAuditChainDetailed(){
+        AuditChainResult result = auditService.verifyAuditChainDetailed();
 
-        if(valid){
+        if(result.isValid()){
             return "Audit chain is valid";
         } else {
-            return "Audit chain is broken";
+            return "Audit chain is broken at log ID: "
+                    + result.getBrokenAtId()
+                    + " (" + result.getReason()
+                    + " in field: " + result.getFieldName() + ")";
         }
     }
 }
