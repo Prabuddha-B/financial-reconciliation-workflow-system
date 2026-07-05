@@ -51,4 +51,22 @@ public interface TaxConfigurationRepository extends JpaRepository<TaxConfigurati
             String module,
             String category
     );
+
+    @Query("""
+       SELECT DISTINCT t.module
+       FROM TaxConfiguration t
+       WHERE t.isActive = true
+       ORDER BY t.module
+       """)
+    List<String> findAllActiveModules();
+
+
+    @Query("""
+       SELECT DISTINCT t.category
+       FROM TaxConfiguration t
+       WHERE t.isActive = true
+       ORDER BY t.category
+       """)
+    List<String> findAllActiveCategories();
+
 }

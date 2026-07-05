@@ -143,4 +143,14 @@ public class TaxEstimationService {
                 );
     }
 
+    @Transactional
+    public List<String> getAvailableModules() {
+        return taxConfigurationRepository.findAllActiveModules();
+    }
+
+    @Transactional
+    public List<String> getAvailableCategories() {
+        return taxConfigurationRepository.findAllActiveCategories();
+    }
+
 }
