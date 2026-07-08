@@ -38,7 +38,6 @@ public class WorkflowViewController {
 
         model.addAttribute("workflows", workflows);
         model.addAttribute("needsAttentionCount", needsAttentionCount);
-        model.addAttribute("currentUser", securityContextAdapter.getCurrentUsername());
 
         return "workflow/approvals";
     }
@@ -49,9 +48,7 @@ public class WorkflowViewController {
         List<WorkflowHistoryResponseDto> history = workflowService.getWorkflowHistory(workflowId);
 
         model.addAttribute("workflow", workflowService.getWorkflowById(workflowId));
-        model.addAttribute("currentUser",securityContextAdapter.getCurrentUsername());
         model.addAttribute("history", history);
-        model.addAttribute("userRole", securityContextAdapter.getCurrentUserRole());
         model.addAttribute("latestTransition", workflowService.getLatestWorkflowActivity(workflowId));
         model.addAttribute("lastUpdated", history.stream()
                 .map(WorkflowHistoryResponseDto::getTransitionTime)
