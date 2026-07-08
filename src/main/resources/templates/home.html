@@ -212,6 +212,20 @@
             </div>
 
         </div>
+
+        <!-- Reports & Export -->
+        <div class="col-lg-4 col-md-6">
+            <div class="card shadow-sm h-100" onclick="window.location.href='/reports'" style="cursor:pointer;">
+                <div class="card-body text-center">
+                    <i class="bi bi-file-earmark-text fs-1 text-secondary"></i>
+                    <h5 class="mt-2">Reports & Export</h5>
+                    <p class="text-muted small">Generate PDF and Excel reports</p>
+                    <a href="/reports" class="btn btn-secondary btn-sm">
+                        <i class="bi bi-download me-1"></i>Generate Reports
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 
 
@@ -256,7 +270,6 @@
         </div>
     </div>
 
-    <!-- Add this after the System Status card and before closing container -->
     <div class="row mt-4">
         <div class="col-12">
             <div class="mb-3">
@@ -282,9 +295,24 @@
                             </thead>
                             <tbody>
                             <tr th:each="log : ${recentLogs}" th:if="${log != null}">
-                                <td class="small" th:text="${#temporals.format(log.timestamp, 'HH:mm:ss')}">10:30</td>
                                 <td>
-                                    <span class="badge bg-secondary" th:text="${log.actionType}">ACTION</span>
+    <span th:switch="${log.actionType.name()}" class="badge rounded-pill">
+        <!-- Reconciliation Actions - Blue -->
+        <span th:case="'RECONCILIATION_STARTED'" class="bg-primary-subtle text-primary-emphasis border border-primary-subtle" th:text="${log.actionType}">RECONCILIATION_STARTED</span>
+        <span th:case="'RECONCILIATION_COMPLETED'" class="bg-primary-subtle text-primary-emphasis border border-primary-subtle" th:text="${log.actionType}">RECONCILIATION_COMPLETED</span>
+        <span th:case="'EXACT_MATCH_FOUND'" class="bg-primary-subtle text-primary-emphasis border border-primary-subtle" th:text="${log.actionType}">EXACT_MATCH_FOUND</span>
+        <span th:case="'PARTIAL_MATCH_FOUND'" class="bg-primary-subtle text-primary-emphasis border border-primary-subtle" th:text="${log.actionType}">PARTIAL_MATCH_FOUND</span>
+        <span th:case="'ORPHAN_RECORD_FOUND'" class="bg-primary-subtle text-primary-emphasis border border-primary-subtle" th:text="${log.actionType}">ORPHAN_RECORD_FOUND</span>
+
+        <!-- Workflow Actions - Yellow -->
+        <span th:case="'WORKFLOW_STATE_CHANGED'" class="bg-warning-subtle text-warning-emphasis border border-warning-subtle" th:text="${log.actionType}">WORKFLOW_STATE_CHANGED</span>
+
+        <!-- Report Actions - Gray -->
+        <span th:case="'REPORT_EXPORTED'" class="bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle" th:text="${log.actionType}">REPORT_EXPORTED</span>
+
+        <!-- Default - Gray -->
+        <span th:case="*" class="bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle" th:text="${log.actionType}">UNKNOWN</span>
+    </span>
                                 </td>
                                 <td th:text="${log.performedBy}">admin</td>
                             </tr>
