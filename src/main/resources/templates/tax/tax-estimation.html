@@ -3,9 +3,7 @@
 
 <head th:replace="~{fragments/header :: header('Tax Estimation')}"></head>
 
-<body class="bg-light"
-      th:with="currentUser=${currentUser != null ? currentUser : (#authentication != null ? #authentication.name : 'admin')},
-               userRole=${userRole != null ? userRole : 'Authenticated User'}">
+<body class="d-flex flex-column min-vh-100">
 
 <!-- Nav Bar -->
 <div th:replace="~{fragments/navbar :: navbar}"></div>
