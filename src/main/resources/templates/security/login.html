@@ -10,17 +10,29 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
     <style>
-        /* ---------- Global ---------- */
+        :root {
+            --brand-navy: #111827;
+            --brand-blue: #2563eb;
+            --brand-blue-dark: #1e40af;
+            --brand-cyan: #06b6d4;
+            --text-muted: #6b7280;
+            --border-soft: #dbe3ef;
+        }
+
         * {
             margin: 0;
             padding: 0;
-            box-sizing: border-box
+            box-sizing: border-box;
         }
 
         body {
             font-family: system-ui, -apple-system, sans-serif;
             min-height: 100vh;
-            background: linear-gradient(135deg, #0f172a, #1e3a8a, #2563eb);
+            background:
+                    linear-gradient(rgba(17, 24, 39, .84), rgba(30, 64, 175, .74)),
+                    url("https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1600&q=80");
+            background-size: cover;
+            background-position: center;
             overflow-x: hidden;
         }
 
@@ -29,8 +41,8 @@
             position: fixed;
             inset: 0;
             background:
-                    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, .08), transparent 35%),
-                    radial-gradient(circle at 80% 70%, rgba(255, 255, 255, .05), transparent 30%);
+                    linear-gradient(90deg, rgba(17, 24, 39, .55), rgba(37, 99, 235, .22)),
+                    repeating-linear-gradient(135deg, rgba(255, 255, 255, .05) 0 1px, transparent 1px 18px);
             pointer-events: none;
         }
 
@@ -40,31 +52,64 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            height: 100vh;
+            min-height: 100vh;
+            position: relative;
+            z-index: 1;
         }
 
         .logo {
-            width: 90px;
-            height: 90px;
-            border-radius: 50%;
+            width: 178px;
+            height: 82px;
+            border-radius: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(255, 255, 255, .12);
+            gap: .65rem;
+            background: rgba(255, 255, 255, .14);
             backdrop-filter: blur(10px);
-            font-size: 2.5rem;
             margin-bottom: 2rem;
             box-shadow: 0 10px 30px rgba(0, 0, 0, .25);
+            border: 1px solid rgba(255, 255, 255, .22);
+            position: relative;
+        }
+
+        .logo-mark {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(6, 182, 212, .18);
+            border: 1px solid rgba(6, 182, 212, .45);
+            color: var(--brand-cyan);
+            font-size: 1.35rem;
+        }
+
+        .logo-text {
+            font-size: 1.45rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .logo-subtext {
+            display: block;
+            margin-top: .25rem;
+            font-size: .62rem;
+            font-weight: 700;
+            letter-spacing: .08em;
+            opacity: .78;
         }
 
         .left-panel h1 {
-            font-size: 3.2rem;
+            font-size: 3rem;
             font-weight: 700;
+            letter-spacing: 0;
         }
 
         .left-panel h3 {
             font-size: 1.3rem;
-            font-weight: 300;
+            font-weight: 400;
             margin-top: .5rem;
         }
 
@@ -76,113 +121,168 @@
             opacity: .9;
         }
 
-        /* ---------- Login Card ---------- */
         .login-wrap {
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 100vh;
+            min-height: 100vh;
             padding: 2rem;
+            position: relative;
+            z-index: 1;
         }
 
         .login-card {
-            background: rgba(255, 255, 255, .92);
+            background: rgba(255, 255, 255, .96);
             backdrop-filter: blur(16px);
-            border-radius: 22px;
+            border-radius: 16px;
             padding: 2.5rem;
             width: 100%;
             max-width: 470px;
             box-shadow: 0 25px 60px rgba(0, 0, 0, .25);
+            border: 1px solid rgba(255, 255, 255, .72);
             animation: fade .6s ease;
         }
 
         @keyframes fade {
             from {
                 opacity: 0;
-                transform: translateY(20px)
+                transform: translateY(20px);
             }
 
             to {
                 opacity: 1;
-                transform: translateY(0)
+                transform: translateY(0);
             }
         }
 
         .form-control {
             height: 52px;
             border-radius: 12px;
+            border-color: var(--border-soft);
         }
 
         .form-control:focus {
-            border-color: #2563eb;
+            border-color: var(--brand-blue);
             box-shadow: 0 0 0 .2rem rgba(37, 99, 235, .15);
         }
 
         .input-group-text {
             border-radius: 12px 0 0 12px;
+            border-color: var(--border-soft);
+        }
+
+        #password {
+            border-right: 0;
+        }
+
+        #password::-ms-reveal,
+        #password::-ms-clear {
+            display: none;
+        }
+
+        #password::-webkit-credentials-auto-fill-button,
+        #password::-webkit-caps-lock-indicator {
+            visibility: hidden;
+            display: none !important;
+            pointer-events: none;
         }
 
         .password-btn {
+            border-left: 0;
             border-radius: 0 12px 12px 0;
+            border-color: var(--border-soft);
+            min-width: 52px;
+            transition: background-color .2s ease, color .2s ease;
+        }
+
+        .password-btn:hover,
+        .password-btn:focus {
+            background: #f8fafc !important;
+            color: var(--brand-blue-dark);
+            box-shadow: none;
         }
 
         .btn-login {
             height: 52px;
             font-weight: 600;
             border: none;
-            background: linear-gradient(90deg, #1e40af, #2563eb);
+            background: linear-gradient(90deg, var(--brand-blue-dark), var(--brand-blue));
             transition: .25s;
         }
 
-        .btn-login:hover {
+        .btn-login:hover,
+        .btn-login:focus {
             transform: translateY(-2px);
             box-shadow: 0 12px 24px rgba(37, 99, 235, .35);
         }
 
-        .notice {
-            font-size: .86rem;
-            color: #6c757d;
+        .btn-login:disabled {
+            transform: none;
+            box-shadow: none;
+            cursor: wait;
+            opacity: .85;
         }
 
         .footer {
             font-size: .82rem;
-            color: #6c757d;
+            color: var(--text-muted);
         }
 
-        @media(max-width:992px) {
+        @media(max-width: 992px) {
             .left-panel {
-                height: auto;
+                min-height: auto;
                 text-align: center;
                 padding: 3rem 2rem 1rem;
             }
 
+            .left-panel h1 {
+                font-size: 2.45rem;
+            }
+
+            .left-panel h3 {
+                font-size: 1.05rem;
+            }
+
             .left-panel p {
-                margin-inline: auto
+                margin-inline: auto;
             }
 
             .login-wrap {
-                height: auto;
-                padding-bottom: 3rem
+                min-height: auto;
+                padding-bottom: 3rem;
             }
         }
 
-        /* Password input */
-        #password{
-            border-right:0;
+        @media(max-width: 576px) {
+            .left-panel {
+                padding: 2rem 1.25rem .5rem;
+            }
+
+            .logo {
+                width: 158px;
+                height: 72px;
+                margin: 0 auto 1.25rem;
+            }
+
+            .logo-mark {
+                width: 38px;
+                height: 38px;
+                font-size: 1.15rem;
+            }
+
+            .left-panel p {
+                display: none;
+            }
+
+            .login-wrap {
+                padding: 1rem 1rem 2rem;
+            }
+
+            .login-card {
+                padding: 1.5rem;
+                border-radius: 14px;
+            }
         }
-
-        /* Eye button */
-        .password-btn,
-        .btn.bg-white{
-            border-left:0;
-            border-radius:0 12px 12px 0;
-        }
-
-        .btn.bg-white:focus{
-            box-shadow:none;
-        }
-
-
     </style>
 </head>
 
@@ -194,27 +294,31 @@
         <!-- Branding -->
         <div class="col-lg-6">
             <div class="left-panel">
-                <div class="logo">
-                    <i class="bi bi-shield-lock"></i>
+                <div class="logo" aria-label="FRWSS">
+                    <span class="logo-mark">
+                        <i class="bi bi-shield-lock" aria-hidden="true"></i>
+                    </span>
+                    <span>
+                        <span class="logo-text">FRWSS</span>
+                        <span class="logo-subtext">SECURE FINANCE</span>
+                    </span>
                 </div>
 
                 <h1>FRWSS</h1>
 
-                <h3>Financial Reconciliation & Workflow Support System</h3>
+                <h3>Financial Reconciliation &amp; Workflow Support System</h3>
 
                 <p>
                     A secure platform for managing financial records,
                     reconciliation workflows, approval processes,
                     and audit-ready reporting with complete traceability.
                 </p>
-
             </div>
         </div>
 
         <!-- Login -->
         <div class="col-lg-6">
             <div class="login-wrap">
-
                 <div class="login-card">
 
                     <div class="text-center mb-4">
@@ -225,58 +329,72 @@
                     <!-- Alert -->
                     <div th:if="${alertMessage != null}"
                          th:class="'alert alert-' + ${alertType} + ' d-flex align-items-center mb-4'">
-                        <i class="bi bi-exclamation-circle-fill me-2"></i>
+                        <i th:class="${alertType == 'success'} ? 'bi bi-check-circle-fill me-2' : (${alertType == 'warning'} ? 'bi bi-exclamation-triangle-fill me-2' : 'bi bi-exclamation-circle-fill me-2')"
+                           aria-hidden="true"></i>
                         <span th:text="${alertMessage}"></span>
                     </div>
 
                     <!-- Login Form -->
-                    <form th:action="@{/login}" method="post">
+                    <form th:action="@{/login}" method="post" id="loginForm">
+                        <input type="hidden"
+                               th:if="${_csrf != null}"
+                               th:name="${_csrf.parameterName}"
+                               th:value="${_csrf.token}">
 
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Username</label>
+                            <label for="username" class="form-label fw-semibold">Username</label>
                             <div class="input-group">
-                                <span class="input-group-text"><i class="bi bi-person"></i></span>
-                                <input class="form-control" id="username" name="username" autocomplete="username"
-                                       placeholder="Enter your username" required>
+                                <span class="input-group-text">
+                                    <i class="bi bi-person" aria-hidden="true"></i>
+                                </span>
+                                <input type="text"
+                                       class="form-control"
+                                       id="username"
+                                       name="username"
+                                       autocomplete="username"
+                                       placeholder="Enter your username"
+                                       required>
                             </div>
                         </div>
 
                         <div class="mb-4">
-                            <label class="form-label fw-semibold">Password</label>
+                            <label for="password" class="form-label fw-semibold">Password</label>
 
                             <div class="input-group">
-                                    <span class="input-group-text">
-                                        <i class="bi bi-lock"></i>
-                                    </span>
+                                <span class="input-group-text">
+                                    <i class="bi bi-lock" aria-hidden="true"></i>
+                                </span>
 
-                                <input type="password" class="form-control" id="password" name="password"
-                                       autocomplete="current-password" placeholder="Enter your password" required>
+                                <input type="password"
+                                       class="form-control"
+                                       id="password"
+                                       name="password"
+                                       autocomplete="current-password"
+                                       placeholder="Enter your password"
+                                       required>
 
-                                <button
-                                        type="button"
-                                        class="btn bg-white border-start-0"
-                                        onclick="togglePassword()">
-                                    <i id="eye" class="bi bi-eye text-secondary"></i>
+                                <button type="button"
+                                        class="btn bg-white password-btn"
+                                        id="togglePassword"
+                                        aria-label="Show password"
+                                        aria-controls="password"
+                                        aria-pressed="false">
+                                    <i id="eye" class="bi bi-eye text-secondary" aria-hidden="true"></i>
                                 </button>
-
                             </div>
                         </div>
 
-                        <button class="btn btn-primary btn-login w-100" type="submit">
-                            <i class="bi bi-box-arrow-in-right me-2"></i>
-                            Sign In
+                        <button class="btn btn-primary btn-login w-100" type="submit" id="loginButton">
+                            <span class="spinner-border spinner-border-sm me-2 d-none"
+                                  id="loginSpinner"
+                                  aria-hidden="true"></span>
+                            <i class="bi bi-box-arrow-in-right me-2" id="loginIcon" aria-hidden="true"></i>
+                            <span id="loginButtonText">Sign In</span>
                         </button>
 
-                        <div class="text-center mt-4 notice">
-                            <i class="bi bi-shield-check me-1"></i>
-                            All login attempts are monitored and recorded.<br>
-                            Unauthorized access is prohibited.
+                        <div class="text-center mt-4 footer">
+                            FRWSS Version 1.0 &bull; Group A &bull; 2026
                         </div>
-
-                        <div class="text-center mt-3 footer">
-                            FRWSS Version 1.0 • Group A • 2026
-                        </div>
-
                     </form>
 
                 </div>
@@ -287,17 +405,36 @@
 </div>
 
 <script>
-    function togglePassword() {
-        const p = document.getElementById("password");
-        const e = document.getElementById("eye");
-        if (p.type === "password") {
-            p.type = "text";
-            e.className = "bi bi-eye-slash";
+    const passwordInput = document.getElementById("password");
+    const passwordToggle = document.getElementById("togglePassword");
+    const eyeIcon = document.getElementById("eye");
+    const loginForm = document.getElementById("loginForm");
+    const loginButton = document.getElementById("loginButton");
+    const loginIcon = document.getElementById("loginIcon");
+    const loginSpinner = document.getElementById("loginSpinner");
+    const loginButtonText = document.getElementById("loginButtonText");
+
+    passwordToggle.addEventListener("click", function () {
+        const isPasswordHidden = passwordInput.type === "password";
+
+        passwordInput.type = isPasswordHidden ? "text" : "password";
+        eyeIcon.className = isPasswordHidden
+            ? "bi bi-eye-slash text-secondary"
+            : "bi bi-eye text-secondary";
+        passwordToggle.setAttribute("aria-pressed", String(isPasswordHidden));
+        passwordToggle.setAttribute("aria-label", isPasswordHidden ? "Hide password" : "Show password");
+    });
+
+    loginForm.addEventListener("submit", function () {
+        if (loginForm.checkValidity()) {
+            loginButton.disabled = true;
+            loginIcon.classList.add("d-none");
+            loginSpinner.classList.remove("d-none");
+            loginButtonText.textContent = "Signing in...";
         } else {
-            p.type = "password";
-            e.className = "bi bi-eye";
+            loginButton.disabled = false;
         }
-    }
+    });
 </script>
 
 </body>
