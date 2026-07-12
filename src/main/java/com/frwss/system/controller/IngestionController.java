@@ -141,4 +141,43 @@ public class IngestionController {
         model.addAttribute("validCount", summary.validCount());
         model.addAttribute("invalidCount", summary.invalidCount());
     }
+
+    /**
+     * Optimized bulk upload for large CSV files (10,000+ records)
+     * Uses batch processing for fast ingestion
+     */
+    @PostMapping("/ingestion/bulk-upload")
+    public String bulkUpload(
+            @RequestParam("file") MultipartFile file,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            log.info("Received bulk upload request: fileName={}, size={}",
+                    file.getOriginalFilename(), file.getSize());
+
+            long startTime = System.currentTimeMillis();
+            IngestionResult result = ingestionService.processLargeAccountingFile(file);
+            long endTime = System.currentTimeMillis();
+
+            String message = String.format(
+                    "Bulk upload completed in %d ms! " +
+                            "Total: %d, Saved: %d, Invalid: %d, Duplicates: %d",
+                    (endTime - startTime),
+                    result.getTotalRecords(),
+                    result.getValidRecords(),
+                    result.getInvalidRecords(),
+                    result.getTotalRecords() - result.getValidRecords() - result.getInvalidRecords()
+            );
+
+            log.info(message);
+            redirectAttributes.addFlashAttribute("message", message);
+
+        } catch (Exception e) {
+            log.error("Bulk upload failed", e);
+            redirectAttributes.addFlashAttribute("error",
+                    "Bulk upload failed: " + e.getMessage());
+        }
+
+        return "redirect:/ingestion/upload";
+    }
 }

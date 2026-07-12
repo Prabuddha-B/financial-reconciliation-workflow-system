@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import org.springframework.data.domain.Pageable;;
 import java.util.List;
+import java.util.Set;
 
 @Repository
 public interface AccountingRecordRepository extends JpaRepository<AccountingRecord, String> {
@@ -40,4 +41,7 @@ public interface AccountingRecordRepository extends JpaRepository<AccountingReco
     // Count records by parent
     @Query("SELECT COUNT(a) FROM AccountingRecord a WHERE a.parentRecordId = :parentId")
     long countChildrenByParentId(@Param("parentId") String parentId);
+
+    @Query("SELECT a.referenceNo FROM AccountingRecord a WHERE a.referenceNo IN :referenceNos")
+    Set<String> findExistingReferenceNos(@Param("referenceNos") List<String> referenceNos);
 }

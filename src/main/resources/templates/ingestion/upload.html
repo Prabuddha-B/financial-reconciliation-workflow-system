@@ -173,6 +173,48 @@
                     <p id="uploadStatus" class="text-primary mt-3 mb-0"></p>
 
                 </form>
+                <!-- ========================================== -->
+                <!-- BULK UPLOAD SECTION (NEW)                  -->
+                <!-- ========================================== -->
+                <hr class="my-5">
+
+                <div class="row">
+                    <div class="col-12">
+                        <h4 class="fw-bold mb-3">
+                            <i class="bi bi-rocket-takeoff me-2 text-success"></i>Bulk Upload (Optimized)
+                        </h4>
+                        <p class="text-muted mb-3">
+                            For large files with <strong>10,000+ records</strong>. Uses batch processing for fast ingestion.
+                            <span class="badge bg-success ms-2">Recommended for large datasets</span>
+                        </p>
+
+                        <div class="alert alert-info mb-3">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Note:</strong> Bulk upload bypasses preview and saves directly to the database.
+                            It's optimized for performance with large files.
+                        </div>
+
+                        <form th:action="@{/ingestion/bulk-upload}" method="post" enctype="multipart/form-data" onsubmit="return handleBulkUpload();">
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Select Large CSV File</label>
+                                <input type="file" name="file" id="bulkFileInput" class="form-control" accept=".csv" required>
+                                <div class="form-text">Only CSV format supported for bulk upload. File size limit: 50MB</div>
+                            </div>
+
+                            <div id="bulkFileError" class="text-danger fw-semibold mb-2"></div>
+                            <div id="bulkFileName" class="text-success fw-semibold mb-2"></div>
+
+                            <button id="bulkUploadBtn" type="submit" class="btn btn-success px-4">
+                                <i class="bi bi-rocket-takeoff me-2"></i>
+                                Bulk Upload
+                            </button>
+
+                            <span id="bulkUploadStatus" class="text-primary ms-3"></span>
+
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -211,6 +253,12 @@
             fileInput.addEventListener("change", function () {
                 handleFileSelection(this.files[0]);
             });
+
+            // Bulk upload file selection
+            const bulkFileInput = document.getElementById("bulkFileInput");
+            bulkFileInput.addEventListener("change", function () {
+                handleBulkFileSelection(this.files[0]);
+            });
         });
 
         // Validates selected file type (CSV or XLSX only)
@@ -236,6 +284,27 @@
             fileName.innerText = "Selected: " + file.name;
         }
 
+        // Bulk file selection handler
+        function handleBulkFileSelection(file) {
+            const fileName = document.getElementById("bulkFileName");
+            const fileError = document.getElementById("bulkFileError");
+
+            fileError.innerText = "";
+
+            if (!file) return;
+
+            const extension = file.name.split(".").pop().toLowerCase();
+
+            if (extension !== "csv") {
+                fileName.innerText = "";
+                fileError.innerText = "Invalid file type. Only CSV allowed for bulk upload.";
+                document.getElementById("bulkFileInput").value = "";
+                return;
+            }
+
+            fileName.innerText = "Selected: " + file.name + " (" + (file.size / 1024).toFixed(1) + " KB)";
+        }
+
         // Form Submit Validation
         function handleUpload() {
 
@@ -250,6 +319,29 @@
 
             uploadBtn.disabled = true;
             status.innerText = "Uploading...";
+
+            return true;
+        }
+
+        // Bulk upload submit validation
+        function handleBulkUpload() {
+            const fileInput = document.getElementById("bulkFileInput");
+            const uploadBtn = document.getElementById("bulkUploadBtn");
+            const status = document.getElementById("bulkUploadStatus");
+
+            if (!fileInput.files.length) {
+                document.getElementById("bulkFileError").innerText = "Please select a CSV file";
+                return false;
+            }
+
+            const extension = fileInput.files[0].name.split(".").pop().toLowerCase();
+            if (extension !== "csv") {
+                document.getElementById("bulkFileError").innerText = "Only CSV files are supported for bulk upload";
+                return false;
+            }
+
+            uploadBtn.disabled = true;
+            status.innerText = "⏳ Bulk uploading... This may take a few moments...";
 
             return true;
         }
