@@ -1,6 +1,7 @@
-package com.frwss.system.workflow.validation;
+package com.frwss.system.workflow.com.frwss.system.workflow.validation;
 
 import com.frwss.system.workflow.model.WorkflowState;
+import com.frwss.system.workflow.validation.WorkflowTransitionValidator;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
