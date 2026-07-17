@@ -13,6 +13,36 @@
 
     <div class="container py-4">
 
+        <!-- Success Message -->
+        <div th:if="${successMessage}"
+             class="alert alert-success alert-dismissible fade show"
+             role="alert">
+
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <span th:text="${successMessage}"></span>
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert">
+            </button>
+
+        </div>
+
+        <!-- Error Message -->
+        <div th:if="${errorMessage}"
+             class="alert alert-danger alert-dismissible fade show"
+             role="alert">
+
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <span th:text="${errorMessage}"></span>
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert">
+            </button>
+
+        </div>
+
         <div class="d-flex justify-content-between align-items-center mb-4">
 
             <div>
@@ -26,10 +56,20 @@
                 </p>
             </div>
 
-            <a th:href="@{/tax}" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left me-2"></i>
-                Back to Tax Estimation
-            </a>
+            <div class="d-flex gap-2">
+
+                <a th:href="@{/admin/tax-configurations/create}"
+                   class="btn btn-success">
+                    <i class="bi bi-plus-circle me-2"></i>
+                    Add Configuration
+                </a>
+
+                <a th:href="@{/tax}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-2"></i>
+                    Back to Tax Estimation
+                </a>
+
+            </div>
 
         </div>
 
@@ -82,13 +122,51 @@
 
                         <td>
 
-                            <a class="btn btn-sm btn-primary"
-                               th:href="@{/admin/tax-configurations/{id}/edit(id=${config.id})}">
+                            <div class="d-flex gap-2">
 
-                                <i class="bi bi-pencil-square me-1"></i>
-                                Edit
+                                <a class="btn btn-sm btn-primary"
+                                   th:href="@{/admin/tax-configurations/{id}/edit(id=${config.id})}">
 
-                            </a>
+                                    <i class="bi bi-pencil-square me-1"></i>
+                                    Edit
+
+                                </a>
+
+                                <!-- Active Configuration -->
+                                <form th:if="${config.isActive}"
+                                      th:action="@{/admin/tax-configurations/{id}/deactivate(id=${config.id})}"
+                                      method="post"
+                                      class="d-inline">
+
+                                    <button type="submit"
+                                            class="btn btn-sm btn-danger"
+                                            onclick="return confirm('Are you sure you want to deactivate this tax configuration?');">
+
+                                        <i class="bi bi-pause-circle me-1"></i>
+                                        Deactivate
+
+                                    </button>
+
+                                </form>
+
+                                <!-- Inactive Configuration -->
+                                <form th:unless="${config.isActive}"
+                                      th:action="@{/admin/tax-configurations/{id}/activate(id=${config.id})}"
+                                      method="post"
+                                      class="d-inline">
+
+                                    <button type="submit"
+                                            class="btn btn-sm btn-success"
+                                            onclick="return confirm('Activate this tax configuration?');">
+
+                                        <i class="bi bi-play-circle me-1"></i>
+                                        Activate
+
+                                    </button>
+
+                                </form>
+
+                            </div>
 
                         </td>
 
