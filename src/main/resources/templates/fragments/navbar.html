@@ -3,59 +3,280 @@
 
 <body>
 
-    <nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm border-bottom">
+<nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm border-bottom">
 
-            <div class="container-xl">
+    <div class="container-xl">
 
-                <!-- Brand -->
-                <a class="navbar-brand fw-bold d-flex align-items-center" href="/">
-                    <i class="bi bi-bank2 fs-4 me-2"></i>
-                    <span class="fs-3">FRWSS</span>
+        <!-- Brand -->
+        <a class="navbar-brand fw-bold d-flex align-items-center" href="/">
+            <i class="bi bi-bank2 fs-4 me-2"></i>
+            <span class="fs-3">FRWSS</span>
+        </a>
+
+        <!-- Toggle Button for Mobile -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+                aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Navbar Content -->
+        <div class="collapse navbar-collapse" id="navbarContent">
+
+            <!-- Navigation Links -->
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/ingestion/dashboard">
+                        <i class="bi bi-upload me-1"></i>Ingestion
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/reconciliation">
+                        <i class="bi bi-check2-all me-1"></i>Reconciliation
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/workflow/approvals">
+                        <i class="bi bi-check2-square me-1"></i>Workflow
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/audit/logs">
+                        <i class="bi bi-clipboard-data me-1"></i>Audit
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/reports">
+                        <i class="bi bi-file-earmark-text me-1"></i>Reports
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Right Side -->
+            <div class="d-flex align-items-center">
+
+                <!-- ========================================== -->
+                <!-- 1. MESSAGES BUTTON (with badge) -->
+                <!-- ========================================== -->
+                <a class="nav-link position-relative text-white me-2" href="/messages/inbox"
+                   title="Messages" id="messagesLink">
+                    <i class="bi bi-envelope fs-5"></i>
+                    <span id="messageBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                          style="font-size: 0.6rem; display: none;">
+                            0
+                        </span>
                 </a>
 
-                <!-- Right Side -->
-                <div class="d-flex align-items-center">
+                <!-- ========================================== -->
+                <!-- 2. NOTIFICATIONS BUTTON (with badge) -->
+                <!-- ========================================== -->
+                <a class="nav-link position-relative text-white me-2" href="/notifications"
+                   title="Notifications" id="notificationsLink">
+                    <i class="bi bi-bell fs-5"></i>
+                    <span id="notificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                          style="font-size: 0.6rem; display: none;">
+                            0
+                        </span>
+                </a>
 
-                    <!-- User Information -->
-                    <div class="d-flex align-items-center border rounded-pill px-2 py-1">
+                <!-- ========================================== -->
+                <!-- 3. COMPOSE MESSAGE BUTTON -->
+                <!-- ========================================== -->
+                <a class="nav-link text-white me-2" href="/messages/compose" title="Compose Message">
+                    <i class="bi bi-pencil-square fs-5"></i>
+                </a>
 
-                        <!-- Avatar -->
-                        <div class="rounded-circle bg-primary d-flex justify-content-center align-items-center me-3"
-                             style="width:40px;height:40px;">
-                            <i class="bi bi-person-fill text-white fs-5"></i>
-                        </div>
+                <!-- ========================================== -->
+                <!-- 4. USER INFO & LOGOUT -->
+                <!-- ========================================== -->
+                <div class="d-flex align-items-center border rounded-pill px-2 py-1" style="border-color: rgba(255,255,255,0.2) !important;">
 
-                        <!-- Username -->
-                        <div class="me-3 text-end">
-
-                            <div class="fw-semibold text-white" th:text="${currentUser}">
-                                admin
-                            </div>
-
-                            <small class="text-white-50" th:text="${userRole}">
-                                Administrator
-                            </small>
-
-                        </div>
-
-                        <!-- Divider -->
-                        <div class="vr text-secondary me-3"></div>
-
-                        <!-- Logout -->
-                        <form th:action="@{/logout}" method="post" class="mb-0">
-
-                            <button type="submit" class="btn btn-outline-light btn-sm rounded-pill px-3">
-                                <i class="bi bi-box-arrow-right me-1"></i>
-                                Logout
-                            </button>
-
-                        </form>
-
+                    <!-- Avatar -->
+                    <div class="rounded-circle bg-primary d-flex justify-content-center align-items-center me-3"
+                         style="width:40px;height:40px;">
+                        <i class="bi bi-person-fill text-white fs-5"></i>
                     </div>
+
+                    <!-- Username & Role -->
+                    <div class="me-3 text-end">
+                        <div class="fw-semibold text-white" th:text="${currentUser}">
+                            admin
+                        </div>
+                        <small class="text-white-50" th:text="${userRole}">
+                            Administrator
+                        </small>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="vr text-secondary me-3" style="opacity:0.3;"></div>
+
+                    <!-- Logout -->
+                    <form th:action="@{/logout}" method="post" class="mb-0">
+                        <button type="submit" class="btn btn-outline-light btn-sm rounded-pill px-3">
+                            <i class="bi bi-box-arrow-right me-1"></i>
+                            Logout
+                        </button>
+                    </form>
 
                 </div>
 
             </div>
-    </nav>
+
+        </div>
+
+    </div>
+
+</nav>
+
+<!-- ========================================== -->
+<!-- JavaScript for Badge Updates & Notifications -->
+<!-- ========================================== -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        // ==========================================
+        // 1. UPDATE BADGES FUNCTION
+        // ==========================================
+        function updateBadges() {
+            // Update message count
+            fetch('/messages/api/unread-count')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text();
+                })
+                .then(count => {
+                    const badge = document.getElementById('messageBadge');
+                    const numCount = parseInt(count);
+                    if (numCount > 0) {
+                        badge.textContent = numCount > 99 ? '99+' : numCount;
+                        badge.style.display = 'inline';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    console.log('Message count error:', error);
+                    // Hide badge on error
+                    const badge = document.getElementById('messageBadge');
+                    badge.style.display = 'none';
+                });
+
+            // Update notification count
+            fetch('/notifications/api/unread-count')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text();
+                })
+                .then(count => {
+                    const badge = document.getElementById('notificationBadge');
+                    const numCount = parseInt(count);
+                    if (numCount > 0) {
+                        badge.textContent = numCount > 99 ? '99+' : numCount;
+                        badge.style.display = 'inline';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    console.log('Notification count error:', error);
+                    const badge = document.getElementById('notificationBadge');
+                    badge.style.display = 'none';
+                });
+        }
+
+        // ==========================================
+        // 2. INITIAL LOAD
+        // ==========================================
+        updateBadges();
+
+        // ==========================================
+        // 3. POLL EVERY 10 SECONDS
+        // ==========================================
+        setInterval(updateBadges, 10000);
+
+        // ==========================================
+        // 4. UPDATE WHEN PAGE BECOMES VISIBLE
+        // ==========================================
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                updateBadges();
+            }
+        });
+
+        // ==========================================
+        // 5. NOTIFICATION TOAST (Optional)
+        // ==========================================
+        // Check for new notifications every 30 seconds
+        let lastNotificationCount = 0;
+
+        function checkNewNotifications() {
+            fetch('/notifications/api/unread-count')
+                .then(response => response.text())
+                .then(count => {
+                    const numCount = parseInt(count);
+                    if (numCount > lastNotificationCount && numCount > 0) {
+                        // New notification arrived!
+                        showNotificationToast('You have a new notification!');
+                    }
+                    lastNotificationCount = numCount;
+                })
+                .catch(() => {});
+        }
+
+        // Simple toast notification
+        function showNotificationToast(message) {
+            // Check if toast container exists
+            let toastContainer = document.getElementById('toastContainer');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.id = 'toastContainer';
+                toastContainer.style.position = 'fixed';
+                toastContainer.style.bottom = '20px';
+                toastContainer.style.right = '20px';
+                toastContainer.style.zIndex = '9999';
+                document.body.appendChild(toastContainer);
+            }
+
+            const toast = document.createElement('div');
+            toast.className = 'toast show';
+            toast.role = 'alert';
+            toast.innerHTML = `
+                    <div class="toast-header bg-primary text-white">
+                        <i class="bi bi-bell me-2"></i>
+                        <strong class="me-auto">FRWSS Notification</strong>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+                    </div>
+                    <div class="toast-body">
+                        ${message}
+                        <a href="/notifications" class="ms-2">View</a>
+                    </div>
+                `;
+            toastContainer.appendChild(toast);
+
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                toast.remove();
+            }, 5000);
+        }
+
+        // Start checking for new notifications (every 30 seconds)
+        // Only if notifications page is not already open
+        setTimeout(() => {
+            fetch('/notifications/api/unread-count')
+                .then(response => response.text())
+                .then(count => {
+                    lastNotificationCount = parseInt(count);
+                })
+                .catch(() => {});
+        }, 1000);
+
+        setInterval(checkNewNotifications, 30000);
+
+    });
+</script>
+
 </body>
 </html>

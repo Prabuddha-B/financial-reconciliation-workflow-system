@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>View Message</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+</head>
+<body>
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="container py-4">
+
+  <!-- Page Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2><i class="bi bi-envelope-open me-2"></i>View Message</h2>
+    </div>
+    <div class="d-flex gap-2">
+      <a th:href="@{/messages/reply/{id}(id=${message.id})}" class="btn btn-primary">
+        <i class="bi bi-reply me-1"></i>Reply
+      </a>
+      <a href="/messages/inbox" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i>Back to Inbox
+      </a>
+    </div>
+  </div>
+
+  <!-- Message Details -->
+  <div class="card shadow-sm">
+    <div class="card-header bg-light">
+      <div class="d-flex justify-content-between align-items-center">
+        <strong th:text="${message.subject}">Subject</strong>
+        <span class="text-muted small" th:text="${#temporals.format(message.sentAt, 'yyyy-MM-dd HH:mm')}">Date</span>
+      </div>
+    </div>
+    <div class="card-body">
+
+      <!-- Sender Info -->
+      <div class="mb-3 pb-3 border-bottom">
+        <div class="row">
+          <div class="col-md-6">
+            <span class="fw-semibold">From:</span>
+            <span>User <span th:text="${message.senderId}">123</span></span>
+          </div>
+          <div class="col-md-6">
+            <span class="fw-semibold">To:</span>
+            <span>User <span th:text="${message.recipientId}">456</span></span>
+          </div>
+        </div>
+        <div class="row mt-1">
+          <div class="col-md-6">
+            <span class="fw-semibold">Status:</span>
+            <span th:if="${message.isRead}" class="text-success">Read</span>
+            <span th:if="${!message.isRead}" class="text-primary">Unread</span>
+          </div>
+          <div class="col-md-6" th:if="${message.referenceType}">
+            <span class="fw-semibold">Reference:</span>
+            <span th:text="${message.referenceType} + ' #' + ${message.referenceId}"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Message Content -->
+      <div class="mb-3">
+        <div style="white-space: pre-wrap;" th:text="${message.content}">Message content goes here...</div>
+      </div>
+
+      <!-- Actions -->
+      <div class="mt-3 pt-3 border-top">
+        <div class="d-flex gap-2">
+          <a th:href="@{/messages/reply/{id}(id=${message.id})}" class="btn btn-primary btn-sm">
+            <i class="bi bi-reply me-1"></i>Reply
+          </a>
+          <form th:action="@{/messages/delete/{id}(id=${message.id})}" method="post" class="d-inline">
+            <button type="submit" class="btn btn-danger btn-sm"
+                    onclick="return confirm('Delete this message?');">
+              <i class="bi bi-trash me-1"></i>Delete
+            </button>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
