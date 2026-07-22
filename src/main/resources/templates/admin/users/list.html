@@ -125,12 +125,21 @@
 
                         <td>
 
-                            <button class="btn btn-sm btn-primary">
+                            <a class="btn btn-sm btn-primary"
+                               th:href="@{/admin/users/{id}/edit(id=${user.userId})}">
 
                                 <i class="bi bi-pencil-square me-1"></i>
                                 Edit
 
-                            </button>
+                            </a>
+
+                            <a th:href="@{/admin/users/{id}/reset-password(id=${user.userId})}"
+                               class="btn btn-sm btn-warning">
+
+                                <i class="bi bi-key me-1"></i>
+                                Reset Password
+
+                            </a>
 
                             <button th:if="${user.enabled}"
                                     class="btn btn-sm btn-danger">

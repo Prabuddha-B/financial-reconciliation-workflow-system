@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/header :: header('Edit User')}"></head>
+
+<body class="d-flex flex-column min-vh-100">
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<main class="flex-grow-1">
+
+    <div class="container py-4">
+
+        <!-- Error Message -->
+        <div th:if="${errorMessage}"
+             class="alert alert-danger alert-dismissible fade show"
+             role="alert">
+
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+
+            <span th:text="${errorMessage}"></span>
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert">
+            </button>
+
+        </div>
+
+        <div class="card shadow-sm">
+
+            <div class="card-header">
+
+                <h3 class="mb-0">
+
+                    <i class="bi bi-pencil-square me-2"></i>
+                    Edit User
+
+                </h3>
+
+            </div>
+
+            <div class="card-body">
+
+                <form th:action="@{/admin/users/{id}/edit(id=${user.userId})}"
+                      th:object="${user}"
+                      method="post">
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            User ID
+                        </label>
+
+                        <input class="form-control"
+                               th:value="${user.userId}"
+                               readonly>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Username
+                        </label>
+
+                        <input class="form-control"
+                               th:value="${user.username}"
+                               readonly>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Role
+                        </label>
+
+                        <select class="form-select" name="role">
+
+                            <option value="ROLE_ADMIN"
+                                    th:selected="${#lists.toList(user.roles)[0].name == 'ROLE_ADMIN'}">
+                                Administrator
+                            </option>
+
+                            <option value="ROLE_ENTRY_STAFF"
+                                    th:selected="${#lists.toList(user.roles)[0].name == 'ROLE_ENTRY_STAFF'}">
+                                Entry Staff
+                            </option>
+
+                            <option value="ROLE_AUDITOR"
+                                    th:selected="${#lists.toList(user.roles)[0].name == 'ROLE_AUDITOR'}">
+                                Auditor
+                            </option>
+
+                            <option value="ROLE_APPROVER"
+                                    th:selected="${#lists.toList(user.roles)[0].name == 'ROLE_APPROVER'}">
+                                Approver
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Status
+                        </label>
+
+                        <select class="form-select" name="enabled">
+
+                            <option value="true"
+                                    th:selected="${user.enabled}">
+                                Active
+                            </option>
+
+                            <option value="false"
+                                    th:selected="${!user.enabled}">
+                                Disabled
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <button class="btn btn-primary">
+
+                        <i class="bi bi-check-circle me-2"></i>
+                        Save Changes
+
+                    </button>
+
+                    <a th:href="@{/admin/users}"
+                       class="btn btn-secondary">
+
+                        Cancel
+
+                    </a>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+</body>
+
+</html>

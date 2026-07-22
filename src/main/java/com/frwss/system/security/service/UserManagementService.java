@@ -2,6 +2,7 @@
 
 package com.frwss.system.security.service;
 
+import com.frwss.system.audit.model.AuditActionType;
 import com.frwss.system.audit.service.AuditService;
 import com.frwss.system.repository.UserRepository;
 import com.frwss.system.security.SecurityContextAdapter;
@@ -15,6 +16,8 @@ import com.frwss.system.security.model.Role;
 import com.frwss.system.security.repository.RoleRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import com.frwss.system.security.exception.DuplicateUsernameException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -48,6 +51,8 @@ public class UserManagementService {
         return userRepository.findAll();
     }
 
+//    Creates a new user
+    @Transactional
     public void createUser(CreateUserRequest request) {
 
         // Prevent duplicate usernames
@@ -72,6 +77,104 @@ public class UserManagementService {
         user.setRoles(Set.of(role));
 
         userRepository.save(user);
+
+        auditService.log(
+                AuditActionType.USER_CREATED,
+                "User",
+                user.getUserId().toString(),
+                securityContextAdapter.getCurrentUsername(),
+                "Created user '" + user.getUsername()
+                        + "' with role " + role.getName()
+        );
+    }
+
+//    Returns a user by ID
+    @Transactional(readOnly = true)
+    public User getUserById(Integer userId) {
+
+        return userRepository.findById(userId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("User not found.")
+                );
+    }
+
+
+    //    Updates an existing user
+    @Transactional
+    public void updateUser(Integer userId, String roleName, boolean enabled) {
+
+        User user = getUserById(userId);
+
+        Role role = roleRepository.findByName(roleName)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Role not found.")
+                );
+
+        String currentUser = securityContextAdapter.getCurrentUsername();
+
+        if (user.getUsername().equals(currentUser) && !enabled) {
+            throw new IllegalArgumentException(
+                    "You cannot disable your own account."
+            );
+        }
+
+        boolean roleChanged = !user.getRoles().contains(role);
+        boolean statusChanged = user.isEnabled() != enabled;
+
+        user.getRoles().clear();
+        user.getRoles().add(role);
+        user.setEnabled(enabled);
+
+        userRepository.save(user);
+
+        if (statusChanged) {
+
+            auditService.log(
+                    enabled
+                            ? AuditActionType.USER_ENABLED
+                            : AuditActionType.USER_DISABLED,
+                    "User",
+                    user.getUserId().toString(),
+                    currentUser,
+                    (enabled ? "Enabled " : "Disabled ")
+                            + "user '" + user.getUsername() + "'"
+            );
+
+        } else if (roleChanged) {
+
+            auditService.log(
+                    AuditActionType.USER_UPDATED,
+                    "User",
+                    user.getUserId().toString(),
+                    currentUser,
+                    "Updated role for user '" + user.getUsername() + "'"
+            );
+
+        }
+    }
+
+    //    Resets a user's password
+    @Transactional
+    public void resetPassword(Integer userId,String password) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("User not found.")
+                );
+
+        user.setPassword(
+                passwordEncoder.encode(password)
+        );
+
+        userRepository.save(user);
+
+        auditService.log(
+                AuditActionType.PASSWORD_RESET,
+                "User",
+                user.getUserId().toString(),
+                securityContextAdapter.getCurrentUsername(),
+                "Reset password for user '" + user.getUsername() + "'"
+        );
     }
 
 }
