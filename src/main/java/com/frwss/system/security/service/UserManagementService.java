@@ -177,4 +177,52 @@ public class UserManagementService {
         );
     }
 
+    //    Resets a user's PIN
+    @Transactional
+    public void resetPin(
+            Integer userId,
+            String pin) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("User not found.")
+                );
+
+        user.setPinHash(
+                passwordEncoder.encode(pin)
+        );
+
+        userRepository.save(user);
+
+        auditService.log(
+                AuditActionType.PIN_RESET,
+                "User",
+                user.getUserId().toString(),
+                securityContextAdapter.getCurrentUsername(),
+                "Reset PIN for user '" + user.getUsername() + "'"
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public boolean verifyCurrentUserPin(String pin) {
+
+        String username = securityContextAdapter.getCurrentUsername();
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Current user not found.")
+                );
+
+        if (user.getPinHash() == null) {
+            throw new IllegalArgumentException(
+                    "No approval PIN has been configured."
+            );
+        }
+
+        return passwordEncoder.matches(
+                pin,
+                user.getPinHash()
+        );
+    }
+
 }

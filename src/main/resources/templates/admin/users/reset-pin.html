@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/header :: header('Reset PIN')}"></head>
+
+<body class="d-flex flex-column min-vh-100">
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<main class="flex-grow-1">
+
+    <div class="container py-4">
+
+        <div class="card shadow-sm">
+
+            <div class="card-header">
+
+                <h3 class="mb-0">
+
+                    <i class="bi bi-keypad-fill me-2"></i>
+                    Reset PIN
+
+                </h3>
+
+            </div>
+
+            <div class="card-body">
+
+                <form th:action="@{/admin/users/{id}/reset-pin(id=${user.userId})}"
+                      th:object="${resetPinRequest}"
+                      method="post">
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Username
+                        </label>
+
+                        <input type="text"
+                               class="form-control"
+                               th:value="${user.username}"
+                               readonly>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            New PIN
+                        </label>
+
+                        <input type="password"
+                               class="form-control"
+                               th:field="*{pin}"
+                               maxlength="6"
+                               minlength="4"
+                               placeholder="Enter 4-6 digit PIN"
+                               required>
+
+                    </div>
+
+                    <button class="btn btn-warning">
+
+                        <i class="bi bi-keypad-fill me-2"></i>
+                        Reset PIN
+
+                    </button>
+
+                    <a th:href="@{/admin/users}"
+                       class="btn btn-secondary">
+
+                        Cancel
+
+                    </a>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+</body>
+
+</html>

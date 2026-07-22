@@ -1,7 +1,10 @@
 package com.frwss.system.security.controller;
 
+import com.frwss.system.security.PinVerificationSession;
+import com.frwss.system.security.dto.ResetPinRequest;
 import com.frwss.system.security.exception.DuplicateUsernameException;
 import com.frwss.system.security.service.UserManagementService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -14,9 +17,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class AdminUserController {
 
     private final UserManagementService userManagementService;
+    private final PinVerificationSession pinVerificationSession;
 
-    public AdminUserController(UserManagementService userManagementService) {
+    public AdminUserController(
+            UserManagementService userManagementService,
+            PinVerificationSession pinVerificationSession) {
+
         this.userManagementService = userManagementService;
+        this.pinVerificationSession = pinVerificationSession;
     }
 
     @GetMapping
@@ -117,11 +125,28 @@ public class AdminUserController {
         }
     }
 
-    //    Displays the reset password page
-    @GetMapping("/{id}/reset-password")
-    public String resetPasswordPage(
+
+
+    //    Displays the password reset form
+    @GetMapping("/{id}/reset-password/form")
+    public String resetPasswordForm(
             @PathVariable Integer id,
-            Model model) {
+            Model model,
+            HttpSession session) {
+
+        //    Redirects if PIN is not verified
+        if (!pinVerificationSession.isVerified(session)) {
+
+            pinVerificationSession.storeRedirect(
+                    session,
+                    "/admin/users/" + id + "/reset-password/form"
+            );
+
+            return "redirect:/security/verify-pin";
+        }
+
+        //    Clears the verification flag
+        pinVerificationSession.clear(session);
 
         model.addAttribute(
                 "user",
@@ -131,12 +156,30 @@ public class AdminUserController {
         return "admin/users/reset-password";
     }
 
-    //    Resets the user's password
-    @PostMapping("/{id}/reset-password")
+
+
+
+    //    Resets the user's password after successful PIN verification
+    @PostMapping("/{id}/reset-password/form")
     public String resetPassword(
             @PathVariable Integer id,
             @RequestParam String password,
+            HttpSession session,
             RedirectAttributes redirectAttributes) {
+
+        //    Prevents direct POST requests without PIN verification
+        if (!pinVerificationSession.isVerified(session)) {
+
+            pinVerificationSession.storeRedirect(
+                    session,
+                    "/admin/users/" + id + "/reset-password/form"
+            );
+
+            return "redirect:/security/verify-pin";
+        }
+
+        //    Consumes the verification
+        pinVerificationSession.clear(session);
 
         userManagementService.resetPassword(
                 id,
@@ -146,6 +189,75 @@ public class AdminUserController {
         redirectAttributes.addFlashAttribute(
                 "successMessage",
                 "Password reset successfully."
+        );
+
+        return "redirect:/admin/users";
+    }
+
+    //    Displays the reset PIN page
+    @GetMapping("/{id}/reset-pin")
+    public String resetPinPage(
+            @PathVariable Integer id,
+            Model model,
+            HttpSession session) {
+
+        //    Redirects to PIN verification if not already verified
+        if (!pinVerificationSession.isVerified(session)) {
+
+            pinVerificationSession.storeRedirect(
+                    session,
+                    "/admin/users/" + id + "/reset-pin"
+            );
+
+            return "redirect:/security/verify-pin";
+        }
+
+        //    Consumes the verification so it cannot be reused
+        pinVerificationSession.clear(session);
+
+        model.addAttribute(
+                "user",
+                userManagementService.getUserById(id)
+        );
+
+        model.addAttribute(
+                "resetPinRequest",
+                new ResetPinRequest()
+        );
+
+        return "admin/users/reset-pin";
+    }
+
+    //    Resets the user's PIN after successful PIN verification
+    @PostMapping("/{id}/reset-pin")
+    public String resetPin(
+            @PathVariable Integer id,
+            @ModelAttribute ResetPinRequest resetPinRequest,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+
+        //    Prevents direct POST requests without PIN verification
+        if (!pinVerificationSession.isVerified(session)) {
+
+            pinVerificationSession.storeRedirect(
+                    session,
+                    "/admin/users/" + id + "/reset-pin"
+            );
+
+            return "redirect:/security/verify-pin";
+        }
+
+        //    Consumes the verification
+        pinVerificationSession.clear(session);
+
+        userManagementService.resetPin(
+                id,
+                resetPinRequest.getPin()
+        );
+
+        redirectAttributes.addFlashAttribute(
+                "successMessage",
+                "PIN reset successfully."
         );
 
         return "redirect:/admin/users";

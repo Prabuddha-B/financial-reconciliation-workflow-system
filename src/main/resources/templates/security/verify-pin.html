@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/header :: header('Verify PIN')}"></head>
+
+<body class="d-flex flex-column min-vh-100">
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<main class="flex-grow-1">
+
+    <div class="container py-4">
+
+        <!-- Success Message -->
+        <div th:if="${successMessage}"
+             class="alert alert-success alert-dismissible fade show">
+
+            <span th:text="${successMessage}"></span>
+
+            <button class="btn-close"
+                    data-bs-dismiss="alert"></button>
+
+        </div>
+
+        <!-- Error Message -->
+        <div th:if="${errorMessage}"
+             class="alert alert-danger alert-dismissible fade show">
+
+            <span th:text="${errorMessage}"></span>
+
+            <button class="btn-close"
+                    data-bs-dismiss="alert"></button>
+
+        </div>
+
+        <div class="card shadow-sm">
+
+            <div class="card-header">
+
+                <h3 class="mb-0">
+
+                    <i class="bi bi-shield-lock-fill me-2"></i>
+                    Verify PIN
+
+                </h3>
+
+            </div>
+
+            <div class="card-body">
+
+                <p class="text-muted mb-4">
+                    Enter your security PIN to continue.
+                </p>
+
+                <form
+                        th:action="@{/security/verify-pin}"
+                        th:object="${pinVerificationRequest}"
+                        method="post">
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Security PIN
+                        </label>
+
+                        <input
+                                type="password"
+                                class="form-control"
+                                th:field="*{pin}"
+                                maxlength="6"
+                                minlength="4"
+                                pattern="[0-9]{4,6}"
+                                placeholder="Enter your PIN"
+                                required>
+
+                    </div>
+
+                    <button
+                            type="submit"
+                            class="btn btn-primary">
+
+                        <i class="bi bi-check-circle me-2"></i>
+                        Verify PIN
+
+                    </button>
+
+                    <a th:href="@{/home}"
+                       class="btn btn-secondary">
+
+                        Cancel
+
+                    </a>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+</body>
+</html>

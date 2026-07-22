@@ -133,11 +133,19 @@
 
                             </a>
 
-                            <a th:href="@{/admin/users/{id}/reset-password(id=${user.userId})}"
+                            <a th:href="@{/admin/users/{id}/reset-password/form(id=${user.userId})}"
                                class="btn btn-sm btn-warning">
 
                                 <i class="bi bi-key me-1"></i>
                                 Reset Password
+
+                            </a>
+
+                            <a th:href="@{/admin/users/{id}/reset-pin(id=${user.userId})}"
+                               class="btn btn-sm btn-secondary">
+
+                                <i class="bi bi-keypad-fill me-1"></i>
+                                Reset PIN
 
                             </a>
 
