@@ -3,189 +3,648 @@
 
 <head th:replace="~{fragments/header :: header('Manage Tax Configurations')}"></head>
 
-<body class="d-flex flex-column min-vh-100">
+<style>
+    /* ============================================================
+       FRWSS PRO UX/UI DESIGN - Manage Tax Configurations
+       ============================================================ */
 
-<!-- Navbar -->
-<div th:replace="~{fragments/navbar :: navbar}"></div>
+    .main-container {
+        padding: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
 
-<!-- Main Content -->
-<main class="flex-grow-1">
+    /* Page Header */
+    .page-header {
+        margin-bottom: 2rem;
+    }
 
-    <div class="container py-4">
+    .page-header h2 {
+        font-weight: 700;
+        color: #1a2332;
+        font-size: 2rem;
+        letter-spacing: -0.3px;
+        margin-bottom: 0.25rem;
+    }
 
-        <!-- Success Message -->
-        <div th:if="${successMessage}"
-             class="alert alert-success alert-dismissible fade show"
-             role="alert">
+    .page-header h2 i {
+        color: #0d6efd;
+    }
 
-            <i class="bi bi-check-circle-fill me-2"></i>
-            <span th:text="${successMessage}"></span>
+    .page-header .text-muted {
+        font-size: 1.05rem;
+        color: #6c757d !important;
+    }
 
-            <button type="button"
-                    class="btn-close"
-                    data-bs-dismiss="alert">
-            </button>
+    /* Buttons */
+    .btn-add {
+        padding: 0.6rem 1.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        background: #198754;
+        color: white;
+        border: none;
+        transition: all 0.15s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
 
-        </div>
+    .btn-add:hover {
+        background: #157347;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(25, 135, 84, 0.3);
+    }
 
-        <!-- Error Message -->
-        <div th:if="${errorMessage}"
-             class="alert alert-danger alert-dismissible fade show"
-             role="alert">
+    .btn-back {
+        padding: 0.6rem 1.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        border: 1.5px solid #e2e8f0;
+        transition: all 0.15s;
+        background: white;
+        color: #495057;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
 
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-            <span th:text="${errorMessage}"></span>
+    .btn-back:hover {
+        background: #f8f9fa;
+        border-color: #ced4da;
+        transform: translateY(-2px);
+        text-decoration: none;
+        color: #495057;
+    }
 
-            <button type="button"
-                    class="btn-close"
-                    data-bs-dismiss="alert">
-            </button>
+    /* Card */
+    .card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        transition: box-shadow 0.2s ease;
+        background: white;
+    }
 
-        </div>
+    .card:hover {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
 
-        <div class="d-flex justify-content-between align-items-center mb-4">
+    .card-body {
+        padding: 0;
+        overflow: hidden;
+        border-radius: 16px;
+    }
 
-            <div>
-                <h2 class="fw-bold">
-                    <i class="bi bi-cash-stack me-2"></i>
-                    Manage Tax Configurations
-                </h2>
+    /* Table */
+    .table {
+        margin-bottom: 0;
+        font-size: 0.95rem;
+    }
 
-                <p class="text-muted mb-0">
-                    Update reference tax rates used by the estimation module.
-                </p>
+    .table thead th {
+        background: #f8f9fa;
+        border-bottom: 2px solid #e9ecef;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        color: #495057;
+        padding: 1rem 1.25rem;
+    }
+
+    .table tbody td {
+        padding: 1rem 1.25rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f3f5;
+    }
+
+    .table tbody tr {
+        transition: background-color 0.15s ease;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f8f9ff;
+    }
+
+    .table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* Module & Category Text */
+    .module-text {
+        font-weight: 600;
+        color: #1a2332;
+    }
+
+    .category-text {
+        color: #495057;
+    }
+
+    /* Tax Rate Badge */
+    .tax-rate-badge {
+        padding: 0.35rem 0.85rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        display: inline-block;
+        background: #e7f1ff;
+        color: #0d6efd;
+        min-width: 60px;
+        text-align: center;
+    }
+
+    /* Description */
+    .description-text {
+        color: #6c757d;
+        font-size: 0.9rem;
+        max-width: 200px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: block;
+    }
+
+    /* Status Badge */
+    .status-badge {
+        padding: 0.3rem 0.85rem;
+        border-radius: 50px;
+        font-weight: 500;
+        font-size: 0.85rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .status-badge.active {
+        background: #d1e7dd;
+        color: #0f5132;
+    }
+
+    .status-badge.active .status-dot {
+        background: #198754;
+    }
+
+    .status-badge.inactive {
+        background: #e9ecef;
+        color: #495057;
+    }
+
+    .status-badge.inactive .status-dot {
+        background: #adb5bd;
+    }
+
+    .status-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    /* Action Buttons */
+    .action-group {
+        display: flex;
+        gap: 0.4rem;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .action-group .btn-action {
+        padding: 0.3rem 0.7rem;
+        font-size: 0.8rem;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.15s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        border: 1px solid transparent;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .action-group .btn-action i {
+        font-size: 0.85rem;
+    }
+
+    .action-group .btn-action:hover {
+        transform: translateY(-1px);
+    }
+
+    .action-group .btn-edit {
+        background: #e7f1ff;
+        color: #0d6efd;
+        border-color: #cfe2ff;
+    }
+
+    .action-group .btn-edit:hover {
+        background: #cfe2ff;
+    }
+
+    .action-group .btn-activate {
+        background: #d1e7dd;
+        color: #198754;
+        border-color: #a3cfbb;
+    }
+
+    .action-group .btn-activate:hover {
+        background: #a3cfbb;
+    }
+
+    .action-group .btn-deactivate {
+        background: #f8d7da;
+        color: #dc3545;
+        border-color: #f5c2c7;
+    }
+
+    .action-group .btn-deactivate:hover {
+        background: #f5c2c7;
+    }
+
+    /* Alert messages */
+    .alert {
+        border: none;
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        font-weight: 500;
+        font-size: 0.95rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .alert-success {
+        background: #d1e7dd;
+        color: #0f5132;
+    }
+
+    .alert-danger {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .alert i {
+        font-size: 1.1rem;
+        margin-right: 0.5rem;
+    }
+
+    .alert .btn-close {
+        font-size: 0.7rem;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1.5rem;
+        color: #6c757d;
+    }
+
+    .empty-state i {
+        font-size: 2.5rem;
+        color: #dee2e6;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h5 {
+        color: #343a40;
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        max-width: 400px;
+        margin: 0 auto;
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+        .main-container {
+            padding: 1.5rem;
+        }
+        .table thead th,
+        .table tbody td {
+            padding: 0.75rem 1rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .main-container {
+            padding: 1rem;
+        }
+        .page-header h2 {
+            font-size: 1.6rem;
+        }
+        .page-header .text-muted {
+            font-size: 0.95rem;
+        }
+        .btn-add,
+        .btn-back {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+        .table thead th,
+        .table tbody td {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.85rem;
+        }
+        .action-group .btn-action {
+            padding: 0.2rem 0.5rem;
+            font-size: 0.7rem;
+        }
+        .action-group .btn-action i {
+            font-size: 0.7rem;
+        }
+        .action-group .btn-action .btn-text {
+            display: none;
+        }
+        .tax-rate-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.6rem;
+            min-width: 45px;
+        }
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 0.2rem 0.6rem;
+        }
+        .description-text {
+            max-width: 100px;
+        }
+        .d-flex.justify-content-between {
+            flex-direction: column;
+            align-items: stretch !important;
+            gap: 0.75rem;
+        }
+        .d-flex.justify-content-between .d-flex {
+            flex-wrap: wrap;
+        }
+        .d-flex.justify-content-between .d-flex .btn-add,
+        .d-flex.justify-content-between .d-flex .btn-back {
+            flex: 1;
+            justify-content: center;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .main-container {
+            padding: 0.75rem;
+        }
+        .card-body {
+            border-radius: 12px;
+        }
+        .table thead th,
+        .table tbody td {
+            padding: 0.4rem 0.5rem;
+            font-size: 0.8rem;
+        }
+        .page-header h2 {
+            font-size: 1.3rem;
+        }
+        .module-text {
+            font-size: 0.85rem;
+        }
+        .category-text {
+            font-size: 0.8rem;
+        }
+        .tax-rate-badge {
+            font-size: 0.7rem;
+            padding: 0.15rem 0.4rem;
+            min-width: 35px;
+        }
+        .status-badge {
+            font-size: 0.65rem;
+            padding: 0.15rem 0.4rem;
+        }
+        .status-badge .status-text {
+            display: none;
+        }
+        .description-text {
+            max-width: 60px;
+            font-size: 0.75rem;
+        }
+        .action-group .btn-action {
+            padding: 0.15rem 0.3rem;
+            font-size: 0.6rem;
+        }
+        .action-group .btn-action i {
+            font-size: 0.6rem;
+        }
+        .action-group .btn-action .btn-text {
+            display: none;
+        }
+    }
+</style>
+
+<body class="d-flex flex-column min-vh-100 bg-light">
+
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <main class="flex-grow-1">
+
+        <div class="container-fluid main-container">
+
+            <!-- Success Message -->
+            <div th:if="${successMessage}"
+                 class="alert alert-success alert-dismissible fade show"
+                 role="alert">
+
+                <i class="bi bi-check-circle-fill"></i>
+                <span th:text="${successMessage}"></span>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                </button>
+
             </div>
 
-            <div class="d-flex gap-2">
+            <!-- Error Message -->
+            <div th:if="${errorMessage}"
+                 class="alert alert-danger alert-dismissible fade show"
+                 role="alert">
 
-                <a th:href="@{/admin/tax-configurations/create}"
-                   class="btn btn-success">
-                    <i class="bi bi-plus-circle me-2"></i>
-                    Add Configuration
-                </a>
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <span th:text="${errorMessage}"></span>
 
-                <a th:href="@{/tax}" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-left me-2"></i>
-                    Back to Tax Estimation
-                </a>
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                </button>
+
+            </div>
+
+
+            <!-- PAGE HEADER -->
+            <div class="page-header">
+
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div>
+                        <h2>
+                            <i class="bi bi-cash-stack me-2"></i>
+                            Manage Tax Configurations
+                        </h2>
+                        <p class="text-muted mb-0">
+                            Update reference tax rates used by the estimation module.
+                        </p>
+                    </div>
+
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a th:href="@{/admin/tax-configurations/create}"
+                           class="btn-add">
+                            <i class="bi bi-plus-circle"></i>
+                            Add Configuration
+                        </a>
+
+                        <a th:href="@{/tax}"
+                           class="btn-back">
+                            <i class="bi bi-arrow-left"></i>
+                            Back to Tax Estimation
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- TABLE -->
+            <div class="card shadow-sm">
+
+                <div class="card-body">
+
+                    <div class="table-responsive">
+
+                        <table class="table table-hover align-middle">
+
+                            <thead>
+                            <tr>
+                                <th>Module</th>
+                                <th>Category</th>
+                                <th>Tax Rate (%)</th>
+                                <th>Description</th>
+                                <th>Status</th>
+                                <th style="min-width: 160px;">Action</th>
+                            </tr>
+                            </thead>
+
+                            <tbody>
+
+                            <tr th:each="config : ${configurations}">
+
+                                <!-- Module -->
+                                <td>
+                                    <span class="module-text" th:text="${config.module}"></span>
+                                </td>
+
+                                <!-- Category -->
+                                <td>
+                                    <span class="category-text" th:text="${config.category}"></span>
+                                </td>
+
+                                <!-- Tax Rate -->
+                                <td>
+                                        <span class="tax-rate-badge" th:text="${config.taxRate + '%'}">
+                                        </span>
+                                </td>
+
+                                <!-- Description -->
+                                <td>
+                                    <span class="description-text" th:text="${config.description}"></span>
+                                </td>
+
+                                <!-- Status -->
+                                <td>
+                                        <span th:if="${config.isActive}"
+                                              class="status-badge active">
+                                            <span class="status-dot"></span>
+                                            <span class="status-text">Active</span>
+                                        </span>
+                                    <span th:unless="${config.isActive}"
+                                          class="status-badge inactive">
+                                            <span class="status-dot"></span>
+                                            <span class="status-text">Inactive</span>
+                                        </span>
+                                </td>
+
+                                <!-- Actions -->
+                                <td>
+                                    <div class="action-group">
+
+                                        <!-- Edit -->
+                                        <a class="btn-action btn-edit"
+                                           th:href="@{/admin/tax-configurations/{id}/edit(id=${config.id})}"
+                                           title="Edit Configuration">
+                                            <i class="bi bi-pencil-square"></i>
+                                            <span class="btn-text">Edit</span>
+                                        </a>
+
+                                        <!-- Deactivate -->
+                                        <form th:if="${config.isActive}"
+                                              th:action="@{/admin/tax-configurations/{id}/deactivate(id=${config.id})}"
+                                              method="post"
+                                              class="d-inline"
+                                              onsubmit="return confirm('Are you sure you want to deactivate this tax configuration?');">
+
+                                            <button type="submit"
+                                                    class="btn-action btn-deactivate"
+                                                    title="Deactivate Configuration">
+                                                <i class="bi bi-pause-circle"></i>
+                                                <span class="btn-text">Deactivate</span>
+                                            </button>
+
+                                        </form>
+
+                                        <!-- Activate -->
+                                        <form th:unless="${config.isActive}"
+                                              th:action="@{/admin/tax-configurations/{id}/activate(id=${config.id})}"
+                                              method="post"
+                                              class="d-inline"
+                                              onsubmit="return confirm('Activate this tax configuration?');">
+
+                                            <button type="submit"
+                                                    class="btn-action btn-activate"
+                                                    title="Activate Configuration">
+                                                <i class="bi bi-play-circle"></i>
+                                                <span class="btn-text">Activate</span>
+                                            </button>
+
+                                        </form>
+
+                                    </div>
+                                </td>
+
+                            </tr>
+
+                            <!-- Empty State -->
+                            <tr th:if="${#lists.isEmpty(configurations)}">
+                                <td colspan="6" class="text-center py-4">
+                                    <div class="empty-state">
+                                        <i class="bi bi-cash-stack"></i>
+                                        <h5>No tax configurations found</h5>
+                                        <p class="text-muted">Add your first tax configuration to get started.</p>
+                                        <a th:href="@{/admin/tax-configurations/create}"
+                                           class="btn-add mt-2" style="display: inline-flex;">
+                                            <i class="bi bi-plus-circle"></i>
+                                            Add Configuration
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
 
             </div>
 
         </div>
 
-        <div class="card shadow-sm">
+    </main>
 
-            <div class="card-body">
+    <div th:replace="~{fragments/footer :: footer}"></div>
 
-                <table class="table table-hover align-middle">
-
-                    <thead class="table-light">
-                    <tr>
-                        <th>Module</th>
-                        <th>Category</th>
-                        <th>Tax Rate (%)</th>
-                        <th>Description</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                    </thead>
-
-                    <tbody>
-
-                    <tr th:each="config : ${configurations}">
-
-                        <td th:text="${config.module}"></td>
-
-                        <td th:text="${config.category}"></td>
-
-                        <td>
-                                <span class="badge bg-primary"
-                                      th:text="${config.taxRate + '%'}">
-                                </span>
-                        </td>
-
-                        <td th:text="${config.description}"></td>
-
-                        <td>
-
-                                <span th:if="${config.isActive}"
-                                      class="badge bg-success">
-                                    Active
-                                </span>
-
-                            <span th:unless="${config.isActive}"
-                                  class="badge bg-secondary">
-                                    Inactive
-                                </span>
-
-                        </td>
-
-                        <td>
-
-                            <div class="d-flex gap-2">
-
-                                <a class="btn btn-sm btn-primary"
-                                   th:href="@{/admin/tax-configurations/{id}/edit(id=${config.id})}">
-
-                                    <i class="bi bi-pencil-square me-1"></i>
-                                    Edit
-
-                                </a>
-
-                                <!-- Active Configuration -->
-                                <form th:if="${config.isActive}"
-                                      th:action="@{/admin/tax-configurations/{id}/deactivate(id=${config.id})}"
-                                      method="post"
-                                      class="d-inline">
-
-                                    <button type="submit"
-                                            class="btn btn-sm btn-danger"
-                                            onclick="return confirm('Are you sure you want to deactivate this tax configuration?');">
-
-                                        <i class="bi bi-pause-circle me-1"></i>
-                                        Deactivate
-
-                                    </button>
-
-                                </form>
-
-                                <!-- Inactive Configuration -->
-                                <form th:unless="${config.isActive}"
-                                      th:action="@{/admin/tax-configurations/{id}/activate(id=${config.id})}"
-                                      method="post"
-                                      class="d-inline">
-
-                                    <button type="submit"
-                                            class="btn btn-sm btn-success"
-                                            onclick="return confirm('Activate this tax configuration?');">
-
-                                        <i class="bi bi-play-circle me-1"></i>
-                                        Activate
-
-                                    </button>
-
-                                </form>
-
-                            </div>
-
-                        </td>
-
-                    </tr>
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</main>
-
-<!-- Footer -->
-<div th:replace="~{fragments/footer :: footer}"></div>
 </body>
 
 </html>
