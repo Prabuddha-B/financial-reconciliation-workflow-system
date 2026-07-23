@@ -13,6 +13,12 @@ public class CreateUserRequest {
     @NotBlank
     private String role;
 
+    @NotBlank
+    private String pin;
+
+    @NotBlank
+    private String confirmPin;
+
     public String getUsername() {
         return username;
     }
@@ -35,5 +41,21 @@ public class CreateUserRequest {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getPin() {
+        return pin;
+    }
+
+    public void setPin(String pin) {
+        this.pin = pin;
+    }
+
+    public String getConfirmPin() {
+        return confirmPin;
+    }
+
+    public void setConfirmPin(String confirmPin) {
+        this.confirmPin = confirmPin;
     }
 }

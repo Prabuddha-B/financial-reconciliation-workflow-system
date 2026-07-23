@@ -31,6 +31,7 @@ public enum AuditActionType {
     USER_ENABLED,
     USER_DISABLED,
     PASSWORD_RESET,
-    PIN_RESET
+    PIN_RESET,
+    ACCOUNT_SWITCHED
 
 }

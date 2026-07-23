@@ -6,12 +6,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-/**
- * This adapter class provides current user information
- * It supports both development mode (hardcoded values) and production mode (real security).
- * The mode is controlled via application.properties
- */
-
 @Component
 public class SecurityContextAdapter {
 
@@ -65,7 +59,6 @@ public class SecurityContextAdapter {
         }
     }
 
-
 //     Checks multiple roles.
     public boolean hasAnyRole(String... roles) {
         for (String role : roles) {
@@ -84,7 +77,6 @@ public class SecurityContextAdapter {
         return useRealSecurity;
     }
 
-    // these methods will be replaced when the security module is integrated
 
 //     Gets username from Spring Security.
     private String getRealUsername() {

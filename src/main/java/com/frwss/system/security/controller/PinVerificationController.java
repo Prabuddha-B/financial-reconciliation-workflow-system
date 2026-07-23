@@ -24,9 +24,8 @@ public class PinVerificationController {
         this.pinVerificationSession = pinVerificationSession;
     }
 
-    // ------------------------------------------------------------
-    // Displays the PIN verification page
-    // ------------------------------------------------------------
+
+//    Displays the PIN verification page
     @GetMapping("/verify-pin")
     public String verifyPinPage(Model model) {
 
@@ -38,10 +37,7 @@ public class PinVerificationController {
         return "security/verify-pin";
     }
 
-    // ------------------------------------------------------------
-    // Verifies the current user's PIN before executing
-    // the requested sensitive operation
-    // ------------------------------------------------------------
+//    Verifies the current user's PIN before executing the requested sensitive operation
     @PostMapping("/verify-pin")
     public String verifyPin(
             @ModelAttribute PinVerificationRequest request,

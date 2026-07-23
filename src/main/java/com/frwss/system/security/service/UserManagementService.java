@@ -47,9 +47,17 @@ public class UserManagementService {
     }
 
     @Transactional(readOnly = true)
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public List<User> getAllUsers(String username,String role,Boolean enabled) {
+
+        return userRepository.findUsersByFilters(
+                username,role,enabled);
     }
+
+    @Transactional(readOnly = true)
+    public List<User> getAllUsers() {
+        return getAllUsers(null, null,null);
+    }
+
 
 //    Creates a new user
     @Transactional
@@ -58,6 +66,27 @@ public class UserManagementService {
         // Prevent duplicate usernames
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
             throw new DuplicateUsernameException("Username already exists.");
+        }
+
+        // Validate PIN
+        if (request.getPin() == null || request.getPin().isBlank()) {
+            throw new IllegalArgumentException("PIN is required.");
+        }
+
+        if (request.getConfirmPin() == null || request.getConfirmPin().isBlank()) {
+            throw new IllegalArgumentException("Confirm PIN is required.");
+        }
+
+        if (!request.getPin().matches("\\d{4,6}")) {
+            throw new IllegalArgumentException(
+                    "PIN must contain 4 to 6 digits."
+            );
+        }
+
+        if (!request.getPin().equals(request.getConfirmPin())) {
+            throw new IllegalArgumentException(
+                    "PINs do not match."
+            );
         }
 
         Role role = roleRepository.findByName(request.getRole())
@@ -71,9 +100,23 @@ public class UserManagementService {
 
         user.setUserId(nextId);
         user.setUsername(request.getUsername());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        // Encode password
+        user.setPassword(
+                passwordEncoder.encode(request.getPassword())
+        );
+
+        // Encode PIN
+        user.setPinHash(
+                passwordEncoder.encode(request.getPin())
+        );
+
         user.setEnabled(true);
         user.setCreatedAt(LocalDateTime.now());
+
+        // Keep compatibility with existing code
+        user.setRole(role.getName());
+
         user.setRoles(Set.of(role));
 
         userRepository.save(user);
@@ -179,9 +222,7 @@ public class UserManagementService {
 
     //    Resets a user's PIN
     @Transactional
-    public void resetPin(
-            Integer userId,
-            String pin) {
+    public void resetPin(Integer userId,String pin) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() ->
@@ -225,4 +266,177 @@ public class UserManagementService {
         );
     }
 
+    //    Returns enabled demo accounts with the same role as the current user
+    @Transactional(readOnly = true)
+    public List<User> getEligibleSwitchAccounts() {
+
+        String currentUsername = securityContextAdapter.getCurrentUsername();
+        String currentRole = securityContextAdapter.getCurrentUserRole();
+
+        return userRepository.findEnabledUsersByRoleNameExcludingUsername(
+                "ROLE_" + currentRole,
+                currentUsername
+        );
+    }
+
+    //    Validates the selected demo account before switching sessions
+    @Transactional(readOnly = true)
+    public User validateSwitchAccount(Integer userId) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Selected user not found.")
+                );
+
+        String currentUsername = securityContextAdapter.getCurrentUsername();
+        String currentRole = "ROLE_"
+                + securityContextAdapter.getCurrentUserRole();
+
+        if (user.getUsername().equals(currentUsername)) {
+            throw new IllegalArgumentException(
+                    "You cannot switch to the current account."
+            );
+        }
+
+        if (!user.isEnabled()) {
+            throw new IllegalArgumentException(
+                    "Selected user account is disabled."
+            );
+        }
+
+        boolean hasSameRole = user.getRoles().stream()
+                .anyMatch(role -> role.getName().equals(currentRole));
+
+        if (!hasSameRole) {
+            throw new IllegalArgumentException(
+                    "You can only switch to an account with the same role."
+            );
+        }
+
+        return user;
+    }
+
+    //    Verifies the selected user's PIN
+    @Transactional(readOnly = true)
+    public void verifySwitchAccountPin(Integer userId,String pin) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("User not found.")
+                );
+
+        if (!user.isEnabled()) {
+
+            throw new IllegalArgumentException(
+                    "Selected account is disabled."
+            );
+        }
+
+        if (!passwordEncoder.matches(
+                pin,
+                user.getPinHash())) {
+
+            throw new IllegalArgumentException(
+                    "Invalid PIN."
+            );
+        }
+    }
+
+    // Enables a single user
+    @Transactional
+    public void enableUser(Integer userId) {
+
+        User user = getUserById(userId);
+
+        if (user.isEnabled()) {
+            return;
+        }
+
+        user.setEnabled(true);
+
+        userRepository.save(user);
+
+        auditService.log(
+                AuditActionType.USER_ENABLED,
+                "User",
+                user.getUserId().toString(),
+                securityContextAdapter.getCurrentUsername(),
+                "Enabled user '" + user.getUsername() + "'"
+        );
+    }
+
+    // Disables a single user
+    @Transactional
+    public void disableUser(Integer userId) {
+
+        User user = getUserById(userId);
+
+        String currentUser = securityContextAdapter.getCurrentUsername();
+
+        if (user.getUsername().equals(currentUser)) {
+            throw new IllegalArgumentException(
+                    "You cannot disable your own account."
+            );
+        }
+
+        if (!user.isEnabled()) {
+            return;
+        }
+
+        user.setEnabled(false);
+
+        userRepository.save(user);
+
+        auditService.log(
+                AuditActionType.USER_DISABLED,
+                "User",
+                user.getUserId().toString(),
+                currentUser,
+                "Disabled user '" + user.getUsername() + "'"
+        );
+    }
+
+    // Enables multiple user
+    @Transactional
+    public void bulkEnable(List<Integer> userIds) {
+        for (Integer userId : userIds) {
+            enableUser(userId);
+        }
+    }
+
+    // Disables multiple users
+    @Transactional
+    public void bulkDisable(List<Integer> userIds) {
+        for (Integer userId : userIds) {
+            disableUser(userId);
+        }
+    }
+
+    // Bulk password reset
+    @Transactional
+    public void bulkResetPassword(List<Integer> userIds,String temporaryPassword) {
+
+        String currentUser = securityContextAdapter.getCurrentUsername();
+
+        List<User> users = userRepository.findAllById(userIds);
+
+        for (User user : users) {
+
+            user.setPassword(
+                    passwordEncoder.encode(
+                            temporaryPassword
+                    )
+            );
+
+            auditService.log(
+                    AuditActionType.PASSWORD_RESET,
+                    "User",
+                    user.getUserId().toString(),
+                    currentUser,
+                    "Bulk reset password for user '" + user.getUsername() + "'"
+            );
+        }
+
+        userRepository.saveAll(users);
+    }
 }
