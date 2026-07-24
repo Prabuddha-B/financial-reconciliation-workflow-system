@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Notifications</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <style>
+    .notification-item {
+      transition: background-color 0.2s ease;
+    }
+    .notification-item:hover {
+      background-color: #f8f9fa !important;
+    }
+    .notification-item.unread {
+      background-color: #f0f7ff;
+      border-left: 4px solid #0d6efd;
+    }
+    .notification-item.unread:hover {
+      background-color: #e8f0fe !important;
+    }
+    .notification-item .badge-new {
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.6; }
+      100% { opacity: 1; }
+    }
+    .notification-icon {
+      font-size: 1.5rem;
+      width: 2.5rem;
+      text-align: center;
+    }
+    .type-badge {
+      font-size: 0.7rem;
+      padding: 0.2rem 0.6rem;
+    }
+  </style>
+</head>
+<body>
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="container py-4">
+
+  <!-- Page Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2><i class="bi bi-bell me-2"></i>Notifications</h2>
+      <p class="text-muted mb-0">View all your system notifications</p>
+    </div>
+    <div>
+            <span class="badge bg-primary rounded-pill px-3 py-2 me-2"
+                  th:if="${unreadCount != null and unreadCount > 0}">
+                <i class="bi bi-bell me-1"></i>
+                <span th:text="${unreadCount}">0</span> unread
+            </span>
+      <span class="badge bg-secondary rounded-pill px-3 py-2 me-2"
+            th:if="${unreadCount == null or unreadCount == 0}">
+                <i class="bi bi-check-all me-1"></i>All read
+            </span>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div th:if="${error}" class="alert alert-danger">
+    <i class="bi bi-exclamation-triangle me-2"></i>
+    <span th:text="${error}"></span>
+  </div>
+
+  <!-- Success Message -->
+  <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="bi bi-check-circle me-2"></i><span th:text="${successMessage}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+
+  <!-- Mark All Read Button -->
+  <div class="mb-3" th:if="${not #lists.isEmpty(notifications) and unreadCount > 0}">
+    <form th:action="@{/notifications/mark-all-read}" method="post" class="d-inline">
+      <button type="submit" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-check2-all me-1"></i>Mark all as read
+      </button>
+    </form>
+  </div>
+
+  <!-- Notification List -->
+  <div class="card shadow-sm">
+    <div class="list-group list-group-flush">
+      <div th:each="notification : ${notifications}"
+           class="list-group-item list-group-item-action notification-item"
+           th:classappend="${!notification.isRead} ? 'unread' : ''">
+
+        <div class="d-flex align-items-start gap-3">
+          <!-- Icon based on type -->
+          <div class="notification-icon mt-1">
+                        <span th:switch="${notification.type}">
+                            <span th:case="'MESSAGE'" class="text-primary">📩</span>
+                            <span th:case="'APPROVAL'" class="text-warning">⚠️</span>
+                            <span th:case="'REMINDER'" class="text-info">🔔</span>
+                            <span th:case="'SYSTEM'" class="text-secondary">⚙️</span>
+                            <span th:case="'TASK'" class="text-success">📋</span>
+                            <span th:case="'RECONCILIATION'" class="text-success">✅</span>
+                            <span th:case="'WORKFLOW'" class="text-warning">🔄</span>
+                            <span th:case="'APPROVED'" class="text-success">✅</span>
+                            <span th:case="'REJECTED'" class="text-danger">❌</span>
+                            <span th:case="'UPLOAD'" class="text-primary">📤</span>
+                            <span th:case="*" class="text-secondary">📌</span>
+                        </span>
+          </div>
+
+          <div class="flex-grow-1">
+            <!-- Header: Status + Title -->
+            <div class="mb-1">
+              <span th:if="${!notification.isRead}" class="badge bg-primary badge-new me-2">New</span>
+              <!-- ✅ FIXED: Using th:switch for type badge -->
+              <span class="badge type-badge me-2" th:switch="${notification.type}">
+                                <span th:case="'APPROVAL'" class="bg-warning text-dark">APPROVAL</span>
+                                <span th:case="'MESSAGE'" class="bg-info text-white">MESSAGE</span>
+                                <span th:case="'SYSTEM'" class="bg-secondary text-white">SYSTEM</span>
+                                <span th:case="'RECONCILIATION'" class="bg-success text-white">RECONCILIATION</span>
+                                <span th:case="'APPROVED'" class="bg-success text-white">APPROVED</span>
+                                <span th:case="'REJECTED'" class="bg-danger text-white">REJECTED</span>
+                                <span th:case="'TASK'" class="bg-primary text-white">TASK</span>
+                                <span th:case="'REMINDER'" class="bg-info text-white">REMINDER</span>
+                                <span th:case="'WORKFLOW'" class="bg-warning text-dark">WORKFLOW</span>
+                                <span th:case="'UPLOAD'" class="bg-primary text-white">UPLOAD</span>
+                                <span th:case="*" class="bg-secondary text-white">UNKNOWN</span>
+                            </span>
+              <strong th:text="${notification.title}">Title</strong>
+            </div>
+
+            <!-- Message -->
+            <div class="text-muted small" th:text="${notification.message}">Message</div>
+
+            <!-- Footer: Link + Date -->
+            <div class="d-flex justify-content-between align-items-center mt-1">
+              <div>
+                <a th:if="${notification.link}" th:href="${notification.link}" class="btn btn-sm btn-outline-primary">
+                  <i class="bi bi-eye me-1"></i>View
+                </a>
+                <span th:if="${notification.link == null}" class="text-muted small">No action required</span>
+              </div>
+              <div class="text-muted small">
+                <i class="bi bi-clock me-1"></i>
+                <span th:text="${#temporals.format(notification.createdAt, 'dd MMM yyyy HH:mm')}">Date</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="d-flex gap-1">
+            <form th:if="${!notification.isRead}" th:action="@{/notifications/mark-read/{id}(id=${notification.id})}" method="post" class="d-inline">
+              <button type="submit" class="btn btn-sm btn-outline-secondary" title="Mark as read">
+                <i class="bi bi-check"></i>
+              </button>
+            </form>
+            <form th:action="@{/notifications/delete/{id}(id=${notification.id})}" method="post" class="d-inline">
+              <button type="submit" class="btn btn-sm btn-outline-danger"
+                      onclick="return confirm('Delete this notification?');" title="Delete">
+                <i class="bi bi-x"></i>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div th:if="${#lists.isEmpty(notifications)}" class="text-center py-5 text-muted">
+        <i class="bi bi-bell-slash fs-1 d-block mb-2"></i>
+        <h5>No notifications</h5>
+        <p class="mb-0">When you receive notifications, they'll appear here.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

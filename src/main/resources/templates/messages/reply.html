@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Reply to Message</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+</head>
+<body>
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="container py-4">
+
+  <!-- Page Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2><i class="bi bi-reply me-2"></i>Reply to Message</h2>
+      <p class="text-muted mb-0">Reply to <span th:text="${originalMessage.subject}">Subject</span></p>
+    </div>
+    <a th:href="@{/messages/view/{id}(id=${originalMessage.id})}" class="btn btn-outline-secondary">
+      <i class="bi bi-arrow-left me-1"></i>Back
+    </a>
+  </div>
+
+  <!-- Original Message Preview -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-light">
+      <strong>Original Message</strong>
+    </div>
+    <div class="card-body">
+      <div class="row mb-2">
+        <div class="col-md-6">
+          <span class="fw-semibold">From:</span>
+          <span th:text="${senderName}">Sender</span>
+        </div>
+        <div class="col-md-6">
+          <span class="fw-semibold">To:</span>
+          <span th:text="${recipientName}">Recipient</span>
+        </div>
+      </div>
+      <div class="mb-2">
+        <span class="fw-semibold">Subject:</span>
+        <span th:text="${originalMessage.subject}">Subject</span>
+      </div>
+      <div class="border-top pt-2">
+        <div style="white-space: pre-wrap;" th:text="${originalMessage.content}">Content</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reply Form -->
+  <div class="card shadow-sm">
+    <div class="card-body p-4">
+      <form th:action="@{/messages/reply/send}" method="post">
+        <input type="hidden" name="parentMessageId" th:value="${originalMessage.id}">
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">To</label>
+          <input type="text" class="form-control" th:value="${senderName}" readonly>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Subject</label>
+          <input type="text" class="form-control" th:value="'Re: ' + ${originalMessage.subject}" readonly>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Reply <span class="text-danger">*</span></label>
+          <textarea name="content" class="form-control" rows="6" required
+                    placeholder="Type your reply here..."></textarea>
+        </div>
+
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-send me-1"></i>Send Reply
+          </button>
+          <a th:href="@{/messages/view/{id}(id=${originalMessage.id})}" class="btn btn-outline-secondary">
+            <i class="bi bi-x-circle me-1"></i>Cancel
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

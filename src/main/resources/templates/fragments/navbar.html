@@ -136,13 +136,12 @@
         // ==========================================
         // 1. UPDATE BADGES FUNCTION
         // ==========================================
+        // In navbar.html - Updated polling
         function updateBadges() {
-            // Update message count
+            // Message count
             fetch('/messages/api/unread-count')
                 .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
+                    if (!response.ok) throw new Error('Network error');
                     return response.text();
                 })
                 .then(count => {
@@ -155,19 +154,15 @@
                         badge.style.display = 'none';
                     }
                 })
-                .catch(error => {
-                    console.log('Message count error:', error);
-                    // Hide badge on error
+                .catch(() => {
                     const badge = document.getElementById('messageBadge');
                     badge.style.display = 'none';
                 });
 
-            // Update notification count
+            // Notification count
             fetch('/notifications/api/unread-count')
                 .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
+                    if (!response.ok) throw new Error('Network error');
                     return response.text();
                 })
                 .then(count => {
@@ -180,8 +175,7 @@
                         badge.style.display = 'none';
                     }
                 })
-                .catch(error => {
-                    console.log('Notification count error:', error);
+                .catch(() => {
                     const badge = document.getElementById('notificationBadge');
                     badge.style.display = 'none';
                 });

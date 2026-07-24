@@ -62,14 +62,30 @@ public class MessageController {
      */
     @GetMapping("/inbox")
     public String inbox(Model model) {
-        Long userId = getCurrentUserId();
-        List<Message> messages = messageService.getInbox(userId);
-        long unreadCount = messageService.getUnreadCount(userId);
+        try {
+            Long userId = getCurrentUserId();
+            List<Message> messages = messageService.getInbox(userId);
+            long unreadCount = messageService.getUnreadCount(userId);
 
-        model.addAttribute("messages", messages);
-        model.addAttribute("unreadCount", unreadCount);
-        model.addAttribute("activeTab", "inbox");
+            // Set sender and recipient names for each message
+            for (Message msg : messages) {
+                User sender = userRepository.findById(msg.getSenderId().intValue())
+                        .orElse(null);
+                User recipient = userRepository.findById(msg.getRecipientId().intValue())
+                        .orElse(null);
 
+                msg.setSenderName(sender != null ? sender.getUsername() : "Unknown");
+                msg.setRecipientName(recipient != null ? recipient.getUsername() : "Unknown");
+            }
+
+            model.addAttribute("messages", messages);
+            model.addAttribute("unreadCount", unreadCount);
+            model.addAttribute("activeTab", "inbox");
+            model.addAttribute("pageTitle", "Inbox");
+        } catch (Exception e) {
+            log.error("Error loading inbox: {}", e.getMessage());
+            model.addAttribute("error", "Failed to load messages");
+        }
         return "messages/inbox";
     }
 
@@ -78,12 +94,28 @@ public class MessageController {
      */
     @GetMapping("/sent")
     public String sent(Model model) {
-        Long userId = getCurrentUserId();
-        List<Message> messages = messageService.getSentMessages(userId);
+        try {
+            Long userId = getCurrentUserId();
+            List<Message> messages = messageService.getSentMessages(userId);
 
-        model.addAttribute("messages", messages);
-        model.addAttribute("activeTab", "sent");
+            // Set sender and recipient names for each message
+            for (Message msg : messages) {
+                User sender = userRepository.findById(msg.getSenderId().intValue())
+                        .orElse(null);
+                User recipient = userRepository.findById(msg.getRecipientId().intValue())
+                        .orElse(null);
 
+                msg.setSenderName(sender != null ? sender.getUsername() : "Unknown");
+                msg.setRecipientName(recipient != null ? recipient.getUsername() : "Unknown");
+            }
+
+            model.addAttribute("messages", messages);
+            model.addAttribute("activeTab", "sent");
+            model.addAttribute("pageTitle", "Sent");
+        } catch (Exception e) {
+            log.error("Error loading sent messages: {}", e.getMessage());
+            model.addAttribute("error", "Failed to load sent messages");
+        }
         return "messages/inbox";
     }
 
@@ -141,16 +173,31 @@ public class MessageController {
      */
     @GetMapping("/view/{id}")
     public String viewMessage(@PathVariable Long id, Model model) {
-        Long userId = getCurrentUserId();
-        Message message = messageService.getMessage(id);
+        try {
+            Long userId = getCurrentUserId();
+            Message message = messageService.getMessage(id);
 
-        // Mark as read if user is the recipient
-        if (message.getRecipientId().equals(userId) && !message.getIsRead()) {
-            messageService.markAsRead(id, userId);
+            if (message.getRecipientId().equals(userId) && !message.getIsRead()) {
+                messageService.markAsRead(id, userId);
+            }
+
+            // FIX: Get sender and recipient usernames
+            User sender = userRepository.findById(message.getSenderId().intValue())
+                    .orElse(null);
+            User recipient = userRepository.findById(message.getRecipientId().intValue())
+                    .orElse(null);
+
+            // Set the names on the message object
+            message.setSenderName(sender != null ? sender.getUsername() : "Unknown");
+            message.setRecipientName(recipient != null ? recipient.getUsername() : "Unknown");
+
+            model.addAttribute("message", message);
+
+        } catch (Exception e) {
+            log.error("Error viewing message: {}", e.getMessage());
+            model.addAttribute("error", "Message not found");
+            return "redirect:/messages/inbox";
         }
-
-        model.addAttribute("message", message);
-
         return "messages/view";
     }
 
@@ -158,23 +205,40 @@ public class MessageController {
      * Reply to a message (shows reply form)
      */
     @GetMapping("/reply/{id}")
-    public String reply(@PathVariable Long id, Model model){
-        Long userId = getCurrentUserId();
-        Message originalMessage = messageService.getMessage(id);
+    public String reply(@PathVariable Long id, Model model) {
+        try {
+            Long userId = getCurrentUserId();
+            Message originalMessage = messageService.getMessage(id);
 
-        // Verify user is authorized to reply
-        if (!originalMessage.getRecipientId().equals(userId) &&
-                !originalMessage.getSenderId().equals(userId)) {
-            throw new RuntimeException("You are not authorized to reply to this message");
+            // Check authorization properly
+            if (!originalMessage.getRecipientId().equals(userId) &&
+                    !originalMessage.getSenderId().equals(userId)) {
+                model.addAttribute("error", "You are not authorized to reply to this message");
+                return "redirect:/messages/inbox";
+            }
+
+            // Get sender username
+            User sender = userRepository.findById(originalMessage.getSenderId().intValue())
+                    .orElse(null);
+            User recipient = userRepository.findById(originalMessage.getRecipientId().intValue())
+                    .orElse(null);
+
+            MessageDto replyDto = new MessageDto();
+            replyDto.setSubject("Re: " + originalMessage.getSubject());
+
+            // Reply to the sender, not the recipient
+            replyDto.setRecipientId(originalMessage.getSenderId());
+
+            model.addAttribute("originalMessage", originalMessage);
+            model.addAttribute("reply", replyDto);
+            model.addAttribute("senderName", sender != null ? sender.getUsername() : "Unknown");
+            model.addAttribute("recipientName", recipient != null ? recipient.getUsername() : "Unknown");
+
+        } catch (Exception e) {
+            log.error("Error loading reply page: {}", e.getMessage());
+            model.addAttribute("error", e.getMessage());
+            return "redirect:/messages/inbox";
         }
-
-        MessageDto replyDto = new MessageDto();
-        replyDto.setSubject("Re: " + originalMessage.getSubject());
-        replyDto.setRecipientId(originalMessage.getSenderId());
-
-        model.addAttribute("originalMessage", originalMessage);
-        model.addAttribute("reply", replyDto);
-
         return "messages/reply";
     }
 

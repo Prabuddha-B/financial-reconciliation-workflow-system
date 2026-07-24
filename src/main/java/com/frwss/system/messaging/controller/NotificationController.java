@@ -6,6 +6,8 @@ import com.frwss.system.messaging.service.NotificationService;
 import com.frwss.system.model.User;
 import com.frwss.system.repository.UserRepository;
 import com.frwss.system.security.SecurityContextAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -14,20 +16,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Controller for notification functionality
- *
- * URL Mapping:
- * - GET  /notifications         - View all notifications
- * - POST /notifications/mark-read/{id} - Mark as read
- * - POST /notifications/mark-all-read  - Mark all as read
- * - POST /notifications/delete/{id}    - Delete a notification
- * - GET  /notifications/api/unread-count - API endpoint for badge
- */
-
 @Controller
 @RequestMapping("/notifications")
 public class NotificationController {
+
+    private static final Logger log = LoggerFactory.getLogger(NotificationController.class);
+
     private final NotificationService notificationService;
     private final UserRepository userRepository;
     private final SecurityContextAdapter securityContextAdapter;
@@ -35,108 +29,122 @@ public class NotificationController {
     public NotificationController(
             NotificationService notificationService,
             UserRepository userRepository,
-            SecurityContextAdapter securityContextAdapter){
+            SecurityContextAdapter securityContextAdapter) {
         this.notificationService = notificationService;
         this.userRepository = userRepository;
         this.securityContextAdapter = securityContextAdapter;
     }
 
-    /**
-     * Get current user ID from security context
-     */
     private Long getCurrentUserId() {
-        String username = securityContextAdapter.getCurrentUsername();
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        return user.getUserId().longValue();
+        try {
+            String username = securityContextAdapter.getCurrentUsername();
+            if (username == null || username.isEmpty()) {
+                log.warn("Username is null or empty");
+                return null;
+            }
+            User user = userRepository.findByUsername(username)
+                    .orElse(null);
+            if (user == null) {
+                log.warn("User not found: {}", username);
+                return null;
+            }
+            return user.getUserId().longValue();
+        } catch (Exception e) {
+            log.error("Error getting current user ID: {}", e.getMessage());
+            return null;
+        }
     }
 
-    /**
-     * Display all notifications for the current user
-     */
     @GetMapping
     public String notifications(Model model) {
-        Long userId = getCurrentUserId();
-        List<Notification> notifications = notificationService.getNotifications(userId);
-        long unreadCount = notificationService.getUnreadCount(userId);
+        try {
+            Long userId = getCurrentUserId();
+            if (userId == null) {
+                log.warn("User not authenticated for notifications page");
+                model.addAttribute("error", "User not authenticated");
+                model.addAttribute("notifications", List.of());
+                model.addAttribute("unreadCount", 0);
+                return "notifications/notifications";
+            }
 
-        model.addAttribute("notifications", notifications);
-        model.addAttribute("unreadCount", unreadCount);
+            List<Notification> notifications = notificationService.getNotifications(userId);
+            long unreadCount = notificationService.getUnreadCount(userId);
 
+            log.info("Loaded {} notifications for user {}, {} unread",
+                    notifications != null ? notifications.size() : 0,
+                    userId, unreadCount);
+
+            model.addAttribute("notifications", notifications != null ? notifications : List.of());
+            model.addAttribute("unreadCount", unreadCount);
+        } catch (Exception e) {
+            log.error("Error loading notifications: {}", e.getMessage(), e);
+            model.addAttribute("error", "Failed to load notifications: " + e.getMessage());
+            model.addAttribute("notifications", List.of());
+            model.addAttribute("unreadCount", 0);
+        }
         return "notifications/notifications";
     }
 
-    /**
-     * Mark a notification as read
-     */
     @PostMapping("/mark-read/{id}")
     public String markAsRead(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
             Long userId = getCurrentUserId();
+            if (userId == null) {
+                redirectAttributes.addFlashAttribute("error", "User not authenticated");
+                return "redirect:/notifications";
+            }
             notificationService.markAsRead(id, userId);
-
-            redirectAttributes.addFlashAttribute("successMessage",
-                    "Notification marked as read!");
-
+            redirectAttributes.addFlashAttribute("successMessage", "✅ Notification marked as read!");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage",
-                    "Failed to mark notification as read: " + e.getMessage());
+            log.error("Error marking notification as read: {}", e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "❌ Failed to mark notification as read: " + e.getMessage());
         }
-
         return "redirect:/notifications";
     }
 
-    /**
-     * Mark all notifications as read
-     */
     @PostMapping("/mark-all-read")
     public String markAllAsRead(RedirectAttributes redirectAttributes) {
         try {
             Long userId = getCurrentUserId();
+            if (userId == null) {
+                redirectAttributes.addFlashAttribute("error", "User not authenticated");
+                return "redirect:/notifications";
+            }
             notificationService.markAllAsRead(userId);
-
-            redirectAttributes.addFlashAttribute("successMessage",
-                    "All notifications marked as read!");
-
+            redirectAttributes.addFlashAttribute("successMessage", "✅ All notifications marked as read!");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage",
-                    "Failed to mark notifications as read: " + e.getMessage());
+            log.error("Error marking all notifications as read: {}", e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "❌ Failed to mark notifications as read: " + e.getMessage());
         }
-
         return "redirect:/notifications";
     }
 
-    /**
-     * Delete a notification
-     */
     @PostMapping("/delete/{id}")
     public String deleteNotification(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
             Long userId = getCurrentUserId();
+            if (userId == null) {
+                redirectAttributes.addFlashAttribute("error", "User not authenticated");
+                return "redirect:/notifications";
+            }
             notificationService.deleteNotification(id, userId);
-
-            redirectAttributes.addFlashAttribute("successMessage",
-                    "Notification deleted successfully!");
-
+            redirectAttributes.addFlashAttribute("successMessage", "🗑️ Notification deleted successfully!");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage",
-                    "Failed to delete notification: " + e.getMessage());
+            log.error("Error deleting notification: {}", e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "❌ Failed to delete notification: " + e.getMessage());
         }
-
         return "redirect:/notifications";
     }
 
-    /**
-     * API endpoint for unread count (for AJAX polling)
-     * Used by the navbar to show notification badge
-     */
     @GetMapping("/api/unread-count")
     @ResponseBody
     public long getUnreadCount() {
         try {
             Long userId = getCurrentUserId();
+            if (userId == null) return 0;
             return notificationService.getUnreadCount(userId);
         } catch (Exception e) {
+            log.error("Error getting unread count: {}", e.getMessage());
             return 0;
         }
     }
@@ -144,25 +152,32 @@ public class NotificationController {
     @GetMapping("/api/latest")
     @ResponseBody
     public List<NotificationDto> getLatestNotifications() {
-        Long userId = getCurrentUserId();
-        List<Notification> notifications = notificationService.getNotifications(userId);
+        try {
+            Long userId = getCurrentUserId();
+            if (userId == null) return List.of();
 
-        // Return only the 5 most recent notifications
-        return notifications.stream()
-                .limit(5)
-                .map(n -> {
-                    NotificationDto dto = new NotificationDto();
-                    dto.setId(n.getId());
-                    dto.setTitle(n.getTitle());
-                    dto.setMessage(n.getMessage());
-                    dto.setType(n.getType());
-                    dto.setIsRead(n.getIsRead());
-                    dto.setLink(n.getLink());
-                    dto.setCreatedAt(n.getCreatedAt());
-                    return dto;
-                })
-                .collect(Collectors.toList());
+            List<Notification> notifications = notificationService.getNotifications(userId);
+            if (notifications == null) return List.of();
+
+            return notifications.stream()
+                    .limit(5)
+                    .map(n -> {
+                        NotificationDto dto = new NotificationDto();
+                        dto.setId(n.getId());
+                        dto.setTitle(n.getTitle());
+                        dto.setMessage(n.getMessage());
+                        dto.setType(n.getType());
+                        dto.setIsRead(n.getIsRead());
+                        dto.setLink(n.getLink());
+                        dto.setCreatedAt(n.getCreatedAt());
+                        dto.setEntityType(n.getEntityType());
+                        dto.setEntityId(n.getEntityId());
+                        return dto;
+                    })
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("Error getting latest notifications: {}", e.getMessage());
+            return List.of();
+        }
     }
-
-
 }

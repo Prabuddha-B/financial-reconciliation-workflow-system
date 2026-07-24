@@ -64,6 +64,14 @@ public class Message {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    // ========== Transient fields for display names ==========
+
+    @Transient
+    private String senderName;           // Username of sender (not stored in DB)
+
+    @Transient
+    private String recipientName;        // Username of recipient (not stored in DB)
+
     // ========== Lifecycle Callbacks ==========
 
     /**
@@ -209,5 +217,23 @@ public class Message {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    // ==========Getters and Setters for transient fields ==========
+
+    public String getSenderName() {
+        return senderName;
+    }
+
+    public void setSenderName(String senderName) {
+        this.senderName = senderName;
+    }
+
+    public String getRecipientName() {
+        return recipientName;
+    }
+
+    public void setRecipientName(String recipientName) {
+        this.recipientName = recipientName;
     }
 }
