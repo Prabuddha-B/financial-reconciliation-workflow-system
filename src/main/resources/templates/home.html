@@ -24,300 +24,283 @@
     </style>
 </head>
 <body>
-<!-- Nav Bar -->
-<div th:replace="~{fragments/navbar :: navbar}"></div>
 
-<!-- Hero Section -->
-<div class="hero-section">
-    <div class="container text-center">
-        <h1 class="display-4 fw-bold">Welcome to FRWSS</h1>
-        <p class="lead">Financial Reconciliation & Workflow Support System</p>
-        <div class="mt-3">
-                <span class="badge bg-light text-dark px-3 py-2">
-                    <i class="bi bi-shield-check me-1"></i>
-                    System Status: Online
-                </span>
-        </div>
-    </div>
-</div>
+    <!-- Nav Bar -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-<div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-            <h2 class="h4 fw-bold mb-1">System Overview</h2>
-            <p class="text-muted mb-0">Key reconciliation and audit indicators across FRWSS</p>
-        </div>
-    </div>
-
-    <!-- Statistics Cards -->
-    <div class="row g-3 mb-4">
-        <div class="col-md-3">
-            <div class="card stat-card shadow-sm h-100">
-                <div class="card-body text-center">
-                    <i class="bi bi-database fs-2 text-primary"></i>
-                    <h6 class="text-muted mt-2">Total Records</h6>
-                    <h2 class="text-primary" th:text="${totalRecords != null ? totalRecords : '0'}">0</h2>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card stat-card shadow-sm h-100">
-                <div class="card-body text-center">
-                    <i class="bi bi-check-circle fs-2 text-success"></i>
-                    <h6 class="text-muted mt-2">Reconciled</h6>
-                    <h2 class="text-success" th:text="${reconciledCount != null ? reconciledCount : '0'}">0</h2>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card stat-card shadow-sm h-100">
-                <div class="card-body text-center">
-                    <i class="bi bi-clock fs-2 text-warning"></i>
-                    <h6 class="text-muted mt-2">Pending Approval</h6>
-                    <h2 class="text-warning" th:text="${pendingApprovalCount != null ? pendingApprovalCount : '0'}">0</h2>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card stat-card shadow-sm h-100">
-                <div class="card-body text-center">
-                    <i class="bi bi-shield-lock fs-2 text-info"></i>
-                    <h6 class="text-muted mt-2">Audit Entries</h6>
-                    <h2 class="text-info" th:text="${auditCount != null ? auditCount : '0'}">0</h2>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-            <h2 class="h4 fw-bold mb-1">Modules</h2>
-            <p class="text-muted mb-0">Access core financial processing, review, and audit tools</p>
-        </div>
-    </div>
-
-    <!-- Feature Cards -->
-    <div class="row g-3">
-
-        <!-- Ingestion -->
-        <div class="col-lg-4 col-md-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-body text-center">
-                    <i class="bi bi-upload fs-1 text-primary"></i>
-                    <h5 class="mt-2">Ingestion</h5>
-                    <p class="text-muted small">Upload financial records</p>
-                    <a href="/ingestion" class="btn btn-primary btn-sm">
-                        Upload Records
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Reconciliation -->
-        <div class="col-lg-4 col-md-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-body text-center">
-                    <i class="bi bi-check2-all fs-1 text-success"></i>
-                    <h5 class="mt-2">Reconciliation</h5>
-                    <p class="text-muted small">Match records automatically</p>
-                    <a href="/reconciliation" class="btn btn-success btn-sm">
-                        Open Dashboard
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tax Estimation -->
-        <div class="col-lg-4 col-md-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-body text-center">
-                    <i class="bi bi-cash-stack fs-1 text-primary"></i>
-
-                    <h5 class="mt-2">Tax Estimation</h5>
-
-                    <p class="text-muted small mb-2">
-                        Estimate reference tax for financial records
-                    </p>
-
-                    <div class="mb-3">
-                    <span class="badge rounded-pill bg-warning-subtle text-warning-emphasis border border-warning-subtle">
-                        Reference Only
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="container text-center">
+            <h1 class="display-4 fw-bold">Welcome to FRWSS</h1>
+            <p class="lead">Financial Reconciliation & Workflow Support System</p>
+            <div class="mt-3">
+                    <span class="badge bg-light text-dark px-3 py-2">
+                        <i class="bi bi-shield-check me-1"></i>
+                        System Status: Online
                     </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h2 class="h4 fw-bold mb-1">System Overview</h2>
+                <p class="text-muted mb-0">Key reconciliation and audit indicators across FRWSS</p>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card stat-card shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-database fs-2 text-primary"></i>
+                        <h6 class="text-muted mt-2">Total Records</h6>
+                        <h2 class="text-primary" th:text="${totalRecords != null ? totalRecords : '0'}">0</h2>
                     </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-check-circle fs-2 text-success"></i>
+                        <h6 class="text-muted mt-2">Reconciled</h6>
+                        <h2 class="text-success" th:text="${reconciledCount != null ? reconciledCount : '0'}">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-clock fs-2 text-warning"></i>
+                        <h6 class="text-muted mt-2">Pending Approval</h6>
+                        <h2 class="text-warning" th:text="${pendingApprovalCount != null ? pendingApprovalCount : '0'}">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-shield-lock fs-2 text-info"></i>
+                        <h6 class="text-muted mt-2">Audit Entries</h6>
+                        <h2 class="text-info" th:text="${auditCount != null ? auditCount : '0'}">0</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                    <a th:href="@{/tax}" class="btn btn-primary btn-sm">
-                        <i class="bi bi-calculator me-1"></i>
-                        Estimate Tax
-                    </a>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h2 class="h4 fw-bold mb-1">Modules</h2>
+                <p class="text-muted mb-0">Access core financial processing, review, and audit tools</p>
+            </div>
+        </div>
 
-                    <div class="mt-3"
-                         sec:authorize="hasRole('ADMIN')">
+        <!-- Feature Cards -->
+        <div class="row g-3">
 
-                        <hr class="my-3">
+            <!-- Ingestion -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-upload fs-1 text-primary"></i>
+                        <h5 class="mt-2">Ingestion</h5>
+                        <p class="text-muted small">Upload financial records</p>
+                        <a href="/ingestion" class="btn btn-primary btn-sm">
+                            Upload Records
+                        </a>
+                    </div>
+                </div>
+            </div>
 
-                        <small class="text-muted d-block mb-2">
-                            Administrative Functions
-                        </small>
+            <!-- Reconciliation -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-check2-all fs-1 text-success"></i>
+                        <h5 class="mt-2">Reconciliation</h5>
+                        <p class="text-muted small">Match records automatically</p>
+                        <a href="/reconciliation" class="btn btn-success btn-sm">
+                            Open Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
 
-                        <a th:href="@{/admin/tax-configurations}"
-                           class="btn btn-outline-primary btn-sm">
+            <!-- Tax Estimation -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-cash-stack fs-1 text-primary"></i>
 
-                            <i class="bi bi-gear me-1"></i>
-                            Manage Tax Rates
+                        <h5 class="mt-2">Tax Estimation</h5>
 
+                        <p class="text-muted small mb-2">
+                            Estimate reference tax for financial records
+                        </p>
+
+                        <div class="mb-3">
+                        <span class="badge rounded-pill bg-warning-subtle text-warning-emphasis border border-warning-subtle">
+                            Reference Only
+                        </span>
+                        </div>
+
+                        <a th:href="@{/tax}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-calculator me-1"></i>
+                            Estimate Tax
                         </a>
 
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Workflow -->
-        <div class="col-lg-4 col-md-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-body text-center">
-                    <i class="bi bi-check2-square fs-1 text-warning"></i>
-                    <h5 class="mt-2">Workflow</h5>
-                    <p class="text-muted small">Review approvals</p>
-                    <a href="/workflow/approvals" class="btn btn-warning btn-sm">
-                        Review Approvals
-                    </a>
+            <!-- Workflow -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-check2-square fs-1 text-warning"></i>
+                        <h5 class="mt-2">Workflow</h5>
+                        <p class="text-muted small">Review approvals</p>
+                        <a href="/workflow/approvals" class="btn btn-warning btn-sm">
+                            Review Approvals
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Audit -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-clipboard-data fs-1 text-info"></i>
+                        <h5 class="mt-2">Audit</h5>
+                        <p class="text-muted small">View audit trail</p>
+                        <a href="/audit/logs" class="btn btn-info btn-sm">
+                            View Audit Logs
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reports & Export -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card shadow-sm h-100" onclick="window.location.href='/reports'" style="cursor:pointer;">
+                    <div class="card-body text-center">
+                        <i class="bi bi-file-earmark-text fs-1 text-secondary"></i>
+                        <h5 class="mt-2">Reports & Export</h5>
+                        <p class="text-muted small">Generate PDF and Excel reports</p>
+                        <a href="/reports" class="btn btn-secondary btn-sm">
+                            <i class="bi bi-download me-1"></i>Generate Reports
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Audit -->
-        <div class="col-lg-4 col-md-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-body text-center">
-                    <i class="bi bi-clipboard-data fs-1 text-info"></i>
-                    <h5 class="mt-2">Audit</h5>
-                    <p class="text-muted small">View audit trail</p>
-                    <a href="/audit/logs" class="btn btn-info btn-sm">
-                        View Audit Logs
-                    </a>
+
+        <!-- System Status -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="mb-3">
+                    <h2 class="h4 fw-bold mb-1">System Health</h2>
+                    <p class="text-muted mb-0">Operational status and integrity indicators</p>
+                </div>
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="bi bi-info-circle me-2"></i>
+                                <span class="fw-semibold">System Status</span>
+                            </div>
+                            <div>
+                                <span class="badge bg-success">Operational</span>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row small text-muted">
+                            <div class="col-md-3">Database: <span class="text-success">Connected</span></div>
+                            <div class="col-md-3">Audit Chain: <span th:if="${chainValid != null and chainValid}" class="text-success">Valid</span>
+                                <span th:if="${chainValid != null and !chainValid}" class="text-danger">Broken</span>
+                                <span th:if="${chainValid == null}">Unknown</span>
+                            </div>
+                            <div class="col-md-3">Version: <span>1.0.0</span></div>
+                            <div class="col-md-3">
+                                    <span th:if="${#authentication != null and #authentication.authenticated}">
+                                        <i class="bi bi-person-circle me-1"></i>
+                                        <span th:text="${#authentication.name}">User</span>
+                                    </span>
+                                <span th:if="${#authentication == null or !#authentication.authenticated}">
+                                        <a href="/login" class="btn btn-sm btn-outline-primary">Login</a>
+                                    </span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Reports & Export -->
-        <div class="col-lg-4 col-md-6">
-            <div class="card shadow-sm h-100" onclick="window.location.href='/reports'" style="cursor:pointer;">
-                <div class="card-body text-center">
-                    <i class="bi bi-file-earmark-text fs-1 text-secondary"></i>
-                    <h5 class="mt-2">Reports & Export</h5>
-                    <p class="text-muted small">Generate PDF and Excel reports</p>
-                    <a href="/reports" class="btn btn-secondary btn-sm">
-                        <i class="bi bi-download me-1"></i>Generate Reports
-                    </a>
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="mb-3">
+                    <h2 class="h4 fw-bold mb-1">Recent Activity</h2>
+                    <p class="text-muted mb-0">Latest audit events recorded by the system</p>
+                </div>
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-semibold"><i class="bi bi-clock-history me-2"></i>Recent Activity</span>
+                            <a href="/audit/logs" class="btn btn-sm btn-outline-primary">View All</a>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Action</th>
+                                    <th>User</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="log : ${recentLogs}" th:if="${log != null}">
+                                    <td class="small" th:text="${#temporals.format(log.timestamp, 'HH:mm:ss')}">10:30</td>
+                                    <td>
+        <span th:switch="${log.actionType.name()}" class="badge rounded-pill">
+            <!-- Reconciliation Actions - Blue -->
+            <span th:case="'RECONCILIATION_STARTED'" class="bg-primary-subtle text-primary-emphasis border border-primary-subtle" th:text="${log.actionType}">RECONCILIATION_STARTED</span>
+            <span th:case="'RECONCILIATION_COMPLETED'" class="bg-primary-subtle text-primary-emphasis border border-primary-subtle" th:text="${log.actionType}">RECONCILIATION_COMPLETED</span>
+            <span th:case="'EXACT_MATCH_FOUND'" class="bg-primary-subtle text-primary-emphasis border border-primary-subtle" th:text="${log.actionType}">EXACT_MATCH_FOUND</span>
+            <span th:case="'PARTIAL_MATCH_FOUND'" class="bg-primary-subtle text-primary-emphasis border border-primary-subtle" th:text="${log.actionType}">PARTIAL_MATCH_FOUND</span>
+            <span th:case="'ORPHAN_RECORD_FOUND'" class="bg-primary-subtle text-primary-emphasis border border-primary-subtle" th:text="${log.actionType}">ORPHAN_RECORD_FOUND</span>
+
+            <!-- Workflow Actions - Yellow -->
+            <span th:case="'WORKFLOW_STATE_CHANGED'" class="bg-warning-subtle text-warning-emphasis border border-warning-subtle" th:text="${log.actionType}">WORKFLOW_STATE_CHANGED</span>
+
+            <!-- Report Actions - Gray -->
+            <span th:case="'REPORT_EXPORTED'" class="bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle" th:text="${log.actionType}">REPORT_EXPORTED</span>
+
+            <!-- Default - Gray -->
+            <span th:case="*" class="bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle" th:text="${log.actionType}">UNKNOWN</span>
+        </span>
+                                    </td>
+                                    <td th:text="${log.performedBy}">admin</td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(recentLogs)}">
+                                    <td colspan="3" class="text-center text-muted p-3">
+                                        No recent activity
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-
-
-    <!-- System Status -->
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="mb-3">
-                <h2 class="h4 fw-bold mb-1">System Health</h2>
-                <p class="text-muted mb-0">Operational status and integrity indicators</p>
-            </div>
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <i class="bi bi-info-circle me-2"></i>
-                            <span class="fw-semibold">System Status</span>
-                        </div>
-                        <div>
-                            <span class="badge bg-success">Operational</span>
-                        </div>
-                    </div>
-                    <hr>
-                    <div class="row small text-muted">
-                        <div class="col-md-3">Database: <span class="text-success">Connected</span></div>
-                        <div class="col-md-3">Audit Chain: <span th:if="${chainValid != null and chainValid}" class="text-success">Valid</span>
-                            <span th:if="${chainValid != null and !chainValid}" class="text-danger">Broken</span>
-                            <span th:if="${chainValid == null}">Unknown</span>
-                        </div>
-                        <div class="col-md-3">Version: <span>1.0.0</span></div>
-                        <div class="col-md-3">
-                                <span th:if="${#authentication != null and #authentication.authenticated}">
-                                    <i class="bi bi-person-circle me-1"></i>
-                                    <span th:text="${#authentication.name}">User</span>
-                                </span>
-                            <span th:if="${#authentication == null or !#authentication.authenticated}">
-                                    <a href="/login" class="btn btn-sm btn-outline-primary">Login</a>
-                                </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="mb-3">
-                <h2 class="h4 fw-bold mb-1">Recent Activity</h2>
-                <p class="text-muted mb-0">Latest audit events recorded by the system</p>
-            </div>
-            <div class="card shadow-sm">
-                <div class="card-header bg-white">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="fw-semibold"><i class="bi bi-clock-history me-2"></i>Recent Activity</span>
-                        <a href="/audit/logs" class="btn btn-sm btn-outline-primary">View All</a>
-                    </div>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead class="table-light">
-                            <tr>
-                                <th>Time</th>
-                                <th>Action</th>
-                                <th>User</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr th:each="log : ${recentLogs}" th:if="${log != null}">
-                                <td class="small" th:text="${#temporals.format(log.timestamp, 'HH:mm:ss')}">10:30</td>
-                                <td>
-    <span th:switch="${log.actionType.name()}" class="badge rounded-pill">
-        <!-- Reconciliation Actions - Blue -->
-        <span th:case="'RECONCILIATION_STARTED'" class="bg-primary-subtle text-primary-emphasis border border-primary-subtle" th:text="${log.actionType}">RECONCILIATION_STARTED</span>
-        <span th:case="'RECONCILIATION_COMPLETED'" class="bg-primary-subtle text-primary-emphasis border border-primary-subtle" th:text="${log.actionType}">RECONCILIATION_COMPLETED</span>
-        <span th:case="'EXACT_MATCH_FOUND'" class="bg-primary-subtle text-primary-emphasis border border-primary-subtle" th:text="${log.actionType}">EXACT_MATCH_FOUND</span>
-        <span th:case="'PARTIAL_MATCH_FOUND'" class="bg-primary-subtle text-primary-emphasis border border-primary-subtle" th:text="${log.actionType}">PARTIAL_MATCH_FOUND</span>
-        <span th:case="'ORPHAN_RECORD_FOUND'" class="bg-primary-subtle text-primary-emphasis border border-primary-subtle" th:text="${log.actionType}">ORPHAN_RECORD_FOUND</span>
-
-        <!-- Workflow Actions - Yellow -->
-        <span th:case="'WORKFLOW_STATE_CHANGED'" class="bg-warning-subtle text-warning-emphasis border border-warning-subtle" th:text="${log.actionType}">WORKFLOW_STATE_CHANGED</span>
-
-        <!-- Report Actions - Gray -->
-        <span th:case="'REPORT_EXPORTED'" class="bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle" th:text="${log.actionType}">REPORT_EXPORTED</span>
-
-        <!-- Default - Gray -->
-        <span th:case="*" class="bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle" th:text="${log.actionType}">UNKNOWN</span>
-    </span>
-                                </td>
-                                <td th:text="${log.performedBy}">admin</td>
-                            </tr>
-                            <tr th:if="${#lists.isEmpty(recentLogs)}">
-                                <td colspan="3" class="text-center text-muted p-3">
-                                    No recent activity
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<div th:replace="~{fragments/footer :: footer}"></div>
+    <div th:replace="~{fragments/footer :: footer}"></div>
 
 </body>
 </html>

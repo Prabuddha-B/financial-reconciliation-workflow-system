@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/header :: header('Administrator Dashboard')}"></head>
+
+<style>
+    /* ============================================================
+       FRWSS ADMIN DASHBOARD - Enterprise Banking Style
+       ============================================================ */
+
+    .main-container {
+        padding: 2rem;
+        max-width: 1600px;
+        margin: 0 auto;
+    }
+
+    body {
+        background: linear-gradient(135deg, #f8fafc 0%, #eef2f6 100%);
+        min-height: 100vh;
+    }
+
+    /* ============================================================
+       HERO HEADER
+       ============================================================ */
+    .hero-header {
+        background: linear-gradient(135deg, #1a2332 0%, #2d3748 100%);
+        border-radius: 16px;
+        padding: 2rem 2.5rem;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .hero-header .hero-left {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .hero-header .hero-title {
+        color: white;
+        font-weight: 700;
+        font-size: 2.1rem;
+        letter-spacing: -0.3px;
+        margin-bottom: 0;
+    }
+
+    .hero-header .hero-title i {
+        color: #60a5fa;
+        margin-right: 0.75rem;
+    }
+
+    .hero-header .hero-title .user-name {
+        color: #60a5fa;
+    }
+
+    .hero-header .hero-subtitle {
+        color: #94a3b8;
+        font-size: 1rem;
+        margin-bottom: 0;
+    }
+
+    .hero-header .hero-right {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .hero-header .last-updated {
+        color: #94a3b8;
+        font-size: 0.85rem;
+        text-align: right;
+    }
+
+    .hero-header .last-updated .label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #64748b;
+    }
+
+    .hero-header .last-updated .value {
+        font-weight: 500;
+        color: #e2e8f0;
+    }
+
+    .hero-header .status-badge {
+        padding: 0.5rem 1.25rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        animation: pulse-badge 2s infinite;
+    }
+
+    .hero-header .status-badge.online {
+        background: #d1e7dd;
+        color: #0f5132;
+    }
+
+    .hero-header .status-badge.offline {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .hero-header .status-badge .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    .hero-header .status-badge.online .dot {
+        background: #198754;
+    }
+
+    .hero-header .status-badge.offline .dot {
+        background: #dc3545;
+    }
+
+    @keyframes pulse-badge {
+        0% { opacity: 1; }
+        50% { opacity: 0.7; }
+        100% { opacity: 1; }
+    }
+
+    /* ============================================================
+       STATISTICS CARDS (CLICKABLE)
+       ============================================================ */
+    .stat-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.25rem 1.5rem;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        height: 100%;
+        border-top: 4px solid #0d6efd;
+        animation: fadeInUp 0.5s ease forwards;
+        opacity: 0;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+        cursor: pointer;
+    }
+
+    .stat-card:nth-child(1) { animation-delay: 0.05s; }
+    .stat-card:nth-child(2) { animation-delay: 0.10s; }
+    .stat-card:nth-child(3) { animation-delay: 0.15s; }
+    .stat-card:nth-child(4) { animation-delay: 0.20s; }
+    .stat-card:nth-child(5) { animation-delay: 0.25s; }
+    .stat-card:nth-child(6) { animation-delay: 0.30s; }
+    .stat-card:nth-child(7) { animation-delay: 0.35s; }
+    .stat-card:nth-child(8) { animation-delay: 0.40s; }
+
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .stat-card .stat-icon {
+        font-size: 1.75rem;
+        margin-bottom: 0.5rem;
+        display: inline-block;
+    }
+
+    .stat-card .stat-icon.blue { color: #0d6efd; }
+    .stat-card .stat-icon.green { color: #198754; }
+    .stat-card .stat-icon.red { color: #dc3545; }
+    .stat-card .stat-icon.purple { color: #6f42c1; }
+    .stat-card .stat-icon.orange { color: #fd7e14; }
+    .stat-card .stat-icon.gray { color: #6c757d; }
+    .stat-card .stat-icon.teal { color: #20c997; }
+    .stat-card .stat-icon.gold { color: #ffc107; }
+
+    .stat-card .stat-title {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-card .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #1a2332;
+        line-height: 1.2;
+    }
+
+    .stat-card .stat-label {
+        font-size: 0.8rem;
+        color: #adb5bd;
+        margin-top: 0.25rem;
+    }
+
+    .stat-card .stat-percentage {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #0d6efd;
+        margin-left: 0.25rem;
+    }
+
+    .stat-card.accent-blue { border-top-color: #0d6efd; }
+    .stat-card.accent-green { border-top-color: #198754; }
+    .stat-card.accent-red { border-top-color: #dc3545; }
+    .stat-card.accent-purple { border-top-color: #6f42c1; }
+    .stat-card.accent-orange { border-top-color: #fd7e14; }
+    .stat-card.accent-gray { border-top-color: #6c757d; }
+    .stat-card.accent-teal { border-top-color: #20c997; }
+    .stat-card.accent-gold { border-top-color: #ffc107; }
+
+    .stat-card .click-hint {
+        font-size: 0.7rem;
+        color: #adb5bd;
+        margin-top: 0.25rem;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .stat-card:hover .click-hint {
+        opacity: 1;
+    }
+
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ============================================================
+       CHARTS
+       ============================================================ */
+    .chart-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        transition: all 0.3s ease;
+        height: 100%;
+        animation: fadeInUp 0.6s ease forwards;
+        opacity: 0;
+    }
+
+    .chart-card:nth-child(1) { animation-delay: 0.30s; }
+    .chart-card:nth-child(2) { animation-delay: 0.35s; }
+    .chart-card:nth-child(3) { animation-delay: 0.40s; }
+
+    .chart-card:hover {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .chart-card .chart-title {
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: #1a2332;
+        margin-bottom: 0.25rem;
+    }
+
+    .chart-card .chart-subtitle {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-bottom: 1rem;
+    }
+
+    .chart-wrapper {
+        position: relative;
+        height: 250px;
+    }
+
+    .chart-wrapper canvas {
+        max-height: 100%;
+        max-width: 100%;
+    }
+
+    /* ============================================================
+       QUICK ACTIONS
+       ============================================================ */
+    .quick-action-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: #1a2332;
+        display: block;
+        height: 100%;
+        border: 2px solid transparent;
+        animation: fadeInUp 0.5s ease forwards;
+        opacity: 0;
+    }
+
+    .quick-action-card:nth-child(1) { animation-delay: 0.50s; }
+    .quick-action-card:nth-child(2) { animation-delay: 0.55s; }
+    .quick-action-card:nth-child(3) { animation-delay: 0.60s; }
+    .quick-action-card:nth-child(4) { animation-delay: 0.65s; }
+
+    .quick-action-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+        border-color: #0d6efd;
+        text-decoration: none;
+        color: #1a2332;
+    }
+
+    .quick-action-card .qa-icon {
+        font-size: 2.5rem;
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+
+    .quick-action-card .qa-icon.blue { color: #0d6efd; }
+    .quick-action-card .qa-icon.green { color: #198754; }
+    .quick-action-card .qa-icon.purple { color: #6f42c1; }
+    .quick-action-card .qa-icon.orange { color: #fd7e14; }
+
+    .quick-action-card .qa-title {
+        font-weight: 600;
+        font-size: 1rem;
+        margin-bottom: 0.1rem;
+    }
+
+    .quick-action-card .qa-subtitle {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+
+    /* ============================================================
+       SYSTEM SUMMARY
+       ============================================================ */
+    .summary-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        height: 100%;
+        animation: fadeInUp 0.6s ease forwards;
+        opacity: 0;
+        animation-delay: 0.50s;
+    }
+
+    .summary-card .summary-title {
+        font-weight: 600;
+        font-size: 1rem;
+        color: #1a2332;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #f0f2f5;
+    }
+
+    .summary-card .list-group-item {
+        border: none;
+        padding: 0.6rem 0;
+        background: transparent;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #f1f3f5;
+    }
+
+    .summary-card .list-group-item:last-child {
+        border-bottom: none;
+    }
+
+    .summary-card .list-group-item .label {
+        font-size: 0.9rem;
+        color: #495057;
+    }
+
+    .summary-card .list-group-item .value {
+        font-weight: 600;
+        color: #1a2332;
+    }
+
+    .summary-card .list-group-item .value .percentage {
+        font-weight: 400;
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-left: 0.3rem;
+    }
+
+    /* ============================================================
+       RECENT ACTIVITY
+       ============================================================ */
+    .activity-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        height: 100%;
+        animation: fadeInUp 0.6s ease forwards;
+        opacity: 0;
+        animation-delay: 0.55s;
+    }
+
+    .activity-card .activity-title {
+        font-weight: 600;
+        font-size: 1rem;
+        color: #1a2332;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #f0f2f5;
+    }
+
+    .activity-card .activity-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #f1f3f5;
+    }
+
+    .activity-card .activity-item:last-child {
+        border-bottom: none;
+    }
+
+    .activity-card .activity-item .activity-left {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .activity-card .activity-item .activity-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+    }
+
+    .activity-card .activity-item .activity-icon.login { background: #d1e7dd; color: #198754; }
+    .activity-card .activity-item .activity-icon.create { background: #cfe2ff; color: #0d6efd; }
+    .activity-card .activity-item .activity-icon.edit { background: #fff3cd; color: #856404; }
+    .activity-card .activity-item .activity-icon.reset { background: #f8d7da; color: #dc3545; }
+    .activity-card .activity-item .activity-icon.default { background: #e9ecef; color: #6c757d; }
+
+    .activity-card .activity-item .activity-text {
+        font-size: 0.9rem;
+        color: #1a2332;
+    }
+
+    .activity-card .activity-item .activity-text .user {
+        font-weight: 600;
+    }
+
+    .activity-card .activity-item .activity-time {
+        font-size: 0.75rem;
+        color: #adb5bd;
+        white-space: nowrap;
+    }
+
+    .activity-card .view-all-link {
+        display: block;
+        text-align: center;
+        margin-top: 0.75rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid #f0f2f5;
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: #0d6efd;
+        text-decoration: none;
+    }
+
+    .activity-card .view-all-link:hover {
+        text-decoration: underline;
+    }
+
+    /* ============================================================
+       RESPONSIVE
+       ============================================================ */
+    @media (max-width: 992px) {
+        .main-container { padding: 1.5rem; }
+        .hero-header { padding: 1.5rem; }
+        .hero-header .hero-title { font-size: 1.6rem; }
+        .hero-header .hero-right { justify-content: flex-start; width: 100%; }
+    }
+
+    @media (max-width: 768px) {
+        .main-container { padding: 1rem; }
+        .hero-header {
+            flex-direction: column;
+            text-align: left;
+            padding: 1.25rem;
+        }
+        .hero-header .hero-title { font-size: 1.3rem; }
+        .hero-header .hero-subtitle { font-size: 0.9rem; }
+        .hero-header .hero-right {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.75rem;
+            width: 100%;
+        }
+        .hero-header .last-updated { text-align: left; }
+        .stat-card .stat-number { font-size: 1.5rem; }
+        .chart-wrapper { height: 200px; }
+        .quick-action-card { padding: 1rem; }
+        .quick-action-card .qa-icon { font-size: 2rem; }
+    }
+
+    @media (max-width: 576px) {
+        .main-container { padding: 0.75rem; }
+        .hero-header { padding: 1rem; }
+        .hero-header .hero-title { font-size: 1.1rem; }
+        .stat-card { padding: 1rem; }
+        .stat-card .stat-number { font-size: 1.25rem; }
+        .chart-wrapper { height: 180px; }
+        .chart-card { padding: 1rem; }
+    }
+</style>
+
+<body class="d-flex flex-column min-vh-100">
+
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <main class="flex-grow-1">
+
+        <div class="container-fluid main-container">
+
+
+            <!-- HERO HEADER -->
+            <div class="hero-header">
+                <div class="hero-left">
+                    <h1 class="hero-title">
+                        <i class="bi bi-speedometer2"></i>
+                        Welcome back, <span class="user-name" th:text="${currentUser}">admin</span>
+                    </h1>
+                    <p class="hero-subtitle">
+                        <i class="bi bi-bar-chart-line me-1"></i>
+                        System overview and operational analytics
+                    </p>
+                </div>
+                <div class="hero-right">
+                    <div class="last-updated">
+                        <div class="label">Last Updated</div>
+                        <div class="value">
+                            <span th:text="${#temporals.format(#temporals.createNow(), 'dd MMM yyyy')}"></span>
+                            <span th:text="${#temporals.format(#temporals.createNow(), 'HH:mm')}"></span>
+                        </div>
+                    </div>
+                    <span class="status-badge"
+                          th:classappend="${dashboard.systemStatus == 'ONLINE' ? 'online' : 'offline'}">
+                        <span class="dot"></span>
+                        <span th:text="${dashboard.systemStatus}">ONLINE</span>
+                    </span>
+                </div>
+            </div>
+
+
+            <!-- STATISTICS CARDS -->
+            <div class="row g-3 mb-4">
+
+                <!-- Total Users -->
+                <div class="col-xl-3 col-lg-4 col-md-6">
+                    <a th:href="@{/admin/users}" class="stat-card accent-blue">
+                        <div class="stat-icon blue"><i class="bi bi-people-fill"></i></div>
+                        <div class="stat-title">Total Users</div>
+                        <div class="stat-number" th:text="${dashboard.totalUsers}">0</div>
+                        <div class="stat-label">Registered users</div>
+                        <div class="click-hint"><i class="bi bi-arrow-right"></i> Click to manage</div>
+                    </a>
+                </div>
+
+                <!-- Active Users -->
+                <div class="col-xl-3 col-lg-4 col-md-6">
+                    <div class="stat-card accent-green">
+                        <div class="stat-icon green"><i class="bi bi-person-check-fill"></i></div>
+                        <div class="stat-title">Active Users</div>
+                        <div class="stat-number" th:text="${dashboard.activeUsers}">0</div>
+                        <div class="stat-label">Currently active</div>
+                    </div>
+                </div>
+
+                <!-- Disabled Users -->
+                <div class="col-xl-3 col-lg-4 col-md-6">
+                    <div class="stat-card accent-red">
+                        <div class="stat-icon red"><i class="bi bi-person-x-fill"></i></div>
+                        <div class="stat-title">Disabled Users</div>
+                        <div class="stat-number" th:text="${dashboard.disabledUsers}">0</div>
+                        <div class="stat-label">Inactive accounts</div>
+                    </div>
+                </div>
+
+                <!-- Total Workflows -->
+                <div class="col-xl-3 col-lg-4 col-md-6">
+                    <a th:href="@{/workflow}" class="stat-card accent-purple">
+                        <div class="stat-icon purple"><i class="bi bi-diagram-3-fill"></i></div>
+                        <div class="stat-title">Total Workflows</div>
+                        <div class="stat-number" th:text="${dashboard.totalWorkflows}">0</div>
+                        <div class="stat-label">Workflow records</div>
+                        <div class="click-hint"><i class="bi bi-arrow-right"></i> Click to view</div>
+                    </a>
+                </div>
+
+                <!-- Pending Workflows -->
+                <div class="col-xl-3 col-lg-4 col-md-6">
+                    <div class="stat-card accent-orange">
+                        <div class="stat-icon orange"><i class="bi bi-clock-history"></i></div>
+                        <div class="stat-title">Pending Workflows</div>
+                        <div class="stat-number" th:text="${dashboard.pendingWorkflows}">0</div>
+                        <div class="stat-label">Awaiting approval</div>
+                    </div>
+                </div>
+
+                <!-- Audit Logs -->
+                <div class="col-xl-3 col-lg-4 col-md-6">
+                    <a th:href="@{/audit/logs}" class="stat-card accent-gray">
+                        <div class="stat-icon gray"><i class="bi bi-clipboard-check-fill"></i></div>
+                        <div class="stat-title">Audit Logs</div>
+                        <div class="stat-number" th:text="${dashboard.totalAuditLogs}">0</div>
+                        <div class="stat-label">Total audit entries</div>
+                        <div class="click-hint"><i class="bi bi-arrow-right"></i> Click to view</div>
+                    </a>
+                </div>
+
+                <!-- Tax Configurations -->
+                <div class="col-xl-3 col-lg-4 col-md-6">
+                    <a th:href="@{/admin/tax-configurations}" class="stat-card accent-teal">
+                        <div class="stat-icon teal"><i class="bi bi-cash-stack"></i></div>
+                        <div class="stat-title">Tax Configurations</div>
+                        <div class="stat-number" th:text="${dashboard.totalTaxConfigurations}">0</div>
+                        <div class="stat-label">Active tax rates</div>
+                        <div class="click-hint"><i class="bi bi-arrow-right"></i> Click to manage</div>
+                    </a>
+                </div>
+
+                <!-- System Status -->
+                <div class="col-xl-3 col-lg-4 col-md-6">
+                    <div class="stat-card accent-gold">
+                        <div class="stat-icon gold"><i class="bi bi-heart-pulse-fill"></i></div>
+                        <div class="stat-title">System Status</div>
+                        <div class="stat-number" th:text="${dashboard.systemStatus}">ONLINE</div>
+                        <div class="stat-label">System health</div>
+                    </div>
+                </div>
+
+            </div>
+
+
+            <!-- CHARTS -->
+            <div class="row g-3 mb-4">
+
+                <!-- Chart 1: User Status Doughnut -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="chart-card">
+                        <div class="chart-title">User Status</div>
+                        <div class="chart-subtitle">Active vs Disabled users</div>
+                        <div class="chart-wrapper">
+                            <canvas id="userStatusChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart 2: Role Distribution Bar -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="chart-card">
+                        <div class="chart-title">Role Distribution</div>
+                        <div class="chart-subtitle">User roles across system</div>
+                        <div class="chart-wrapper">
+                            <canvas id="roleDistributionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart 3: Workflow Status Pie -->
+                <div class="col-lg-4 col-md-12">
+                    <div class="chart-card">
+                        <div class="chart-title">Workflow Status</div>
+                        <div class="chart-subtitle">Pending vs Approved vs Rejected</div>
+                        <div class="chart-wrapper">
+                            <canvas id="workflowStatusChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+
+            <!-- QUICK ACTIONS -->
+            <div class="row g-3 mb-4">
+
+                <div class="col-lg-3 col-md-6">
+                    <a th:href="@{/admin/users}" class="quick-action-card">
+                        <span class="qa-icon blue"><i class="bi bi-people-fill"></i></span>
+                        <div class="qa-title">User Management</div>
+                        <div class="qa-subtitle">Manage system users</div>
+                    </a>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <a th:href="@{/admin/tax-configurations}" class="quick-action-card">
+                        <span class="qa-icon green"><i class="bi bi-cash-stack"></i></span>
+                        <div class="qa-title">Tax Configuration</div>
+                        <div class="qa-subtitle">Manage tax rates</div>
+                    </a>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <a th:href="@{/audit/logs}" class="quick-action-card">
+                        <span class="qa-icon purple"><i class="bi bi-clipboard-check-fill"></i></span>
+                        <div class="qa-title">Audit Logs</div>
+                        <div class="qa-subtitle">View audit trail</div>
+                    </a>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <a th:href="@{/}" class="quick-action-card">
+                        <span class="qa-icon orange"><i class="bi bi-house-door-fill"></i></span>
+                        <div class="qa-title">Home Dashboard</div>
+                        <div class="qa-subtitle">Return to home</div>
+                    </a>
+                </div>
+
+            </div>
+
+
+            <!-- SYSTEM SUMMARY + RECENT ACTIVITY -->
+            <div class="row g-3">
+
+                <!-- System Summary -->
+                <div class="col-lg-6">
+                    <div class="summary-card">
+                        <div class="summary-title">
+                            <i class="bi bi-list-ul me-2" style="color: #0d6efd;"></i>
+                            System Summary
+                        </div>
+                        <div class="list-group">
+                            <div class="list-group-item">
+                                <span class="label"><i class="bi bi-people me-2" style="color: #6c757d;"></i>Total Users</span>
+                                <span class="value" th:text="${dashboard.totalUsers}">0</span>
+                            </div>
+                            <div class="list-group-item">
+                                <span class="label"><i class="bi bi-person-check me-2" style="color: #198754;"></i>Active Users</span>
+                                <span class="value" th:text="${dashboard.activeUsers}">0</span>
+                            </div>
+                            <div class="list-group-item">
+                                <span class="label"><i class="bi bi-person-x me-2" style="color: #dc3545;"></i>Disabled Users</span>
+                                <span class="value" th:text="${dashboard.disabledUsers}">0</span>
+                            </div>
+                            <div class="list-group-item">
+                                <span class="label"><i class="bi bi-diagram-3 me-2" style="color: #6f42c1;"></i>Workflows</span>
+                                <span class="value" th:text="${dashboard.totalWorkflows}">0</span>
+                            </div>
+                            <div class="list-group-item">
+                                <span class="label"><i class="bi bi-clock me-2" style="color: #fd7e14;"></i>Pending Workflows</span>
+                                <span class="value" th:text="${dashboard.pendingWorkflows}">0</span>
+                            </div>
+                            <div class="list-group-item">
+                                <span class="label"><i class="bi bi-clipboard-check me-2" style="color: #6c757d;"></i>Audit Logs</span>
+                                <span class="value" th:text="${dashboard.totalAuditLogs}">0</span>
+                            </div>
+                            <div class="list-group-item" style="border-bottom: none;">
+                                <span class="label"><i class="bi bi-cash-stack me-2" style="color: #20c997;"></i>Tax Configurations</span>
+                                <span class="value" th:text="${dashboard.totalTaxConfigurations}">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="col-lg-6">
+                    <div class="activity-card">
+                        <div class="activity-title">
+                            <i class="bi bi-clock-history me-2" style="color: #0d6efd;"></i>
+                            Recent Audit Activity
+                        </div>
+
+                        <div th:if="${#lists.isEmpty(recentAuditLogs)}" class="text-center text-muted py-3">
+                            <i class="bi bi-inbox" style="font-size: 2rem; display: block; margin-bottom: 0.5rem;"></i>
+                            No recent audit activity
+                        </div>
+
+                        <div th:each="log : ${recentAuditLogs}" class="activity-item">
+                            <div class="activity-left">
+                                <div class="activity-icon"
+                                     th:classappend="${log.actionType == 'LOGIN_SUCCESS' ? 'login' :
+                                                    log.actionType == 'USER_CREATED' ? 'create' :
+                                                    log.actionType == 'USER_UPDATED' ? 'edit' :
+                                                    log.actionType == 'USER_DISABLED' ? 'reset' :
+                                                    log.actionType == 'USER_ENABLED' ? 'reset' :
+                                                    log.actionType == 'PASSWORD_RESET' ? 'reset' :
+                                                    log.actionType == 'PIN_RESET' ? 'reset' :
+                                                    'default'}">
+                                    <i th:class="${log.actionType == 'LOGIN_SUCCESS' ? 'bi bi-box-arrow-in-right' :
+                                                  log.actionType == 'USER_CREATED' ? 'bi bi-person-plus' :
+                                                  log.actionType == 'USER_UPDATED' ? 'bi bi-pencil' :
+                                                  log.actionType == 'USER_DISABLED' ? 'bi bi-person-x' :
+                                                  log.actionType == 'USER_ENABLED' ? 'bi bi-person-check' :
+                                                  log.actionType == 'PASSWORD_RESET' ? 'bi bi-key' :
+                                                  log.actionType == 'PIN_RESET' ? 'bi bi-keypad' :
+                                                  'bi bi-clock'}"></i>
+                                </div>
+                                <div>
+                                    <div class="activity-text">
+                                        <span class="user" th:text="${log.performedBy}"></span>
+                                        <span th:text="${log.actionType}"></span>
+                                    </div>
+                                    <div class="activity-time" th:text="${log.details}"></div>
+                                </div>
+                            </div>
+                            <div class="activity-time" th:text="${#temporals.format(log.timestamp, 'dd MMM HH:mm')}"></div>
+                        </div>
+
+                        <a th:href="@{/audit/logs}" class="view-all-link">
+                            <i class="bi bi-arrow-right me-1"></i>
+                            View All Audit Logs
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+    
+    <!-- CHART.JS + INITIALIZATION -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // ============================================================
+            // Read data from Thymeleaf
+            // ============================================================
+            const activeUsers = [[${dashboard.activeUsers}]];
+            const disabledUsers = [[${dashboard.disabledUsers}]];
+            const adminCount = [[${dashboard.administratorCount}]];
+            const approverCount = [[${dashboard.approverCount}]];
+            const auditorCount = [[${dashboard.auditorCount}]];
+            const entryStaffCount = [[${dashboard.entryStaffCount}]];
+            const pendingWorkflows = [[${dashboard.pendingWorkflows}]];
+            const approvedWorkflows = [[${dashboard.approvedWorkflows}]];
+            const rejectedWorkflows = [[${dashboard.rejectedWorkflows}]];
+
+            // ============================================================
+            // Chart 1: User Status Doughnut
+            // ============================================================
+            const ctx1 = document.getElementById('userStatusChart').getContext('2d');
+            new Chart(ctx1, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Active Users', 'Disabled Users'],
+                    datasets: [{
+                        data: [activeUsers, disabledUsers],
+                        backgroundColor: ['#198754', '#dc3545'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 10,
+                                usePointStyle: true,
+                                pointStyle: 'circle'
+                            }
+                        }
+                    },
+                    cutout: '70%'
+                }
+            });
+
+            // ============================================================
+            // Chart 2: Role Distribution Bar
+            // ============================================================
+            const ctx2 = document.getElementById('roleDistributionChart').getContext('2d');
+            new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: ['Administrator', 'Approver', 'Auditor', 'Entry Staff'],
+                    datasets: [{
+                        label: 'Users',
+                        data: [adminCount, approverCount, auditorCount, entryStaffCount],
+                        backgroundColor: ['#0d6efd', '#ffc107', '#6f42c1', '#20c997'],
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+
+            // ============================================================
+            // Chart 3: Workflow Status Pie
+            // ============================================================
+            const ctx3 = document.getElementById('workflowStatusChart').getContext('2d');
+            new Chart(ctx3, {
+                type: 'pie',
+                data: {
+                    labels: ['Pending', 'Approved', 'Rejected'],
+                    datasets: [{
+                        data: [pendingWorkflows, approvedWorkflows, rejectedWorkflows],
+                        backgroundColor: ['#fd7e14', '#198754', '#dc3545'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 10,
+                                usePointStyle: true,
+                                pointStyle: 'circle'
+                            }
+                        }
+                    }
+                }
+            });
+
+        });
+    </script>
+
+</body>
+
+</html>

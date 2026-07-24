@@ -47,4 +47,22 @@ public interface UserRepository extends JpaRepository<User, Integer> {
             @Param("enabled") Boolean enabled
     );
 
+    // ------------------------------------------------------------
+    // Dashboard Statistics
+    // ------------------------------------------------------------
+
+    long countByEnabledTrue();
+
+    long countByEnabledFalse();
+
+    @Query("""
+            SELECT COUNT(u)
+            FROM User u
+            JOIN u.roles r
+            WHERE r.name = :roleName
+            """)
+    long countUsersByRole(
+            @Param("roleName") String roleName
+    );
+
 }
