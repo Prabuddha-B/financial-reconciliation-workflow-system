@@ -317,8 +317,10 @@ public class MessageController {
     public long getUnreadCount() {
         try {
             Long userId = getCurrentUserId();
+            if (userId == null) return 0;
             return messageService.getUnreadCount(userId);
         } catch (Exception e) {
+            log.error("Error getting unread count: {}", e.getMessage());
             return 0;
         }
     }

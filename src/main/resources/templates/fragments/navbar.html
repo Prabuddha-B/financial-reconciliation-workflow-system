@@ -60,10 +60,12 @@
                 <a class="nav-link position-relative text-white me-2" href="/messages/inbox"
                    title="Messages" id="messagesLink">
                     <i class="bi bi-envelope fs-5"></i>
-                    <span id="messageBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                          style="font-size: 0.6rem; display: none;">
-                            0
-                        </span>
+                    <!-- ✅ Badge with explicit ID -->
+                    <span id="messageBadge"
+                          class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                          style="font-size: 0.65rem; min-width: 1.2rem; padding: 0.25rem 0.4rem; border: 1px solid white; display: none;">
+                        0
+                    </span>
                 </a>
 
                 <!-- ========================================== -->
@@ -72,10 +74,12 @@
                 <a class="nav-link position-relative text-white me-2" href="/notifications"
                    title="Notifications" id="notificationsLink">
                     <i class="bi bi-bell fs-5"></i>
-                    <span id="notificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                          style="font-size: 0.6rem; display: none;">
-                            0
-                        </span>
+                    <!-- ✅ Badge with explicit ID -->
+                    <span id="notificationBadge"
+                          class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                          style="font-size: 0.65rem; min-width: 1.2rem; padding: 0.25rem 0.4rem; border: 1px solid white; display: none;">
+                        0
+                    </span>
                 </a>
 
                 <!-- ========================================== -->
@@ -126,151 +130,6 @@
     </div>
 
 </nav>
-
-<!-- ========================================== -->
-<!-- JavaScript for Badge Updates & Notifications -->
-<!-- ========================================== -->
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-
-        // ==========================================
-        // 1. UPDATE BADGES FUNCTION
-        // ==========================================
-        // In navbar.html - Updated polling
-        function updateBadges() {
-            // Message count
-            fetch('/messages/api/unread-count')
-                .then(response => {
-                    if (!response.ok) throw new Error('Network error');
-                    return response.text();
-                })
-                .then(count => {
-                    const badge = document.getElementById('messageBadge');
-                    const numCount = parseInt(count);
-                    if (numCount > 0) {
-                        badge.textContent = numCount > 99 ? '99+' : numCount;
-                        badge.style.display = 'inline';
-                    } else {
-                        badge.style.display = 'none';
-                    }
-                })
-                .catch(() => {
-                    const badge = document.getElementById('messageBadge');
-                    badge.style.display = 'none';
-                });
-
-            // Notification count
-            fetch('/notifications/api/unread-count')
-                .then(response => {
-                    if (!response.ok) throw new Error('Network error');
-                    return response.text();
-                })
-                .then(count => {
-                    const badge = document.getElementById('notificationBadge');
-                    const numCount = parseInt(count);
-                    if (numCount > 0) {
-                        badge.textContent = numCount > 99 ? '99+' : numCount;
-                        badge.style.display = 'inline';
-                    } else {
-                        badge.style.display = 'none';
-                    }
-                })
-                .catch(() => {
-                    const badge = document.getElementById('notificationBadge');
-                    badge.style.display = 'none';
-                });
-        }
-
-        // ==========================================
-        // 2. INITIAL LOAD
-        // ==========================================
-        updateBadges();
-
-        // ==========================================
-        // 3. POLL EVERY 10 SECONDS
-        // ==========================================
-        setInterval(updateBadges, 10000);
-
-        // ==========================================
-        // 4. UPDATE WHEN PAGE BECOMES VISIBLE
-        // ==========================================
-        document.addEventListener('visibilitychange', function() {
-            if (!document.hidden) {
-                updateBadges();
-            }
-        });
-
-        // ==========================================
-        // 5. NOTIFICATION TOAST (Optional)
-        // ==========================================
-        // Check for new notifications every 30 seconds
-        let lastNotificationCount = 0;
-
-        function checkNewNotifications() {
-            fetch('/notifications/api/unread-count')
-                .then(response => response.text())
-                .then(count => {
-                    const numCount = parseInt(count);
-                    if (numCount > lastNotificationCount && numCount > 0) {
-                        // New notification arrived!
-                        showNotificationToast('You have a new notification!');
-                    }
-                    lastNotificationCount = numCount;
-                })
-                .catch(() => {});
-        }
-
-        // Simple toast notification
-        function showNotificationToast(message) {
-            // Check if toast container exists
-            let toastContainer = document.getElementById('toastContainer');
-            if (!toastContainer) {
-                toastContainer = document.createElement('div');
-                toastContainer.id = 'toastContainer';
-                toastContainer.style.position = 'fixed';
-                toastContainer.style.bottom = '20px';
-                toastContainer.style.right = '20px';
-                toastContainer.style.zIndex = '9999';
-                document.body.appendChild(toastContainer);
-            }
-
-            const toast = document.createElement('div');
-            toast.className = 'toast show';
-            toast.role = 'alert';
-            toast.innerHTML = `
-                    <div class="toast-header bg-primary text-white">
-                        <i class="bi bi-bell me-2"></i>
-                        <strong class="me-auto">FRWSS Notification</strong>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
-                    </div>
-                    <div class="toast-body">
-                        ${message}
-                        <a href="/notifications" class="ms-2">View</a>
-                    </div>
-                `;
-            toastContainer.appendChild(toast);
-
-            // Auto-remove after 5 seconds
-            setTimeout(() => {
-                toast.remove();
-            }, 5000);
-        }
-
-        // Start checking for new notifications (every 30 seconds)
-        // Only if notifications page is not already open
-        setTimeout(() => {
-            fetch('/notifications/api/unread-count')
-                .then(response => response.text())
-                .then(count => {
-                    lastNotificationCount = parseInt(count);
-                })
-                .catch(() => {});
-        }, 1000);
-
-        setInterval(checkNewNotifications, 30000);
-
-    });
-</script>
 
 </body>
 </html>
