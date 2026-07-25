@@ -1,4 +1,4 @@
-package com.frwss.system.report.dto;
+package com.frwss.system.reporting.dto;
 
 import java.time.LocalDate;
 

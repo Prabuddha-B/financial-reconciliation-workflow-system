@@ -1,8 +1,8 @@
-package com.frwss.system.report.service;
+package com.frwss.system.reporting.service;
 
 import com.frwss.system.reconciliation.model.ReconciliationResult;
 import com.frwss.system.reconciliation.model.ReconciliationStatus;
-import com.frwss.system.report.dto.ReportFilterDto;
+import com.frwss.system.reporting.dto.ReportFilterDto;
 import com.lowagie.text.*;
 
 import com.lowagie.text.pdf.PdfPCell;

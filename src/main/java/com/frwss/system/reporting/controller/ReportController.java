@@ -1,13 +1,13 @@
-package com.frwss.system.report.controller;
+package com.frwss.system.reporting.controller;
 
 import com.frwss.system.audit.model.AuditActionType;
 import com.frwss.system.audit.service.AuditService;
 import com.frwss.system.reconciliation.model.ReconciliationResult;
 import com.frwss.system.reconciliation.model.ReconciliationStatus;
 import com.frwss.system.reconciliation.service.ReconciliationService;
-import com.frwss.system.report.dto.ReportFilterDto;
-import com.frwss.system.report.service.ExcelReportService;
-import com.frwss.system.report.service.PdfReportService;
+import com.frwss.system.reporting.dto.ReportFilterDto;
+import com.frwss.system.reporting.service.ExcelReportService;
+import com.frwss.system.reporting.service.PdfReportService;
 import com.frwss.system.security.SecurityContextAdapter;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
