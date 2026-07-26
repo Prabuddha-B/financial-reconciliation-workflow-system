@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/header :: header('Edit User')}"></head>
+
+<style>
+    .main-container {
+        padding: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        margin-bottom: 2.5rem;
+    }
+
+    .page-header .breadcrumb-nav {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        font-size: 0.95rem;
+        color: #6c757d;
+        margin-bottom: 0.75rem;
+    }
+
+    .page-header .breadcrumb-nav a {
+        color: #0d6efd;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .page-header .breadcrumb-nav a:hover {
+        text-decoration: underline;
+    }
+
+    .page-header .breadcrumb-nav .separator {
+        color: #ced4da;
+    }
+
+    .page-header .breadcrumb-nav .current {
+        color: #1a2332;
+        font-weight: 600;
+    }
+
+    .page-header h2 {
+        font-weight: 700;
+        color: #1a2332;
+        font-size: 2rem;
+        letter-spacing: -0.3px;
+        margin-bottom: 0.25rem;
+    }
+
+    .page-header h2 i {
+        color: #0d6efd;
+    }
+
+    .page-header .text-muted {
+        font-size: 1.05rem;
+        color: #6c757d !important;
+    }
+
+    .card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        transition: box-shadow 0.2s ease;
+        background: white;
+    }
+
+    .card:hover {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .card-header {
+        background: white;
+        border-bottom: 1px solid #f0f2f5;
+        padding: 1.25rem 1.5rem;
+        border-radius: 16px 16px 0 0 !important;
+    }
+
+    .card-header h3 {
+        font-weight: 600;
+        color: #1a2332;
+        font-size: 1.1rem;
+        margin: 0;
+    }
+
+    .card-header h3 i {
+        color: #0d6efd;
+        margin-right: 0.5rem;
+    }
+
+    .card-body {
+        padding: 2rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: #1a2332;
+        margin-bottom: 0.4rem;
+    }
+
+    .form-label i {
+        color: #6c757d;
+        width: 1.2rem;
+    }
+
+    .form-control,
+    .form-select {
+        border-radius: 10px;
+        border: 1.5px solid #e2e8f0;
+        padding: 0.7rem 1rem;
+        font-size: 1rem;
+        transition: all 0.15s;
+        background: white;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1);
+    }
+
+    .form-control[readonly] {
+        background: #f8f9fa;
+        cursor: not-allowed;
+        opacity: 0.8;
+    }
+
+    .btn-primary-custom {
+        padding: 0.7rem 2rem;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 1rem;
+        background: #0d6efd;
+        color: white;
+        border: none;
+        transition: all 0.15s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+    }
+
+    .btn-primary-custom:hover {
+        background: #0b5ed7;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(13, 110, 253, 0.35);
+    }
+
+    .btn-secondary-custom {
+        padding: 0.7rem 2rem;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 1rem;
+        border: 1.5px solid #e2e8f0;
+        transition: all 0.15s;
+        background: white;
+        color: #495057;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-secondary-custom:hover {
+        background: #f8f9fa;
+        border-color: #ced4da;
+        transform: translateY(-2px);
+    }
+
+    .info-box {
+        background: #f8f9fa;
+        border-radius: 16px;
+        padding: 1.75rem;
+        border: 1px solid #e9ecef;
+        height: 100%;
+    }
+
+    .info-box h6 {
+        font-weight: 600;
+        color: #1a2332;
+        font-size: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .info-box .info-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 0.6rem 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .info-box .info-item:last-child {
+        border-bottom: none;
+    }
+
+    .info-box .info-icon {
+        color: #0d6efd;
+        font-size: 1.2rem;
+        margin-top: 0.1rem;
+        min-width: 1.5rem;
+    }
+
+    .info-box .info-text {
+        font-size: 0.95rem;
+        color: #495057;
+    }
+
+    .info-box .info-text strong {
+        color: #1a2332;
+        display: block;
+        margin-bottom: 0.15rem;
+    }
+
+    .alert {
+        border: none;
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        font-weight: 500;
+        font-size: 0.95rem;
+    }
+
+    .alert-danger {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .alert i {
+        font-size: 1.1rem;
+    }
+
+    @media (max-width: 992px) {
+        .main-container {
+            padding: 1.5rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .main-container {
+            padding: 1rem;
+        }
+        .card-body {
+            padding: 1.25rem;
+        }
+        .page-header h2 {
+            font-size: 1.6rem;
+        }
+        .page-header .text-muted {
+            font-size: 0.95rem;
+        }
+        .btn-primary-custom,
+        .btn-secondary-custom {
+            padding: 0.6rem 1.25rem;
+            font-size: 0.9rem;
+        }
+        .form-label {
+            font-size: 0.9rem;
+        }
+        .form-control,
+        .form-select {
+            font-size: 0.95rem;
+            padding: 0.6rem 0.85rem;
+        }
+        .info-box {
+            margin-top: 1.5rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .card-header h3 {
+            font-size: 1rem;
+        }
+        .card-body {
+            padding: 1rem;
+        }
+        .btn-primary-custom,
+        .btn-secondary-custom {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+        .form-control,
+        .form-select {
+            font-size: 0.9rem;
+            padding: 0.5rem 0.75rem;
+        }
+        .form-label {
+            font-size: 0.85rem;
+        }
+        .page-header h2 {
+            font-size: 1.3rem;
+        }
+    }
+</style>
+
+<body class="d-flex flex-column min-vh-100 bg-light">
+
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <main class="flex-grow-1">
+
+        <div class="container-fluid main-container">
+
+            <!-- Error Message -->
+            <div th:if="${errorMessage}"
+                 class="alert alert-danger alert-dismissible fade show"
+                 role="alert">
+
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <span th:text="${errorMessage}"></span>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                </button>
+
+            </div>
+
+
+            <!-- PAGE HEADER-->
+            <div class="page-header">
+
+                <div>
+                    <h2>
+                        <i class="bi bi-pencil-square me-2"></i>
+                        Edit User
+                    </h2>
+                    <p class="text-muted mb-0">
+                        Update user role and account status
+                    </p>
+                </div>
+
+            </div>
+
+
+            <!-- EDIT USER FORM -->
+
+            <div class="row g-4">
+
+                <div class="col-lg-8">
+
+                    <div class="card shadow-sm">
+
+                        <div class="card-header">
+                            <h3 class="mb-0">
+                                <i class="bi bi-pencil-square me-2"></i>
+                                Edit User
+                            </h3>
+                        </div>
+
+                        <div class="card-body">
+
+
+                            <form th:action="@{/admin/users/{id}/edit(id=${user.userId})}"
+                                  th:object="${user}"
+                                  method="post">
+
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <i class="bi bi-hash"></i>
+                                        User ID
+                                    </label>
+                                    <input class="form-control"
+                                           th:value="${user.userId}"
+                                           readonly>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <i class="bi bi-person"></i>
+                                        Username
+                                    </label>
+                                    <input class="form-control"
+                                           th:value="${user.username}"
+                                           readonly>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <i class="bi bi-tag"></i>
+                                        Role
+                                    </label>
+                                    <select class="form-select" name="role">
+                                        <option value="ROLE_ADMIN"
+                                                th:selected="${#lists.toList(user.roles)[0].name == 'ROLE_ADMIN'}">
+                                            Administrator
+                                        </option>
+                                        <option value="ROLE_ENTRY_STAFF"
+                                                th:selected="${#lists.toList(user.roles)[0].name == 'ROLE_ENTRY_STAFF'}">
+                                            Entry Staff
+                                        </option>
+                                        <option value="ROLE_AUDITOR"
+                                                th:selected="${#lists.toList(user.roles)[0].name == 'ROLE_AUDITOR'}">
+                                            Auditor
+                                        </option>
+                                        <option value="ROLE_APPROVER"
+                                                th:selected="${#lists.toList(user.roles)[0].name == 'ROLE_APPROVER'}">
+                                            Approver
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <i class="bi bi-circle"></i>
+                                        Status
+                                    </label>
+                                    <select class="form-select" name="enabled">
+                                        <option value="true"
+                                                th:selected="${user.enabled}">
+                                            Active
+                                        </option>
+                                        <option value="false"
+                                                th:selected="${!user.enabled}">
+                                            Disabled
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div class="d-flex gap-3 pt-3 border-top">
+                                    <button class="btn-primary-custom">
+                                        <i class="bi bi-check-circle me-2"></i>
+                                        Save Changes
+                                    </button>
+                                    <a th:href="@{/admin/users}"
+                                       class="btn-secondary-custom">
+                                        Cancel
+                                    </a>
+                                </div>
+
+                            </form>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- Right Column: Info Box -->
+                <div class="col-lg-4">
+
+                    <div class="info-box">
+                        <h6>
+                            <i class="bi bi-info-circle me-2" style="color: #0d6efd;"></i>
+                            Quick Reference
+                        </h6>
+
+                        <div class="info-item">
+                            <div class="info-icon"><i class="bi bi-person"></i></div>
+                            <div class="info-text">
+                                <strong>Username</strong>
+                                Cannot be changed
+                            </div>
+                        </div>
+
+                        <div class="info-item">
+                            <div class="info-icon"><i class="bi bi-tag"></i></div>
+                            <div class="info-text">
+                                <strong>Role</strong>
+                                Determines system permissions
+                            </div>
+                        </div>
+
+                        <div class="info-item">
+                            <div class="info-icon"><i class="bi bi-circle"></i></div>
+                            <div class="info-text">
+                                <strong>Status</strong>
+                                Active = can login<br>
+                                Disabled = access revoked
+                            </div>
+                        </div>
+
+                        <div class="info-item" style="border-bottom: none; padding-bottom: 0;">
+                            <div class="info-icon"><i class="bi bi-shield-check" style="color: #198754;"></i></div>
+                            <div class="info-text">
+                                <strong>Note</strong>
+                                You cannot disable your own account
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+</body>
+
+</html>

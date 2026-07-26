@@ -5,10 +5,10 @@
 
 <body class="d-flex flex-column min-vh-100">
 
-<!-- Nav Bar -->
-<div th:replace="~{fragments/navbar :: navbar}"></div>
+    <!-- Nav Bar -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-<div class="container py-4 py-lg-5">
+    <div class="container py-4 py-lg-5">
 
     <!-- ===================== Breadcrumb ===================== -->
     <nav aria-label="breadcrumb" class="mb-3">
@@ -22,386 +22,386 @@
         </ol>
     </nav>
 
-    <!-- ===================== Page Header ===================== -->
-    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
-        <div>
-            <h1 class="h3 mb-2">
-                <i class="bi bi-calculator me-2"></i>Tax Estimation
-            </h1>
-            <p class="text-muted mb-0">
-                Generate reference-only tax estimates for financial review and internal comparison.
-            </p>
-        </div>
-
-        <div class="d-flex flex-wrap gap-2">
-            <a th:href="@{/}" class="btn btn-outline-primary">
-                <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
-            </a>
-            <span class="badge rounded-pill bg-warning-subtle text-warning-emphasis border border-warning-subtle px-3 py-2">
-                <i class="bi bi-exclamation-triangle me-1"></i>Reference Only
-            </span>
-        </div>
-    </div>
-
-    <!-- ===================== Disclaimer ===================== -->
-    <div class="alert alert-warning border-warning-subtle shadow-sm d-flex align-items-start gap-3 mb-4" role="alert">
-        <div class="rounded-circle bg-warning text-dark d-inline-flex align-items-center justify-content-center p-2">
-            <i class="bi bi-shield-exclamation fs-4"></i>
-        </div>
-        <div>
-            <div class="fw-bold text-uppercase mb-1">REFERENCE ONLY - Not legally valid</div>
+        <!-- ===================== Page Header ===================== -->
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
             <div>
-                This estimation is NOT legally valid and must not be used for official tax filing.
+                <h1 class="h3 mb-2">
+                    <i class="bi bi-calculator me-2"></i>Tax Estimation
+                </h1>
+                <p class="text-muted mb-0">
+                    Generate reference-only tax estimates for financial review and internal comparison.
+                </p>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2">
+                <a th:href="@{/}" class="btn btn-outline-primary">
+                    <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+                </a>
+                <span class="badge rounded-pill bg-warning-subtle text-warning-emphasis border border-warning-subtle px-3 py-2">
+                    <i class="bi bi-exclamation-triangle me-1"></i>Reference Only
+                </span>
             </div>
         </div>
-    </div>
 
-    <div class="row g-4 align-items-stretch">
-
-        <!-- ===================== Estimation Form ===================== -->
-        <div class="col-12 col-xl-5">
-            <div class="card shadow-sm h-100 border-0">
-                <div class="card-header bg-white py-3">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="rounded-3 bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center p-3">
-                            <i class="bi bi-ui-checks-grid fs-4"></i>
-                        </div>
-                        <div>
-                            <strong>Estimate Tax</strong>
-                            <div class="text-muted small">Select controlled values to prevent invalid input</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card-body p-4">
-                    <form th:action="@{/tax/estimate}"
-                          th:object="${request}"
-                          method="post"
-                          class="row g-4"
-                          aria-label="Tax estimation form">
-
-                        <div class="col-12">
-                            <label for="module" class="form-label fw-semibold">
-                                Module <span class="text-danger" aria-hidden="true">*</span>
-                            </label>
-                            <select id="module"
-                                    th:field="*{module}"
-                                    class="form-select form-select-lg"
-                                    aria-describedby="moduleHelp"
-                                    autofocus
-                                    required>
-
-                                <option value="" disabled th:selected="${request.module == null}">
-                                    Select Module
-                                </option>
-
-                                <option th:each="module : ${modules}"
-                                        th:value="${module}"
-                                        th:text="${module}">
-                                </option>
-
-                            </select>
-                            <div id="moduleHelp" class="form-text">
-                                Choose the source module that applies to this reference estimate.
-                            </div>
-                        </div>
-
-                        <div class="col-12">
-                            <label for="category" class="form-label fw-semibold">
-                                Category <span class="text-danger" aria-hidden="true">*</span>
-                            </label>
-                            <select id="category"
-                                    th:field="*{category}"
-                                    class="form-select form-select-lg"
-                                    aria-describedby="categoryHelp"
-                                    required>
-
-                                <option value="" disabled th:selected="${request.category == null}">
-                                    Select Category
-                                </option>
-
-                                <option th:each="category : ${categories}"
-                                        th:value="${category}"
-                                        th:text="${category}">
-                                </option>
-
-                            </select>
-
-                            <div id="categoryHelp" class="form-text">
-                                Category controls the configured reference tax rate.
-                            </div>
-                        </div>
-
-                        <div class="col-12">
-                            <label for="amount" class="form-label fw-semibold">
-                                Amount <span class="text-danger" aria-hidden="true">*</span>
-                            </label>
-                            <div class="input-group input-group-lg">
-                                <span class="input-group-text bg-white text-muted">
-                                    <i class="bi bi-cash-coin" aria-hidden="true"></i>
-                                </span>
-                                <span class="input-group-text bg-light fw-semibold">LKR</span>
-                                <input type="number"
-                                       id="amount"
-                                       th:field="*{amount}"
-                                       class="form-control"
-                                       min="0.01"
-                                       step="0.01"
-                                       inputmode="decimal"
-                                       autocomplete="off"
-                                       placeholder="0.00"
-                                       aria-describedby="amountHelp"
-                                       aria-label="Amount in Sri Lankan rupees"
-                                       required>
-                            </div>
-                            <div id="amountHelp" class="form-text">
-                                Enter a positive amount using two decimal places when applicable.
-                            </div>
-                        </div>
-
-                        <div class="col-12">
-                            <div class="d-grid d-sm-flex gap-2 pt-2">
-                                <button type="submit" class="btn btn-primary btn-lg px-4">
-                                    <i class="bi bi-calculator me-1"></i>Estimate Tax
-                                </button>
-
-                                <a th:href="@{/tax}" class="btn btn-outline-secondary btn-lg px-4">
-                                    <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
-                                </a>
-                            </div>
-                        </div>
-
-                    </form>
+        <!-- ===================== Disclaimer ===================== -->
+        <div class="alert alert-warning border-warning-subtle shadow-sm d-flex align-items-start gap-3 mb-4" role="alert">
+            <div class="rounded-circle bg-warning text-dark d-inline-flex align-items-center justify-content-center p-2">
+                <i class="bi bi-shield-exclamation fs-4"></i>
+            </div>
+            <div>
+                <div class="fw-bold text-uppercase mb-1">REFERENCE ONLY - Not legally valid</div>
+                <div>
+                    This estimation is NOT legally valid and must not be used for official tax filing.
                 </div>
             </div>
         </div>
 
-        <!-- ===================== Estimation Result ===================== -->
-        <div class="col-12 col-xl-7">
-            <div class="card shadow-sm h-100"
-                 th:classappend="${result != null and result.disclaimer != null and #strings.startsWith(result.disclaimer, 'ERROR')} ? 'border-danger-subtle' : 'border-0'">
-                <div class="card-header bg-white py-3">
-                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+        <div class="row g-4 align-items-stretch">
+
+            <!-- ===================== Estimation Form ===================== -->
+            <div class="col-12 col-xl-5">
+                <div class="card shadow-sm h-100 border-0">
+                    <div class="card-header bg-white py-3">
                         <div class="d-flex align-items-center gap-3">
-                            <div class="rounded-3 bg-success-subtle text-success d-inline-flex align-items-center justify-content-center p-3">
-                                <i class="bi bi-graph-up-arrow fs-4"></i>
+                            <div class="rounded-3 bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center p-3">
+                                <i class="bi bi-ui-checks-grid fs-4"></i>
                             </div>
                             <div>
-                                <strong>Estimation Result</strong>
-                                <div class="text-muted small">Reference calculation returned by the tax service</div>
+                                <strong>Estimate Tax</strong>
+                                <div class="text-muted small">Select controlled values to prevent invalid input</div>
                             </div>
                         </div>
+                    </div>
 
-                        <span th:if="${result != null}"
-                              class="badge rounded-pill bg-success-subtle text-success-emphasis border border-success-subtle px-3 py-2">
-                            <i class="bi bi-check-circle me-1"></i>Generated
-                        </span>
+                    <div class="card-body p-4">
+                        <form th:action="@{/tax/estimate}"
+                              th:object="${request}"
+                              method="post"
+                              class="row g-4"
+                              aria-label="Tax estimation form">
+
+                            <div class="col-12">
+                                <label for="module" class="form-label fw-semibold">
+                                    Module <span class="text-danger" aria-hidden="true">*</span>
+                                </label>
+                                <select id="module"
+                                        th:field="*{module}"
+                                        class="form-select form-select-lg"
+                                        aria-describedby="moduleHelp"
+                                        autofocus
+                                        required>
+
+                                    <option value="" disabled th:selected="${request.module == null}">
+                                        Select Module
+                                    </option>
+
+                                    <option th:each="module : ${modules}"
+                                            th:value="${module}"
+                                            th:text="${module}">
+                                    </option>
+
+                                </select>
+                                <div id="moduleHelp" class="form-text">
+                                    Choose the source module that applies to this reference estimate.
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <label for="category" class="form-label fw-semibold">
+                                    Category <span class="text-danger" aria-hidden="true">*</span>
+                                </label>
+                                <select id="category"
+                                        th:field="*{category}"
+                                        class="form-select form-select-lg"
+                                        aria-describedby="categoryHelp"
+                                        required>
+
+                                    <option value="" disabled th:selected="${request.category == null}">
+                                        Select Category
+                                    </option>
+
+                                    <option th:each="category : ${categories}"
+                                            th:value="${category}"
+                                            th:text="${category}">
+                                    </option>
+
+                                </select>
+
+                                <div id="categoryHelp" class="form-text">
+                                    Category controls the configured reference tax rate.
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <label for="amount" class="form-label fw-semibold">
+                                    Amount <span class="text-danger" aria-hidden="true">*</span>
+                                </label>
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text bg-white text-muted">
+                                        <i class="bi bi-cash-coin" aria-hidden="true"></i>
+                                    </span>
+                                    <span class="input-group-text bg-light fw-semibold">LKR</span>
+                                    <input type="number"
+                                           id="amount"
+                                           th:field="*{amount}"
+                                           class="form-control"
+                                           min="0.01"
+                                           step="0.01"
+                                           inputmode="decimal"
+                                           autocomplete="off"
+                                           placeholder="0.00"
+                                           aria-describedby="amountHelp"
+                                           aria-label="Amount in Sri Lankan rupees"
+                                           required>
+                                </div>
+                                <div id="amountHelp" class="form-text">
+                                    Enter a positive amount using two decimal places when applicable.
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="d-grid d-sm-flex gap-2 pt-2">
+                                    <button type="submit" class="btn btn-primary btn-lg px-4">
+                                        <i class="bi bi-calculator me-1"></i>Estimate Tax
+                                    </button>
+
+                                    <a th:href="@{/tax}" class="btn btn-outline-secondary btn-lg px-4">
+                                        <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
+                                    </a>
+                                </div>
+                            </div>
+
+                        </form>
                     </div>
                 </div>
+            </div>
 
-                <div th:if="${result == null}" class="card-body text-center p-5">
-                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary-subtle text-primary p-4 mb-4 shadow-sm">
-                        <i class="bi bi-clipboard2-pulse fs-1"></i>
-                    </div>
-                    <div class="h5 fw-semibold mb-2">No estimate generated yet</div>
-                    <div class="text-muted mx-auto mb-4">
-                        Select a module, category, and amount to generate a reference-only estimate.
-                        Results will appear here with the calculated tax rate, estimated tax, and total.
-                    </div>
-                    <div class="d-inline-flex align-items-center gap-2 rounded-pill bg-light border px-3 py-2 text-muted small">
-                        <i class="bi bi-arrow-left-circle"></i>
-                        Complete the form to begin
-                    </div>
-                </div>
-
-                <div th:if="${result != null}" class="card-body p-4">
-
-                    <div th:if="${result.disclaimer != null and #strings.startsWith(result.disclaimer, 'ERROR')}"
-                         class="alert alert-danger border-danger-subtle d-flex align-items-start gap-3 mb-4" role="alert">
-                        <i class="bi bi-x-circle-fill fs-5 mt-1"></i>
-                        <div th:text="${result.disclaimer}">ERROR</div>
-                    </div>
-
-                    <div th:if="${result.disclaimer == null or !#strings.startsWith(result.disclaimer, 'ERROR')}"
-                         class="alert alert-warning border-warning-subtle d-flex align-items-start gap-3 mb-4" role="alert">
-                        <i class="bi bi-shield-exclamation fs-5 mt-1"></i>
-                        <div>
-                            <div class="fw-semibold">Reference-only estimate</div>
-                            <div th:text="${result.disclaimer}">
-                                REFERENCE ONLY - This estimation must not be used for official tax filing.
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row g-3 mb-4">
-                        <div class="col-12 col-md-6">
-                            <div class="border rounded-3 p-3 h-100 bg-light">
-                                <div class="text-muted small text-uppercase fw-semibold mb-1">Module</div>
-                                <div class="fw-semibold" th:text="${result.module ?: '-'}">RECEIPT</div>
-                            </div>
-                        </div>
-
-                        <div class="col-12 col-md-6">
-                            <div class="border rounded-3 p-3 h-100 bg-light">
-                                <div class="text-muted small text-uppercase fw-semibold mb-1">Category</div>
-                                <div class="fw-semibold" th:text="${result.category ?: '-'}">STANDARD</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="vstack gap-3">
-                        <div class="card shadow-sm border-0 bg-light">
-                            <div class="card-body d-flex align-items-center gap-3">
-                                <div class="rounded-3 bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center p-3">
-                                    <i class="bi bi-cash-stack fs-4"></i>
+            <!-- ===================== Estimation Result ===================== -->
+            <div class="col-12 col-xl-7">
+                <div class="card shadow-sm h-100"
+                     th:classappend="${result != null and result.disclaimer != null and #strings.startsWith(result.disclaimer, 'ERROR')} ? 'border-danger-subtle' : 'border-0'">
+                    <div class="card-header bg-white py-3">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-3 bg-success-subtle text-success d-inline-flex align-items-center justify-content-center p-3">
+                                    <i class="bi bi-graph-up-arrow fs-4"></i>
                                 </div>
-                                <div class="flex-grow-1">
-                                    <div class="text-muted small text-uppercase fw-semibold mb-1">Original Amount</div>
-                                    <div class="h4 fw-semibold mb-0">
-                                        LKR
-                                        <span th:text="${result.originalAmount != null ? #numbers.formatDecimal(result.originalAmount, 1, 2) : '0.00'}">
-                                            0.00
-                                        </span>
-                                    </div>
+                                <div>
+                                    <strong>Estimation Result</strong>
+                                    <div class="text-muted small">Reference calculation returned by the tax service</div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="text-center text-muted">
-                            <i class="bi bi-arrow-down-circle fs-4"></i>
-                        </div>
-
-                        <div class="card shadow-sm border-0 bg-light">
-                            <div class="card-body d-flex align-items-center gap-3">
-                                <div class="rounded-3 bg-info-subtle text-info d-inline-flex align-items-center justify-content-center p-3">
-                                    <i class="bi bi-percent fs-4"></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <div class="text-muted small text-uppercase fw-semibold mb-1">Tax Rate</div>
-                                    <div class="h4 fw-semibold mb-0 text-info">
-                                        <span th:text="${result.taxRate != null ? #numbers.formatDecimal(result.taxRate, 1, 2) : '0.00'}">0.00</span>%
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="text-center text-muted">
-                            <i class="bi bi-arrow-down-circle fs-4"></i>
-                        </div>
-
-                        <div class="card shadow-sm border-warning-subtle bg-warning-subtle">
-                            <div class="card-body d-flex align-items-center gap-3">
-                                <div class="rounded-3 bg-warning text-dark d-inline-flex align-items-center justify-content-center p-3">
-                                    <i class="bi bi-receipt-cutoff fs-4"></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <div class="text-muted small text-uppercase fw-semibold mb-1">Estimated Tax</div>
-                                    <div class="h3 fw-bold mb-0 text-warning-emphasis">
-                                        LKR
-                                        <span th:text="${result.estimatedTax != null ? #numbers.formatDecimal(result.estimatedTax, 1, 2) : '0.00'}">
-                                            0.00
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="text-center text-muted">
-                            <i class="bi bi-arrow-down-circle fs-4"></i>
-                        </div>
-
-                        <div class="card shadow-sm border-success-subtle bg-success-subtle">
-                            <div class="card-body d-flex align-items-center gap-3">
-                                <div class="rounded-3 bg-success text-white d-inline-flex align-items-center justify-content-center p-3">
-                                    <i class="bi bi-calculator-fill fs-4"></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <div class="text-muted small text-uppercase fw-semibold mb-1">Total With Tax</div>
-                                    <div class="h3 fw-bold mb-0 text-success-emphasis">
-                                        LKR
-                                        <span th:text="${result.totalWithTax != null ? #numbers.formatDecimal(result.totalWithTax, 1, 2) : '0.00'}">
-                                            0.00
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <hr class="my-4">
-
-                    <div class="row g-3 small text-muted">
-                        <div class="col-12 col-md-6">
-                            <i class="bi bi-person-circle me-1"></i>
-                            Estimated by:
-                            <span class="fw-semibold text-dark" th:text="${result.estimatedBy ?: '-'}">admin</span>
-                        </div>
-
-                        <div class="col-12 col-md-6 text-md-end">
-                            <i class="bi bi-clock-history me-1"></i>
-                            Estimated at:
-                            <span class="fw-semibold text-dark"
-                                  th:text="${result.estimatedAt != null ? #temporals.format(result.estimatedAt, 'yyyy-MM-dd HH:mm:ss') : '-'}">
-                                2026-01-01 10:30:00
+                            <span th:if="${result != null}"
+                                  class="badge rounded-pill bg-success-subtle text-success-emphasis border border-success-subtle px-3 py-2">
+                                <i class="bi bi-check-circle me-1"></i>Generated
                             </span>
                         </div>
                     </div>
 
+                    <div th:if="${result == null}" class="card-body text-center p-5">
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary-subtle text-primary p-4 mb-4 shadow-sm">
+                            <i class="bi bi-clipboard2-pulse fs-1"></i>
+                        </div>
+                        <div class="h5 fw-semibold mb-2">No estimate generated yet</div>
+                        <div class="text-muted mx-auto mb-4">
+                            Select a module, category, and amount to generate a reference-only estimate.
+                            Results will appear here with the calculated tax rate, estimated tax, and total.
+                        </div>
+                        <div class="d-inline-flex align-items-center gap-2 rounded-pill bg-light border px-3 py-2 text-muted small">
+                            <i class="bi bi-arrow-left-circle"></i>
+                            Complete the form to begin
+                        </div>
+                    </div>
+
+                    <div th:if="${result != null}" class="card-body p-4">
+
+                        <div th:if="${result.disclaimer != null and #strings.startsWith(result.disclaimer, 'ERROR')}"
+                             class="alert alert-danger border-danger-subtle d-flex align-items-start gap-3 mb-4" role="alert">
+                            <i class="bi bi-x-circle-fill fs-5 mt-1"></i>
+                            <div th:text="${result.disclaimer}">ERROR</div>
+                        </div>
+
+                        <div th:if="${result.disclaimer == null or !#strings.startsWith(result.disclaimer, 'ERROR')}"
+                             class="alert alert-warning border-warning-subtle d-flex align-items-start gap-3 mb-4" role="alert">
+                            <i class="bi bi-shield-exclamation fs-5 mt-1"></i>
+                            <div>
+                                <div class="fw-semibold">Reference-only estimate</div>
+                                <div th:text="${result.disclaimer}">
+                                    REFERENCE ONLY - This estimation must not be used for official tax filing.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-12 col-md-6">
+                                <div class="border rounded-3 p-3 h-100 bg-light">
+                                    <div class="text-muted small text-uppercase fw-semibold mb-1">Module</div>
+                                    <div class="fw-semibold" th:text="${result.module ?: '-'}">RECEIPT</div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <div class="border rounded-3 p-3 h-100 bg-light">
+                                    <div class="text-muted small text-uppercase fw-semibold mb-1">Category</div>
+                                    <div class="fw-semibold" th:text="${result.category ?: '-'}">STANDARD</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="vstack gap-3">
+                            <div class="card shadow-sm border-0 bg-light">
+                                <div class="card-body d-flex align-items-center gap-3">
+                                    <div class="rounded-3 bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center p-3">
+                                        <i class="bi bi-cash-stack fs-4"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="text-muted small text-uppercase fw-semibold mb-1">Original Amount</div>
+                                        <div class="h4 fw-semibold mb-0">
+                                            LKR
+                                            <span th:text="${result.originalAmount != null ? #numbers.formatDecimal(result.originalAmount, 1, 2) : '0.00'}">
+                                                0.00
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="text-center text-muted">
+                                <i class="bi bi-arrow-down-circle fs-4"></i>
+                            </div>
+
+                            <div class="card shadow-sm border-0 bg-light">
+                                <div class="card-body d-flex align-items-center gap-3">
+                                    <div class="rounded-3 bg-info-subtle text-info d-inline-flex align-items-center justify-content-center p-3">
+                                        <i class="bi bi-percent fs-4"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="text-muted small text-uppercase fw-semibold mb-1">Tax Rate</div>
+                                        <div class="h4 fw-semibold mb-0 text-info">
+                                            <span th:text="${result.taxRate != null ? #numbers.formatDecimal(result.taxRate, 1, 2) : '0.00'}">0.00</span>%
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="text-center text-muted">
+                                <i class="bi bi-arrow-down-circle fs-4"></i>
+                            </div>
+
+                            <div class="card shadow-sm border-warning-subtle bg-warning-subtle">
+                                <div class="card-body d-flex align-items-center gap-3">
+                                    <div class="rounded-3 bg-warning text-dark d-inline-flex align-items-center justify-content-center p-3">
+                                        <i class="bi bi-receipt-cutoff fs-4"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="text-muted small text-uppercase fw-semibold mb-1">Estimated Tax</div>
+                                        <div class="h3 fw-bold mb-0 text-warning-emphasis">
+                                            LKR
+                                            <span th:text="${result.estimatedTax != null ? #numbers.formatDecimal(result.estimatedTax, 1, 2) : '0.00'}">
+                                                0.00
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="text-center text-muted">
+                                <i class="bi bi-arrow-down-circle fs-4"></i>
+                            </div>
+
+                            <div class="card shadow-sm border-success-subtle bg-success-subtle">
+                                <div class="card-body d-flex align-items-center gap-3">
+                                    <div class="rounded-3 bg-success text-white d-inline-flex align-items-center justify-content-center p-3">
+                                        <i class="bi bi-calculator-fill fs-4"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="text-muted small text-uppercase fw-semibold mb-1">Total With Tax</div>
+                                        <div class="h3 fw-bold mb-0 text-success-emphasis">
+                                            LKR
+                                            <span th:text="${result.totalWithTax != null ? #numbers.formatDecimal(result.totalWithTax, 1, 2) : '0.00'}">
+                                                0.00
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="row g-3 small text-muted">
+                            <div class="col-12 col-md-6">
+                                <i class="bi bi-person-circle me-1"></i>
+                                Estimated by:
+                                <span class="fw-semibold text-dark" th:text="${result.estimatedBy ?: '-'}">admin</span>
+                            </div>
+
+                            <div class="col-12 col-md-6 text-md-end">
+                                <i class="bi bi-clock-history me-1"></i>
+                                Estimated at:
+                                <span class="fw-semibold text-dark"
+                                      th:text="${result.estimatedAt != null ? #temporals.format(result.estimatedAt, 'yyyy-MM-dd HH:mm:ss') : '-'}">
+                                    2026-01-01 10:30:00
+                                </span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ===================== Quick Actions ===================== -->
+        <div class="row g-3 mt-4">
+            <div class="col-12 col-md-4">
+                <div class="card shadow-sm border-0 bg-light h-100">
+                    <div class="card-body d-flex align-items-center gap-3">
+                        <i class="bi bi-upload fs-3 text-primary"></i>
+                        <div>
+                            <div class="fw-semibold">Import Data</div>
+                            <div class="text-muted small">Upload financial records</div>
+                            <a href="/ingestion/upload" class="btn btn-sm btn-outline-primary mt-1">
+                                <i class="bi bi-arrow-right me-1"></i>Go to Upload
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-4">
+                <div class="card shadow-sm border-0 bg-light h-100">
+                    <div class="card-body d-flex align-items-center gap-3">
+                        <i class="bi bi-check2-all fs-3 text-success"></i>
+                        <div>
+                            <div class="fw-semibold">Reconciliation</div>
+                            <div class="text-muted small">View reconciliation results</div>
+                            <a href="/reconciliation" class="btn btn-sm btn-outline-success mt-1">
+                                <i class="bi bi-arrow-right me-1"></i>Go to Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-4">
+                <div class="card shadow-sm border-0 bg-light h-100">
+                    <div class="card-body d-flex align-items-center gap-3">
+                        <i class="bi bi-clipboard-data fs-3 text-info"></i>
+                        <div>
+                            <div class="fw-semibold">Audit Logs</div>
+                            <div class="text-muted small">View hash-chained audit trail</div>
+                            <a href="/audit/logs" class="btn btn-sm btn-outline-info mt-1">
+                                <i class="bi bi-arrow-right me-1"></i>View Audit
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
     </div>
-
-    <!-- ===================== Quick Actions ===================== -->
-    <div class="row g-3 mt-4">
-        <div class="col-12 col-md-4">
-            <div class="card shadow-sm border-0 bg-light h-100">
-                <div class="card-body d-flex align-items-center gap-3">
-                    <i class="bi bi-upload fs-3 text-primary"></i>
-                    <div>
-                        <div class="fw-semibold">Import Data</div>
-                        <div class="text-muted small">Upload financial records</div>
-                        <a href="/ingestion/upload" class="btn btn-sm btn-outline-primary mt-1">
-                            <i class="bi bi-arrow-right me-1"></i>Go to Upload
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-12 col-md-4">
-            <div class="card shadow-sm border-0 bg-light h-100">
-                <div class="card-body d-flex align-items-center gap-3">
-                    <i class="bi bi-check2-all fs-3 text-success"></i>
-                    <div>
-                        <div class="fw-semibold">Reconciliation</div>
-                        <div class="text-muted small">View reconciliation results</div>
-                        <a href="/reconciliation" class="btn btn-sm btn-outline-success mt-1">
-                            <i class="bi bi-arrow-right me-1"></i>Go to Dashboard
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-12 col-md-4">
-            <div class="card shadow-sm border-0 bg-light h-100">
-                <div class="card-body d-flex align-items-center gap-3">
-                    <i class="bi bi-clipboard-data fs-3 text-info"></i>
-                    <div>
-                        <div class="fw-semibold">Audit Logs</div>
-                        <div class="text-muted small">View hash-chained audit trail</div>
-                        <a href="/audit/logs" class="btn btn-sm btn-outline-info mt-1">
-                            <i class="bi bi-arrow-right me-1"></i>View Audit
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-</div>
 
 <!-- Footer -->
 <div th:replace="~{fragments/footer :: footer}"></div>
@@ -411,14 +411,13 @@
 <div th:replace="~{fragments/scripts :: badgeStyles}"></div>
 <div th:replace="~{fragments/scripts :: badgeScripts}"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    document.querySelectorAll('input[type="number"]').forEach(function (input) {
-        input.addEventListener('wheel', function (event) {
-            event.preventDefault();
-        }, { passive: false });
-    });
-</script>
+    <script>
+        document.querySelectorAll('input[type="number"]').forEach(function (input) {
+            input.addEventListener('wheel', function (event) {
+                event.preventDefault();
+            }, { passive: false });
+        });
+    </script>
 
 </body>
 </html>

@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/header :: header('User Management')}"></head>
+
+<style>
+
+    /* Main container */
+    .main-container {
+        padding: 2rem;
+    }
+
+    /* Page header with breadcrumb style */
+    .page-header {
+        margin-bottom: 2rem;
+    }
+
+    .page-header .breadcrumb-nav {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-bottom: 0.5rem;
+    }
+
+    .page-header .breadcrumb-nav a {
+        color: #0d6efd;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .page-header .breadcrumb-nav a:hover {
+        text-decoration: underline;
+    }
+
+    .page-header .breadcrumb-nav .separator {
+        color: #ced4da;
+    }
+
+    .page-header .breadcrumb-nav .current {
+        color: #1a2332;
+        font-weight: 600;
+    }
+
+    .page-header h2 {
+        font-weight: 700;
+        color: #1a2332;
+        font-size: 1.75rem;
+        letter-spacing: -0.3px;
+        margin-bottom: 0.25rem;
+    }
+
+    .page-header h2 i {
+        color: #0d6efd;
+    }
+
+    .page-header .text-muted {
+        font-size: 0.95rem;
+        color: #6c757d !important;
+    }
+
+    /* Card styles - matching your design */
+    .card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+        transition: box-shadow 0.2s ease;
+        background: white;
+    }
+
+    .card:hover {
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .card-header {
+        background: white;
+        border-bottom: 1px solid #f0f2f5;
+        padding: 1rem 1.25rem;
+        border-radius: 12px 12px 0 0 !important;
+    }
+
+    .card-header h5 {
+        font-weight: 600;
+        color: #1a2332;
+        font-size: 0.95rem;
+        margin: 0;
+    }
+
+    .card-header h5 i {
+        color: #0d6efd;
+        margin-right: 0.5rem;
+    }
+
+    .card-body {
+        padding: 1.25rem;
+    }
+
+    /* Add User button */
+    .btn-add-user {
+        padding: 0.5rem 1.25rem;
+        border-radius: 6px;
+        font-weight: 500;
+        font-size: 0.9rem;
+        background: #198754;
+        color: white;
+        border: none;
+        transition: all 0.15s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-add-user:hover {
+        background: #157347;
+        color: white;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(25, 135, 84, 0.3);
+    }
+
+    /* Filter section */
+    .filter-section .card {
+        margin-bottom: 1.5rem;
+    }
+
+    .filter-section .form-label {
+        font-weight: 500;
+        font-size: 0.85rem;
+        color: #495057;
+        margin-bottom: 0.3rem;
+    }
+
+    .filter-section .form-control,
+    .filter-section .form-select {
+        border-radius: 6px;
+        border: 1px solid #dde1e6;
+        padding: 0.45rem 0.75rem;
+        font-size: 0.9rem;
+        transition: all 0.15s;
+        background: white;
+    }
+
+    .filter-section .form-control:focus,
+    .filter-section .form-select:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.1);
+    }
+
+    .filter-section .input-group .input-group-text {
+        background: white;
+        border: 1px solid #dde1e6;
+        border-right: none;
+        border-radius: 6px 0 0 6px;
+        color: #6c757d;
+        padding: 0.45rem 0.75rem;
+    }
+
+    .filter-section .input-group .form-control {
+        border-radius: 0 6px 6px 0;
+        border-left: none;
+    }
+
+    .btn-filter {
+        border-radius: 6px;
+        padding: 0.45rem 1.5rem;
+        font-weight: 500;
+        font-size: 0.9rem;
+        background: #0d6efd;
+        border: none;
+        color: white;
+        transition: all 0.15s;
+    }
+
+    .btn-filter:hover {
+        background: #0b5ed7;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);
+    }
+
+    .btn-reset {
+        border-radius: 6px;
+        padding: 0.45rem 1.25rem;
+        font-weight: 500;
+        font-size: 0.9rem;
+        border: 1px solid #dde1e6;
+        transition: all 0.15s;
+        background: white;
+        color: #495057;
+    }
+
+    .btn-reset:hover {
+        background: #f8f9fa;
+        border-color: #ced4da;
+    }
+
+    /* Table styles */
+    .table-container .card {
+        overflow: hidden;
+    }
+
+    .table {
+        margin-bottom: 0;
+        font-size: 0.9rem;
+    }
+
+    .table thead th {
+        background: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+        font-weight: 600;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        color: #495057;
+        padding: 0.7rem 1rem;
+    }
+
+    .table tbody td {
+        padding: 0.7rem 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f3f5;
+    }
+
+    .table tbody tr {
+        transition: background-color 0.15s ease;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f8f9ff;
+    }
+
+    .table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* Checkbox styles */
+    .form-check-input {
+        cursor: pointer;
+        border-radius: 3px;
+        border: 1.5px solid #ced4da;
+        width: 1rem;
+        height: 1rem;
+        transition: all 0.15s;
+    }
+
+    .form-check-input:checked {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+
+    .form-check-input:focus {
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+    }
+
+    /* Username */
+    .username-text {
+        font-weight: 600;
+        color: #1a2332;
+    }
+
+    /* Role badges */
+    .role-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 50px;
+        font-weight: 500;
+        font-size: 0.8rem;
+        display: inline-block;
+    }
+
+    /* Status badges */
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 50px;
+        font-weight: 500;
+        font-size: 0.8rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+
+    .status-badge.active {
+        background: #d1e7dd;
+        color: #0f5132;
+    }
+
+    .status-badge.active .status-dot {
+        background: #198754;
+    }
+
+    .status-badge.disabled {
+        background: #e9ecef;
+        color: #495057;
+    }
+
+    .status-badge.disabled .status-dot {
+        background: #adb5bd;
+    }
+
+    .status-dot {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    /* Action buttons */
+    .action-group {
+        display: flex;
+        gap: 0.3rem;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .action-group .btn-action {
+        padding: 0.2rem 0.5rem;
+        font-size: 0.75rem;
+        border-radius: 4px;
+        font-weight: 500;
+        transition: all 0.15s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        border: 1px solid transparent;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .action-group .btn-action i {
+        font-size: 0.7rem;
+    }
+
+    .action-group .btn-action:hover {
+        transform: translateY(-1px);
+    }
+
+    .action-group .btn-edit {
+        background: #e7f1ff;
+        color: #0d6efd;
+        border-color: #cfe2ff;
+    }
+
+    .action-group .btn-edit:hover {
+        background: #cfe2ff;
+    }
+
+    .action-group .btn-reset-password {
+        background: #fff3cd;
+        color: #856404;
+        border-color: #ffe69c;
+    }
+
+    .action-group .btn-reset-password:hover {
+        background: #ffe69c;
+    }
+
+    .action-group .btn-reset-pin {
+        background: #e9ecef;
+        color: #495057;
+        border-color: #dee2e6;
+    }
+
+    .action-group .btn-reset-pin:hover {
+        background: #dee2e6;
+    }
+
+    .action-group .btn-disable {
+        background: #f8d7da;
+        color: #dc3545;
+        border-color: #f5c2c7;
+    }
+
+    .action-group .btn-disable:hover {
+        background: #f5c2c7;
+    }
+
+    .action-group .btn-enable {
+        background: #d1e7dd;
+        color: #198754;
+        border-color: #a3cfbb;
+    }
+
+    .action-group .btn-enable:hover {
+        background: #a3cfbb;
+    }
+
+    /* Created date */
+    .created-date {
+        color: #6c757d;
+        font-size: 0.85rem;
+    }
+
+    /* ============================================================
+       BULK ACTIONS BAR
+       ============================================================ */
+    .bulk-actions-wrapper {
+        margin-bottom: 1rem;
+        overflow: hidden;
+        max-height: 0;
+        transition: max-height 0.3s ease, opacity 0.3s ease, margin 0.3s ease;
+        opacity: 0;
+    }
+
+    .bulk-actions-wrapper.show {
+        max-height: 80px;
+        opacity: 1;
+        margin-bottom: 1rem;
+    }
+
+    .bulk-actions-bar {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .bulk-actions-bar .bulk-info {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-weight: 500;
+        font-size: 0.85rem;
+        color: #1a2332;
+        padding-right: 1rem;
+        border-right: 1px solid #dee2e6;
+    }
+
+    .bulk-actions-bar .bulk-info i {
+        color: #0d6efd;
+        font-size: 1rem;
+    }
+
+    .bulk-actions-bar .bulk-info .count {
+        color: #0d6efd;
+        font-weight: 700;
+    }
+
+    .bulk-actions-bar .bulk-buttons {
+        display: flex;
+        gap: 0.3rem;
+        flex-wrap: wrap;
+        flex: 1;
+    }
+
+    .bulk-actions-bar .bulk-btn {
+        padding: 0.25rem 0.7rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        border-radius: 4px;
+        border: 1px solid transparent;
+        transition: all 0.15s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        cursor: pointer;
+        background: white;
+        color: #495057;
+        border-color: #dee2e6;
+    }
+
+    .bulk-actions-bar .bulk-btn:hover {
+        transform: translateY(-1px);
+    }
+
+    .bulk-actions-bar .bulk-btn.btn-enable {
+        background: #d1e7dd;
+        color: #0f5132;
+        border-color: #a3cfbb;
+    }
+
+    .bulk-actions-bar .bulk-btn.btn-enable:hover {
+        background: #a3cfbb;
+    }
+
+    .bulk-actions-bar .bulk-btn.btn-disable {
+        background: #f8d7da;
+        color: #721c24;
+        border-color: #f5c2c7;
+    }
+
+    .bulk-actions-bar .bulk-btn.btn-disable:hover {
+        background: #f5c2c7;
+    }
+
+    .bulk-actions-bar .bulk-btn.btn-reset {
+        background: #fff3cd;
+        color: #856404;
+        border-color: #ffe69c;
+    }
+
+    .bulk-actions-bar .bulk-btn.btn-reset:hover {
+        background: #ffe69c;
+    }
+
+    .bulk-actions-bar .bulk-close {
+        background: none;
+        border: none;
+        color: #adb5bd;
+        font-size: 0.9rem;
+        padding: 0.1rem 0.3rem;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        border-radius: 4px;
+        line-height: 1;
+    }
+
+    .bulk-actions-bar .bulk-close:hover {
+        color: #dc3545;
+        background: #f8f9fa;
+    }
+
+    /* Alert messages */
+    .alert {
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+
+    .alert-success {
+        background: #d1e7dd;
+        color: #0f5132;
+    }
+
+    .alert-danger {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .alert i {
+        font-size: 1rem;
+    }
+
+    /* Modal */
+    .modal-content {
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-header {
+        border-bottom: 1px solid #e9ecef;
+        padding: 1rem 1.25rem;
+    }
+
+    .modal-body {
+        padding: 1.25rem;
+    }
+
+    .modal-footer {
+        border-top: 1px solid #e9ecef;
+        padding: 1rem 1.25rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+        .main-container {
+            padding: 1.5rem;
+        }
+        .action-group {
+            gap: 0.25rem;
+        }
+        .action-group .btn-action {
+            padding: 0.15rem 0.4rem;
+            font-size: 0.7rem;
+        }
+        .action-group .btn-action i {
+            font-size: 0.65rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .main-container {
+            padding: 1rem;
+        }
+        .card-body {
+            padding: 1rem;
+        }
+        .page-header h2 {
+            font-size: 1.4rem;
+        }
+        .btn-add-user {
+            padding: 0.4rem 1rem;
+            font-size: 0.8rem;
+        }
+        .table thead th,
+        .table tbody td {
+            padding: 0.4rem 0.5rem;
+            font-size: 0.8rem;
+        }
+        .bulk-actions-bar {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0.4rem;
+            padding: 0.5rem;
+        }
+        .bulk-actions-bar .bulk-info {
+            border-right: none;
+            padding-right: 0;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 0.4rem;
+        }
+        .bulk-actions-bar .bulk-buttons {
+            gap: 0.3rem;
+        }
+        .bulk-actions-bar .bulk-btn {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+        }
+        .bulk-actions-wrapper.show {
+            max-height: 120px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .main-container {
+            padding: 0.5rem;
+        }
+        .action-group .btn-action .btn-text {
+            display: none;
+        }
+        .action-group .btn-action {
+            padding: 0.15rem 0.3rem;
+            font-size: 0.65rem;
+        }
+        .table thead th,
+        .table tbody td {
+            padding: 0.3rem 0.3rem;
+            font-size: 0.75rem;
+        }
+        .username-text {
+            font-size: 0.8rem;
+        }
+        .role-badge,
+        .status-badge {
+            font-size: 0.65rem;
+            padding: 0.15rem 0.4rem;
+        }
+        .bulk-actions-bar .bulk-btn {
+            font-size: 0.6rem;
+            padding: 0.15rem 0.4rem;
+        }
+        .bulk-actions-bar .bulk-info {
+            font-size: 0.75rem;
+        }
+        .bulk-actions-wrapper.show {
+            max-height: 150px;
+        }
+    }
+</style>
+
+<body class="d-flex flex-column min-vh-100 bg-light">
+
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <main class="flex-grow-1">
+
+        <div class="container-fluid main-container">
+
+            <!-- Success Message -->
+            <div th:if="${successMessage}"
+                 class="alert alert-success alert-dismissible fade show"
+                 role="alert">
+
+                <i class="bi bi-check-circle-fill me-2"></i>
+                <span th:text="${successMessage}"></span>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                </button>
+
+            </div>
+
+            <!-- Error Message -->
+            <div th:if="${errorMessage}"
+                 class="alert alert-danger alert-dismissible fade show"
+                 role="alert">
+
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <span th:text="${errorMessage}"></span>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                </button>
+
+            </div>
+
+
+            <!-- PAGE HEADER -->
+
+            <div class="page-header">
+
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div>
+                        <h2>
+                            <i class="bi bi-people-fill me-2"></i>
+                            User Management
+                        </h2>
+                        <p class="text-muted mb-0">
+                            Manage system users, roles and account status
+                        </p>
+                    </div>
+                    <a th:href="@{/admin/users/create}" class="btn-add-user">
+                        <i class="bi bi-person-plus-fill"></i>
+                        Add User
+                    </a>
+                </div>
+
+            </div>
+
+
+            <!-- FILTER SECTION -->
+
+            <div class="filter-section">
+
+                <div class="card">
+
+                    <div class="card-header">
+                        <h5>
+                            <i class="bi bi-funnel-fill"></i>
+                            Filter Users
+                        </h5>
+                    </div>
+
+                    <div class="card-body">
+
+                        <form th:action="@{/admin/users}"
+                              method="get">
+
+                            <div class="row g-3 align-items-end">
+
+                                <!-- Username -->
+                                <div class="col-md-4">
+
+                                    <label class="form-label">
+                                        <i class="bi bi-person me-1"></i>
+                                        Username
+                                    </label>
+
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="bi bi-search"></i>
+                                        </span>
+                                        <input
+                                                type="text"
+                                                class="form-control"
+                                                name="username"
+                                                placeholder="Search username..."
+                                                th:value="${searchUsername}">
+                                    </div>
+
+                                </div>
+
+                                <!-- Role -->
+                                <div class="col-md-3">
+
+                                    <label class="form-label">
+                                        <i class="bi bi-tag me-1"></i>
+                                        Role
+                                    </label>
+
+                                    <select class="form-select"
+                                            name="role">
+
+                                        <option value="">All Roles</option>
+
+                                        <option value="ROLE_ADMIN"
+                                                th:selected="${selectedRole == 'ROLE_ADMIN'}">
+                                            Administrator
+                                        </option>
+
+                                        <option value="ROLE_ENTRY_STAFF"
+                                                th:selected="${selectedRole == 'ROLE_ENTRY_STAFF'}">
+                                            Entry Staff
+                                        </option>
+
+                                        <option value="ROLE_AUDITOR"
+                                                th:selected="${selectedRole == 'ROLE_AUDITOR'}">
+                                            Auditor
+                                        </option>
+
+                                        <option value="ROLE_APPROVER"
+                                                th:selected="${selectedRole == 'ROLE_APPROVER'}">
+                                            Approver
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+                                <!-- Status -->
+                                <div class="col-md-3">
+
+                                    <label class="form-label">
+                                        <i class="bi bi-circle me-1"></i>
+                                        Status
+                                    </label>
+
+                                    <select class="form-select"
+                                            name="enabled">
+
+                                        <option value="">All</option>
+
+                                        <option value="true"
+                                                th:selected="${selectedStatus == true}">
+                                            Active
+                                        </option>
+
+                                        <option value="false"
+                                                th:selected="${selectedStatus == false}">
+                                            Disabled
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+                                <!-- Buttons -->
+                                <div class="col-md-2 d-flex gap-2">
+
+                                    <button class="btn-filter flex-grow-1">
+                                        <i class="bi bi-search me-1"></i>
+                                        Filter
+                                    </button>
+
+                                    <a th:href="@{/admin/users}"
+                                       class="btn-reset">
+                                        <i class="bi bi-arrow-counterclockwise"></i>
+                                    </a>
+
+                                </div>
+
+                            </div>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- BULK ACTIONS BAR -->
+            <div id="bulkActionsWrapper" class="bulk-actions-wrapper">
+                <div class="bulk-actions-bar">
+                    <div class="bulk-info">
+                        <i class="bi bi-check2-square"></i>
+                        <span><span class="count" id="selectedCount">0</span> user(s) selected</span>
+                    </div>
+                    <div class="bulk-buttons">
+                        <button class="bulk-btn btn-enable" onclick="bulkEnable()">
+                            <i class="bi bi-person-check-fill"></i> Enable
+                        </button>
+                        <button class="bulk-btn btn-disable" onclick="bulkDisable()">
+                            <i class="bi bi-person-x-fill"></i> Disable
+                        </button>
+                        <button class="bulk-btn btn-reset" onclick="bulkResetPassword()">
+                            <i class="bi bi-key"></i> Reset Password
+                        </button>
+                    </div>
+                    <button class="bulk-close" onclick="clearSelection()" title="Clear selection">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+            </div>
+
+
+            <!-- TABLE -->
+            <div class="table-container">
+
+                <div class="card">
+
+                    <div class="card-body p-0">
+
+                        <div class="table-responsive">
+
+                            <table class="table table-hover align-middle">
+
+                                <thead>
+                                <tr>
+                                    <th width="36">
+                                        <input class="form-check-input" type="checkbox" id="selectAll" onchange="toggleAll()">
+                                    </th>
+                                    <th>User</th>
+                                    <th>Role</th>
+                                    <th>Status</th>
+                                    <th>Created</th>
+                                    <th style="min-width: 260px;">Actions</th>
+                                </tr>
+                                </thead>
+
+                                <tbody>
+
+                                <tr th:each="user : ${users}" th:id="'user-' + ${user.userId}">
+
+                                    <!-- Checkbox -->
+                                    <td>
+                                        <input class="form-check-input user-checkbox" type="checkbox"
+                                               th:value="${user.userId}" onchange="updateSelection()">
+                                    </td>
+
+                                    <!-- User -->
+                                    <td>
+                                        <span class="username-text" th:text="${user.username}"></span>
+                                    </td>
+
+                                    <!-- Role -->
+                                    <td>
+                                            <span class="badge bg-primary role-badge"
+                                                  th:text="${#lists.isEmpty(user.roles) ? 'No Role' : #lists.toList(user.roles)[0].name.replace('ROLE_','')}">
+                                            </span>
+                                    </td>
+
+                                    <!-- Status -->
+                                    <td>
+                                            <span th:if="${user.enabled}"
+                                                  class="status-badge active">
+                                                <span class="status-dot"></span>
+                                                Active
+                                            </span>
+                                        <span th:unless="${user.enabled}"
+                                              class="status-badge disabled">
+                                                <span class="status-dot"></span>
+                                                Disabled
+                                            </span>
+                                    </td>
+
+                                    <!-- Created -->
+                                    <td>
+                                        <span class="created-date" th:text="${#temporals.format(user.createdAt,'dd MMM yyyy')}"></span>
+                                    </td>
+
+                                    <!-- Actions -->
+                                    <td>
+                                        <div class="action-group">
+
+                                            <!-- Edit -->
+                                            <a class="btn-action btn-edit"
+                                               th:href="@{/admin/users/{id}/edit(id=${user.userId})}"
+                                               title="Edit User">
+                                                <i class="bi bi-pencil-square"></i>
+                                                <span class="btn-text">Edit</span>
+                                            </a>
+
+                                            <!-- Reset Password -->
+                                            <a th:href="@{/admin/users/{id}/reset-password/form(id=${user.userId})}"
+                                               class="btn-action btn-reset-password"
+                                               title="Reset Password">
+                                                <i class="bi bi-key"></i>
+                                                <span class="btn-text">Reset Password</span>
+                                            </a>
+
+                                            <!-- Reset PIN -->
+                                            <a th:href="@{/admin/users/{id}/reset-pin(id=${user.userId})}"
+                                               class="btn-action btn-reset-pin"
+                                               title="Reset PIN">
+                                                <i class="bi bi-keypad-fill"></i>
+                                                <span class="btn-text">Reset PIN</span>
+                                            </a>
+
+                                            <!-- Disable Form -->
+                                            <form th:if="${user.enabled}"
+                                                  th:action="@{/admin/users/{id}/disable(id=${user.userId})}"
+                                                  method="post"
+                                                  style="display: inline;"
+                                                  onsubmit="return confirm('Are you sure you want to disable this user?')">
+
+                                                <!-- CSRF Token -->
+                                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+                                                <button type="submit"
+                                                        class="btn-action btn-disable"
+                                                        title="Disable User">
+                                                    <i class="bi bi-person-x-fill"></i>
+                                                    <span class="btn-text">Disable</span>
+                                                </button>
+                                            </form>
+
+                                            <!-- Enable Form -->
+                                            <form th:unless="${user.enabled}"
+                                                  th:action="@{/admin/users/{id}/enable(id=${user.userId})}"
+                                                  method="post"
+                                                  style="display: inline;"
+                                                  onsubmit="return confirm('Are you sure you want to enable this user?')">
+
+                                                <!-- CSRF Token -->
+                                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+                                                <button type="submit"
+                                                        class="btn-action btn-enable"
+                                                        title="Enable User">
+                                                    <i class="bi bi-person-check-fill"></i>
+                                                    <span class="btn-text">Enable</span>
+                                                </button>
+                                            </form>
+
+                                        </div>
+                                    </td>
+
+                                </tr>
+
+                                <!-- Empty State -->
+                                <tr th:if="${#lists.isEmpty(users)}">
+                                    <td colspan="6" class="text-center py-4">
+                                        <i class="bi bi-people" style="font-size: 2rem; color: #dee2e6;"></i>
+                                        <p class="mt-2 mb-0 text-muted">No users found</p>
+                                        <p class="small text-muted">Try adjusting your filters or add a new user.</p>
+                                    </td>
+                                </tr>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <!-- CONFIRMATION MODAL -->
+
+    <div class="modal fade" id="bulkConfirmModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="bulkConfirmTitle">Confirm Bulk Action</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="bulkConfirmBody">
+                    Are you sure you want to perform this action on the selected users?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="bulkConfirmBtn">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <!-- JAVASCRIPT-->
+
+    <script th:inline="javascript">
+        // ============================================================
+        // Bulk Selection
+        // ============================================================
+        let selectedUsers = new Set();
+
+        function toggleAll() {
+            const checkboxes = document.querySelectorAll('.user-checkbox');
+            const selectAll = document.getElementById('selectAll');
+            checkboxes.forEach(cb => {
+                cb.checked = selectAll.checked;
+                if (selectAll.checked) {
+                    selectedUsers.add(parseInt(cb.value));
+                } else {
+                    selectedUsers.delete(parseInt(cb.value));
+                }
+            });
+            updateBulkActions();
+        }
+
+        function updateSelection() {
+            const checkboxes = document.querySelectorAll('.user-checkbox');
+            const selectAll = document.getElementById('selectAll');
+            let allChecked = true;
+            selectedUsers.clear();
+
+            checkboxes.forEach(cb => {
+                if (cb.checked) {
+                    selectedUsers.add(parseInt(cb.value));
+                } else {
+                    allChecked = false;
+                }
+            });
+
+            selectAll.checked = allChecked && checkboxes.length > 0;
+            updateBulkActions();
+        }
+
+        function updateBulkActions() {
+            const count = selectedUsers.size;
+            document.getElementById('selectedCount').textContent = count;
+            const wrapper = document.getElementById('bulkActionsWrapper');
+            if (count > 0) {
+                wrapper.classList.add('show');
+            } else {
+                wrapper.classList.remove('show');
+            }
+        }
+
+        function clearSelection() {
+            selectedUsers.clear();
+            document.querySelectorAll('.user-checkbox').forEach(cb => cb.checked = false);
+            document.getElementById('selectAll').checked = false;
+            updateBulkActions();
+        }
+
+        // ============================================================
+        // Bulk Action Functions
+        // ============================================================
+        let bulkActionCallback = null;
+
+        function showBulkConfirm(title, message, callback) {
+            document.getElementById('bulkConfirmTitle').textContent = title;
+            document.getElementById('bulkConfirmBody').textContent = message;
+            bulkActionCallback = callback;
+            const modal = new bootstrap.Modal(document.getElementById('bulkConfirmModal'));
+            modal.show();
+        }
+
+        document.getElementById('bulkConfirmBtn').addEventListener('click', function() {
+            if (bulkActionCallback) {
+                bulkActionCallback();
+                bulkActionCallback = null;
+            }
+            bootstrap.Modal.getInstance(document.getElementById('bulkConfirmModal')).hide();
+        });
+
+        function bulkEnable() {
+            if (selectedUsers.size === 0) return;
+            const ids = Array.from(selectedUsers).join(',');
+            const count = selectedUsers.size;
+            showBulkConfirm(
+                'Enable Users',
+                `Are you sure you want to enable ${count} selected user(s)?`,
+                () => submitBulkAction('/admin/users/bulk/enable', ids)
+            );
+        }
+
+        function bulkDisable() {
+            if (selectedUsers.size === 0) return;
+            const ids = Array.from(selectedUsers).join(',');
+            const count = selectedUsers.size;
+            showBulkConfirm(
+                'Disable Users',
+                `Are you sure you want to disable ${count} selected user(s)?`,
+                () => submitBulkAction('/admin/users/bulk/disable', ids)
+            );
+        }
+
+        function bulkResetPassword() {
+            if (selectedUsers.size === 0) return;
+            const ids = Array.from(selectedUsers).join(',');
+            const count = selectedUsers.size;
+            showBulkConfirm(
+                'Reset Passwords',
+                `Are you sure you want to reset passwords for ${count} selected user(s)?`,
+                () => submitBulkAction('/admin/users/bulk/reset-password', ids)
+            );
+        }
+
+        // ============================================================
+        // Submit Bulk Action - Using Thymeleaf inline with proper CSRF
+        // ============================================================
+        function submitBulkAction(url, ids) {
+            // Get CSRF values from Thymeleaf
+            const csrfParam = /*[[${_csrf.parameterName}]]*/ 'csrf';
+            const csrfToken = /*[[${_csrf.token}]]*/ 'token';
+
+            // Create a form
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = url;
+            form.style.display = 'none';
+
+            // Add userIds as hidden input
+            const idsInput = document.createElement('input');
+            idsInput.type = 'hidden';
+            idsInput.name = 'userIds';
+            idsInput.value = ids;
+            form.appendChild(idsInput);
+
+            // Add CSRF token using Thymeleaf values (same as working single actions)
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = csrfParam;
+            csrfInput.value = csrfToken;
+            form.appendChild(csrfInput);
+
+            // Submit the form
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+        // ============================================================
+        // Keyboard shortcut: Escape to clear selection
+        // ============================================================
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && selectedUsers.size > 0) {
+                clearSelection();
+            }
+        });
+
+        // ============================================================
+        // Auto-clear selection when navigating away
+        // ============================================================
+        window.addEventListener('beforeunload', function() {
+            clearSelection();
+        });
+
+        console.log('User Management page loaded successfully');
+        console.log('Bulk actions ready: Enable, Disable, Reset Password');
+    </script>
+
+</body>
+
+</html>

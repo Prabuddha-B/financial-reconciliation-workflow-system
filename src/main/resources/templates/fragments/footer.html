@@ -3,26 +3,32 @@
 
 <body>
 
-<footer th:fragment="footer"
-        class="border-top bg-white py-3 mt-5">
+    <footer th:fragment="footer"
+            class="border-top py-3 mt-auto"
+            style="background: #f8fafc;">
 
-    <div class="container-xl">
+        <div class="container-fluid">
 
-        <div class="d-flex justify-content-between align-items-center">
+            <div class="row align-items-center gy-2">
 
-            <small class="text-muted">
-                © 2026 FRWSS
-            </small>
+                <div class="col-md-6 text-center text-md-start">
+                    <small style="color: #475569; font-weight: 500;">
+                        © 2026 <strong style="color: #1a2332;">FRWSS</strong>
+                    </small>
+                </div>
 
-            <small class="text-muted">
-                Financial Reconciliation & Workflow Support System
-            </small>
+                <div class="col-md-6 text-center text-md-end">
+                    <small style="color: #475569; font-weight: 500;">
+                        Financial Reconciliation & Workflow Support System
+                    </small>
+                </div>
+
+            </div>
 
         </div>
 
-    </div>
-
-</footer>
+    </footer>
 
 </body>
+
 </html>
