@@ -2,6 +2,8 @@ package com.frwss.system.admin.service;
 
 import com.frwss.system.admin.dto.AdminDashboardData;
 import com.frwss.system.audit.repository.AuditLogRepository;
+import com.frwss.system.reconciliation.model.ReconciliationStatus;
+import com.frwss.system.reconciliation.repository.ReconciliationResultRepository;
 import com.frwss.system.repository.UserRepository;
 import com.frwss.system.tax.repository.TaxConfigurationRepository;
 import com.frwss.system.workflow.repository.WorkflowRecordRepository;
@@ -11,20 +13,20 @@ import org.springframework.stereotype.Service;
 public class AdminDashboardService {
 
     private final UserRepository userRepository;
-
+    private final ReconciliationResultRepository reconciliationResultRepository;
     private final WorkflowRecordRepository workflowRepository;
-
     private final AuditLogRepository auditRepository;
-
     private final TaxConfigurationRepository taxRepository;
 
     public AdminDashboardService(
             UserRepository userRepository,
+            ReconciliationResultRepository reconciliationResultRepository,
             WorkflowRecordRepository workflowRepository,
             AuditLogRepository auditRepository,
             TaxConfigurationRepository taxRepository) {
 
         this.userRepository = userRepository;
+        this.reconciliationResultRepository = reconciliationResultRepository;
         this.workflowRepository = workflowRepository;
         this.auditRepository = auditRepository;
         this.taxRepository = taxRepository;
@@ -72,18 +74,53 @@ public class AdminDashboardService {
         );
 
         // ------------------------------------------------------------
+        // Reconciliation Statistics
+        // ------------------------------------------------------------
+        dashboard.setTotalReconciliationResults(
+                reconciliationResultRepository.count()
+        );
+
+        dashboard.setExactMatches(
+                reconciliationResultRepository.findByStatus(ReconciliationStatus.EXACT).size()
+        );
+
+        dashboard.setPartialMatches(
+                reconciliationResultRepository.findByStatus(ReconciliationStatus.PARTIAL).size()
+        );
+
+        dashboard.setOrphanRecords(
+                reconciliationResultRepository.findByStatus(ReconciliationStatus.ORPHAN).size()
+        );
+
+        dashboard.setManuallyResolved(
+                reconciliationResultRepository.findByStatus(ReconciliationStatus.MANUALLY_RESOLVED).size()
+        );
+
+        dashboard.setPendingApproval(
+                reconciliationResultRepository.findByStatus(ReconciliationStatus.PENDING_APPROVAL).size()
+        );
+
+        dashboard.setApproved(
+                reconciliationResultRepository.findByStatus(ReconciliationStatus.APPROVED).size()
+        );
+
+        dashboard.setRejected(
+                reconciliationResultRepository.findByStatus(ReconciliationStatus.REJECTED).size()
+        );
+
+        // Bulk matches - you'll need to add this to BulkReconciliationRepository
+        // dashboard.setBulkMatches(bulkReconciliationRepository.count());
+
+        // ------------------------------------------------------------
         // Workflow Statistics
         // ------------------------------------------------------------
         dashboard.setTotalWorkflows(
                 workflowRepository.count()
         );
 
-        // These will be replaced with actual workflow status counts
-        // when status-based repository queries are implemented.
+        // TODO: Replace with actual workflow status counts
         dashboard.setPendingWorkflows(0);
-
         dashboard.setApprovedWorkflows(0);
-
         dashboard.setRejectedWorkflows(0);
 
         // ------------------------------------------------------------
@@ -107,5 +144,4 @@ public class AdminDashboardService {
 
         return dashboard;
     }
-
 }

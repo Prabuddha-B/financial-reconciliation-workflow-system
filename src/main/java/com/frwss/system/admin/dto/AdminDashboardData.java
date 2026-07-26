@@ -15,31 +15,36 @@ public class AdminDashboardData {
     // User Statistics
     // ------------------------------------------------------------
     private long totalUsers;
-
     private long activeUsers;
-
     private long disabledUsers;
 
     // ------------------------------------------------------------
     // Role Statistics
     // ------------------------------------------------------------
     private long administratorCount;
-
     private long approverCount;
-
     private long auditorCount;
-
     private long entryStaffCount;
+
+    // ------------------------------------------------------------
+    // Reconciliation Statistics
+    // ------------------------------------------------------------
+    private long totalReconciliationResults;
+    private long exactMatches;
+    private long partialMatches;
+    private long orphanRecords;
+    private long manuallyResolved;
+    private long pendingApproval;
+    private long approved;
+    private long rejected;
+    private long bulkMatches;
 
     // ------------------------------------------------------------
     // Workflow Statistics
     // ------------------------------------------------------------
     private long totalWorkflows;
-
     private long pendingWorkflows;
-
     private long approvedWorkflows;
-
     private long rejectedWorkflows;
 
     // ------------------------------------------------------------
@@ -61,6 +66,7 @@ public class AdminDashboardData {
     // Getters & Setters
     // ============================================================
 
+    // User Statistics
     public long getTotalUsers() {
         return totalUsers;
     }
@@ -85,6 +91,7 @@ public class AdminDashboardData {
         this.disabledUsers = disabledUsers;
     }
 
+    // Role Statistics
     public long getAdministratorCount() {
         return administratorCount;
     }
@@ -117,6 +124,80 @@ public class AdminDashboardData {
         this.entryStaffCount = entryStaffCount;
     }
 
+    // Reconciliation Statistics
+    public long getTotalReconciliationResults() {
+        return totalReconciliationResults;
+    }
+
+    public void setTotalReconciliationResults(long totalReconciliationResults) {
+        this.totalReconciliationResults = totalReconciliationResults;
+    }
+
+    public long getExactMatches() {
+        return exactMatches;
+    }
+
+    public void setExactMatches(long exactMatches) {
+        this.exactMatches = exactMatches;
+    }
+
+    public long getPartialMatches() {
+        return partialMatches;
+    }
+
+    public void setPartialMatches(long partialMatches) {
+        this.partialMatches = partialMatches;
+    }
+
+    public long getOrphanRecords() {
+        return orphanRecords;
+    }
+
+    public void setOrphanRecords(long orphanRecords) {
+        this.orphanRecords = orphanRecords;
+    }
+
+    public long getManuallyResolved() {
+        return manuallyResolved;
+    }
+
+    public void setManuallyResolved(long manuallyResolved) {
+        this.manuallyResolved = manuallyResolved;
+    }
+
+    public long getPendingApproval() {
+        return pendingApproval;
+    }
+
+    public void setPendingApproval(long pendingApproval) {
+        this.pendingApproval = pendingApproval;
+    }
+
+    public long getApproved() {
+        return approved;
+    }
+
+    public void setApproved(long approved) {
+        this.approved = approved;
+    }
+
+    public long getRejected() {
+        return rejected;
+    }
+
+    public void setRejected(long rejected) {
+        this.rejected = rejected;
+    }
+
+    public long getBulkMatches() {
+        return bulkMatches;
+    }
+
+    public void setBulkMatches(long bulkMatches) {
+        this.bulkMatches = bulkMatches;
+    }
+
+    // Workflow Statistics
     public long getTotalWorkflows() {
         return totalWorkflows;
     }
@@ -149,6 +230,7 @@ public class AdminDashboardData {
         this.rejectedWorkflows = rejectedWorkflows;
     }
 
+    // Audit Statistics
     public long getTotalAuditLogs() {
         return totalAuditLogs;
     }
@@ -157,6 +239,7 @@ public class AdminDashboardData {
         this.totalAuditLogs = totalAuditLogs;
     }
 
+    // Tax Statistics
     public long getTotalTaxConfigurations() {
         return totalTaxConfigurations;
     }
@@ -165,6 +248,7 @@ public class AdminDashboardData {
         this.totalTaxConfigurations = totalTaxConfigurations;
     }
 
+    // System Health
     public String getSystemStatus() {
         return systemStatus;
     }
@@ -172,5 +256,4 @@ public class AdminDashboardData {
     public void setSystemStatus(String systemStatus) {
         this.systemStatus = systemStatus;
     }
-
 }
