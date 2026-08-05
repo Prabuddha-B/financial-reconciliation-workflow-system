@@ -639,6 +639,11 @@ public class ReconciliationService {
         result.setReconciledAt(LocalDateTime.now());
         result.setReconciledBy(performedBy);
 
+        // Set individual field match statuses
+        result.setReferenceMatchStatus("MATCH");
+        result.setAmountMatchStatus("MATCH");
+        result.setDateMatchStatus("MATCH");
+
         return result;
     }
 
@@ -656,6 +661,11 @@ public class ReconciliationService {
         result.setRemarks(remarks);
         result.setReconciledAt(LocalDateTime.now());
         result.setReconciledBy(performedBy);
+
+        // Set individual field match statuses for orphan
+        result.setReferenceMatchStatus("MISMATCH");
+        result.setAmountMatchStatus("MISMATCH");
+        result.setDateMatchStatus("MISMATCH");
 
         return result;
     }
@@ -729,6 +739,11 @@ public class ReconciliationService {
         result.setRemarks(remarks);
         result.setReconciledAt(LocalDateTime.now());
         result.setReconciledBy(performedBy);
+
+        // Set individual field match statuses for partial match
+        result.setReferenceMatchStatus("MATCH"); // Reference matched
+        result.setAmountMatchStatus("MATCH");    // Amount matched
+        result.setDateMatchStatus("PARTIAL");    // Date is within tolerance
     }
 
     private double calculateConfidence(long daysDifference, int toleranceDays){
