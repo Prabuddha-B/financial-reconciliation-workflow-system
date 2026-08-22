@@ -164,6 +164,19 @@
                     </li>
 
                     <!-- ========================================== -->
+                    <!-- DARK MODE TOGGLE -->
+                    <!-- ========================================== -->
+                    <li class="nav-item me-2">
+                        <button type="button"
+                                class="nav-link border-0 bg-transparent theme-toggle-btn"
+                                onclick="toggleFrwssTheme()"
+                                title="Toggle dark mode">
+                            <i class="bi bi-moon-stars-fill fs-5"></i>
+                            <i class="bi bi-sun-fill fs-5"></i>
+                        </button>
+                    </li>
+
+                    <!-- ========================================== -->
                     <!-- PROFILE DROPDOWN -->
                     <!-- ========================================== -->
                     <li class="nav-item dropdown">
@@ -285,6 +298,12 @@
         </div>
 
     </nav>
+
+    <!-- ========================================== -->
+    <!-- DARK MODE (CSS + toggle script) -->
+    <!-- ========================================== -->
+    <link rel="stylesheet" th:href="@{/css/theme-dark.css}">
+    <script th:src="@{/js/theme-toggle.js}"></script>
 
     <!-- ========================================== -->
     <!-- BOOTSTRAP JS (Required for dropdowns) -->
