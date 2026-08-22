@@ -28,6 +28,9 @@ public class AccountingRecord{
     @Column(name = "entered_by")
     private String enteredBy;
 
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
     @Column(name = "parent_record_id")
     private String parentRecordId;
 
@@ -36,6 +39,48 @@ public class AccountingRecord{
 
     @Column(name = "bulk_reference_prefix")
     private String bulkReferencePrefix;
+
+    @Column(name = "payment_transaction_id", unique = true)
+    private String paymentTransactionId;
+
+    @Column(name = "payment_status")
+    private String paymentStatus; // PENDING, PAID, FAILED, REFUNDED
+
+    @Column(name = "payment_gateway")
+    private String paymentGateway; // SIMULATES, STRIPE, PAYPAL, etc.
+
+    @Column(name = "payment_processed_at")
+    private LocalDateTime paymentProcessedAt;
+
+    @Column(name = "payment_webhook_received_at")
+    private LocalDateTime paymentWebhookReceivedAt;
+
+    @Column(name = "is_payment_reconciled")
+    private Boolean isPaymentReconciled = false;
+
+    public String getPaymentTransactionId() {
+        return paymentTransactionId;
+    }
+
+    public String getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public String getPaymentGateway() {
+        return paymentGateway;
+    }
+
+    public LocalDateTime getPaymentProcessedAt() {
+        return paymentProcessedAt;
+    }
+
+    public LocalDateTime getPaymentWebhookReceivedAt() {
+        return paymentWebhookReceivedAt;
+    }
+
+    public Boolean getPaymentReconciled() {
+        return isPaymentReconciled;
+    }
 
     public String getParentRecordId() {
         return parentRecordId;
@@ -89,8 +134,7 @@ public class AccountingRecord{
         return createdAt;
     }
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+
 
     // Standard Setters
     public void setRecordId(String recordId) { this.recordId = recordId; }
@@ -100,4 +144,28 @@ public class AccountingRecord{
     public void setRecordDate(LocalDate recordDate) { this.recordDate = recordDate; }
     public void setEnteredBy(String enteredBy) { this.enteredBy = enteredBy; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public void setPaymentTransactionId(String paymentTransactionId) {
+        this.paymentTransactionId = paymentTransactionId;
+    }
+
+    public void setPaymentStatus(String paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
+
+    public void setPaymentGateway(String paymentGateway) {
+        this.paymentGateway = paymentGateway;
+    }
+
+    public void setPaymentProcessedAt(LocalDateTime paymentProcessedAt) {
+        this.paymentProcessedAt = paymentProcessedAt;
+    }
+
+    public void setPaymentWebhookReceivedAt(LocalDateTime paymentWebhookReceivedAt) {
+        this.paymentWebhookReceivedAt = paymentWebhookReceivedAt;
+    }
+
+    public void setPaymentReconciled(Boolean paymentReconciled) {
+        isPaymentReconciled = paymentReconciled;
+    }
 }

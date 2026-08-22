@@ -90,6 +90,7 @@
             </div>
         </div>
 
+        <!-- Modules -->
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
                 <h2 class="h4 fw-bold mb-1">Modules</h2>
@@ -201,6 +202,25 @@
                 </div>
             </div>
 
+            <!-- Payment module card-->
+            <div class="col-lg-4 col-md-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-credit-card fs-1 text-primary"></i>
+                        <h5 class="mt-2">Payments</h5>
+                        <p class="text-muted small mb-2">Process and reconcile payments</p>
+                        <div class="mb-3">
+                        <span class="badge rounded-pill bg-success-subtle text-success-emphasis border border-success-subtle">
+                            <i class="bi bi-check-circle me-1"></i>Active
+                        </span>
+                        </div>
+                        <a href="/payment/dashboard" class="btn btn-primary btn-sm">
+                            <i class="bi bi-credit-card me-1"></i>Payment Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+
             <!-- Reports & Export -->
             <div class="col-lg-4 col-md-6">
                 <div class="card shadow-sm h-100" onclick="window.location.href='/reports'" style="cursor:pointer;">
@@ -258,6 +278,7 @@
             </div>
         </div>
 
+        <!-- Recent Activity -->
         <div class="row mt-4">
             <div class="col-12">
                 <div class="mb-3">
@@ -318,6 +339,7 @@
             </div>
         </div>
     </div>
+
     <!-- Footer -->
     <div th:replace="~{fragments/footer :: footer}"></div>
     <!-- ========================================== -->

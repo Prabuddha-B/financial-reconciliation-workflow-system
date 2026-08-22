@@ -35,6 +35,14 @@ public enum AuditActionType {
     PIN_RESET,
     ACCOUNT_SWITCHED,
 
-    PASSWORD_RESET
+    PASSWORD_RESET,
+
+    // Payment Module Actions
+    PAYMENT_PROCESSED,          // Payment successfully processed
+    PAYMENT_FAILED,             // Payment processing failed
+    PAYMENT_REFUNDED,           // Payment refunded
+    PAYMENT_WEBHOOK_RECEIVED,   // Webhook received from payment gateway
+    PAYMENT_RECONCILIATION,     // Payment reconciliation run
+
 
 }
