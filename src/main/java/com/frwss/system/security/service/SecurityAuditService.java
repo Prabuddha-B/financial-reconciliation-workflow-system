@@ -30,7 +30,10 @@ public class SecurityAuditService {
         log.setIpAddress(ipAddress);
         log.setMessage(message);
         log.setPreviousHash(previousHash);
-        log.setCreatedAt(LocalDateTime.now());
+        // Truncate to microseconds: matches PostgreSQL's timestamp precision,
+        // so the value used to compute the hash below is identical to what
+        // comes back after a save/reload (see the same fix in AuditService).
+        log.setCreatedAt(LocalDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MICROS));
         log.setCurrentHash(generateHash(log));
 
         repository.save(log);
