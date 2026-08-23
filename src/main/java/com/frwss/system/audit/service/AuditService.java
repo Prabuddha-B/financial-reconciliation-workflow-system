@@ -56,7 +56,13 @@ public class AuditService {
                 ? GENESIS_HASH
                 : latestLog.getCurrentHash();
 
-        LocalDateTime timestamp = LocalDateTime.now();
+        // Truncate to microseconds: PostgreSQL's timestamp column stores
+        // microsecond precision, but LocalDateTime.now() can carry nanosecond
+        // precision on some JVMs. Without truncating here, the value used to
+        // compute the hash and the value that comes back after a save/reload
+        // can differ, making every entry fail verification even though
+        // nothing was actually tampered with.
+        LocalDateTime timestamp = LocalDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MICROS);
 
         // generate the hash for this entry based on its current content and previous hash
         String currentHash = generateHash(
@@ -95,46 +101,122 @@ public class AuditService {
     public AuditChainResult verifyAuditChainDetailed(){
         List<AuditLog> logs = auditLogRepository.findAllByOrderByIdAsc();
 
+        AuditChainResult result = new AuditChainResult();
+
         if (logs.isEmpty()) {
-            return new AuditChainResult(true, null, "No logs to verify", null);
+            return result;
         }
 
         String expectedPreviousHash = GENESIS_HASH;
 
-        for(AuditLog log : logs){
-            // check 1 : Does previousHash match what we expect from the chain?
-            if(!Objects.equals(log.getPreviousHash(), expectedPreviousHash)){
-                return new AuditChainResult(false,
+        // Pass 1: walk the whole chain and record EVERY break found, instead of
+        // stopping at the first one. When a break is found we "resync" using the
+        // entry's own stored currentHash so we can keep checking whether anything
+        // AFTER this entry is independently consistent, rather than every
+        // subsequent entry being falsely reported as broken too.
+        for (AuditLog log : logs) {
+
+            // Check 1: does previousHash match what we expect from the chain so far?
+            if (!Objects.equals(log.getPreviousHash(), expectedPreviousHash)) {
+                result.addBreak(new AuditChainResult.ChainBreak(
                         log.getId(),
-                        "Previous hash mismatch. Expected: " + expectedPreviousHash.substring(0, 10) + "... but got: " + log.getPreviousHash().substring(0, 10) + "...",
-                        "previousHash");
+                        "Previous hash mismatch. Expected: " + safePrefix(expectedPreviousHash)
+                                + "... but got: " + safePrefix(log.getPreviousHash()) + "...",
+                        "previousHash"
+                ));
+            } else {
+                // Check 2: does the stored hash match a freshly recalculated hash?
+                String recalculatedHash = generateHash(
+                        log.getActionType(),
+                        log.getEntityType(),
+                        log.getEntityId(),
+                        log.getPerformedBy(),
+                        log.getTimestamp(),
+                        log.getDetails(),
+                        log.getPreviousHash()
+                );
+
+                if (!Objects.equals(log.getCurrentHash(), recalculatedHash)) {
+                    String mismatchField = findMismatchField(log);
+                    result.addBreak(new AuditChainResult.ChainBreak(
+                            log.getId(),
+                            "Mismatch in field: " + mismatchField,
+                            mismatchField
+                    ));
+                }
             }
 
-            // Check 2 : Does the stored hash match a freshly calculated hash?
-            String recalculatedHash = generateHash(
-                    log.getActionType(),
-                    log.getEntityType(),
-                    log.getEntityId(),
-                    log.getPerformedBy(),
-                    log.getTimestamp(),
-                    log.getDetails(),
-                    log.getPreviousHash()
-            );
-
-            if (!Objects.equals(log.getCurrentHash(), recalculatedHash)){
-                // Find which specific field caused the mismatch
-                String mismatchField = findMismatchField(log);
-                return new AuditChainResult(false,
-                        log.getId(),
-                        "Mismatch in field: " + mismatchField,
-                        mismatchField);
-            }
-
-            // Move the chain forward
+            // Whether or not this entry broke, resync forward using whatever hash
+            // is physically stored on this row. This never rewrites anything -
+            // it only lets verification keep going instead of cascading a single
+            // break into a false "everything after this is also broken" report.
             expectedPreviousHash = log.getCurrentHash();
         }
-        return new AuditChainResult(true, null, "Audit chain is valid", null);
 
+        // Pass 2: any AUDIT_CHAIN_CORRECTED entry (written by acknowledgeChainBreak)
+        // references the broken entry's ID in entityId. Use it to mark that break
+        // as acknowledged - the original broken row is never touched.
+        for (AuditLog log : logs) {
+            if (log.getActionType() == AuditActionType.AUDIT_CHAIN_CORRECTED
+                    && "AuditChainBreak".equals(log.getEntityType())
+                    && log.getEntityId() != null) {
+
+                Long referencedId = parseLongSafely(log.getEntityId());
+                if (referencedId == null) continue;
+
+                result.getBreaks().stream()
+                        .filter(b -> b.getBrokenAtId().equals(referencedId) && !b.isAcknowledged())
+                        .findFirst()
+                        .ifPresent(b -> b.acknowledge(log.getPerformedBy(), log.getTimestamp(), log.getDetails()));
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Records an acknowledgment of a known, investigated chain break.
+     * This does NOT modify or recalculate the original broken entry - the
+     * evidence of tampering/corruption stays exactly as it was found. It adds
+     * a new, normally hash-chained entry that explains the anomaly and lets
+     * the chain be reported as valid again from this point forward, the same
+     * way a correcting journal entry works in accounting rather than editing
+     * a posted ledger line.
+     *
+     * @param brokenLogId   the id of the AuditLog entry that failed verification
+     * @param performedBy   the auditor/admin acknowledging the break
+     * @param justification mandatory explanation of what was found and why
+     *                      it's being acknowledged (e.g. root cause, ticket ref)
+     */
+    @Transactional
+    public AuditLog acknowledgeChainBreak(Long brokenLogId, String performedBy, String justification) {
+        if (brokenLogId == null) {
+            throw new IllegalArgumentException("brokenLogId is required");
+        }
+        if (justification == null || justification.isBlank()) {
+            throw new IllegalArgumentException("A justification is required to acknowledge a chain break");
+        }
+
+        return log(
+                AuditActionType.AUDIT_CHAIN_CORRECTED,
+                "AuditChainBreak",
+                String.valueOf(brokenLogId),
+                performedBy,
+                justification.trim()
+        );
+    }
+
+    private String safePrefix(String value) {
+        if (value == null) return "";
+        return value.length() > 10 ? value.substring(0, 10) : value;
+    }
+
+    private Long parseLongSafely(String value) {
+        try {
+            return Long.valueOf(value);
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     /**
