@@ -1,13 +1,3 @@
-/* ==========================================================
-   FRWSS Dark Mode
-   Works with Bootstrap 5.3's [data-bs-theme] attribute.
-   Bootstrap auto-restyles cards/navbars/dropdowns/forms/modals.
-   This file covers: (a) our own --frwss-* custom variables,
-   (b) utility classes Bootstrap does NOT auto-restyle
-       (bg-light, bg-white, text-dark, etc.), which several
-       FRWSS pages use directly.
-   ========================================================== */
-
 [data-bs-theme="dark"] {
     --frwss-bg: #0f172a;
     --frwss-surface: #1e293b;
@@ -16,26 +6,34 @@
             0 2px 6px rgba(0, 0, 0, .35),
             0 12px 30px rgba(0, 0, 0, .25);
     color-scheme: dark;
+
+    /* ---- Semantic design system tokens (dark) ---- */
+    --frwss-surface-1: #0f172a;
+    --frwss-surface-2: #1e293b;
+    --frwss-surface-3: #334155;
+    --frwss-text-primary: #e2e8f0;
+    --frwss-text-secondary: #cbd5e1;
+    --frwss-text-muted: #94a3b8;
 }
 
 [data-bs-theme="dark"] body { background: var(--frwss-bg); }
 
 [data-bs-theme="dark"] .frwss-card {
     background-color: var(--frwss-surface);
-    color: #e2e8f0;
+    color: var(--frwss-text-primary);
 }
-[data-bs-theme="dark"] .frwss-subtitle { color: #94a3b8 !important; }
+[data-bs-theme="dark"] .frwss-subtitle { color: var(--frwss-text-muted) !important; }
 
 [data-bs-theme="dark"] .bg-light {
     background-color: var(--frwss-surface) !important;
-    color: #e2e8f0;
+    color: var(--frwss-text-primary);
 }
 [data-bs-theme="dark"] .bg-white {
     background-color: var(--frwss-surface) !important;
-    color: #e2e8f0;
+    color: var(--frwss-text-primary);
 }
-[data-bs-theme="dark"] .text-dark { color: #e2e8f0 !important; }
-[data-bs-theme="dark"] .text-muted { color: #94a3b8 !important; }
+[data-bs-theme="dark"] .text-dark { color: var(--frwss-text-primary) !important; }
+[data-bs-theme="dark"] .text-muted { color: var(--frwss-text-muted) !important; }
 
 [data-bs-theme="dark"] .border,
 [data-bs-theme="dark"] .border-bottom,
@@ -45,7 +43,7 @@
 
 [data-bs-theme="dark"] .table-light {
     --bs-table-bg: var(--frwss-surface);
-    --bs-table-color: #e2e8f0;
+    --bs-table-color: var(--frwss-text-primary);
 }
 
 [data-bs-theme="dark"] .stat-card { background-color: var(--frwss-surface); }
@@ -53,7 +51,7 @@
 [data-bs-theme="dark"] ::-webkit-scrollbar-track { background: var(--frwss-bg); }
 [data-bs-theme="dark"] ::-webkit-scrollbar-thumb {
     background: var(--frwss-border);
-    border-radius: 6px;
+    border-radius: var(--frwss-radius-sm);
 }
 
 /* Toggle button icon swap (moon in light mode, sun in dark mode) */
