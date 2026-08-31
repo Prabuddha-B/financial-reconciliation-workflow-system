@@ -16,6 +16,8 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
 
     List<AuditLog> findAllByOrderByTimestampDesc();
 
+    List<AuditLog> findTop5ByOrderByTimestampDesc();
+
 //    @Query("""
 //       SELECT a FROM AuditLog a
 //       WHERE (:actionType IS NULL OR a.actionType = :actionType)

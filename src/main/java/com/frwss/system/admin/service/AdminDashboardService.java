@@ -1,6 +1,7 @@
 package com.frwss.system.admin.service;
 
 import com.frwss.system.admin.dto.AdminDashboardData;
+import com.frwss.system.audit.model.AuditLog;
 import com.frwss.system.audit.repository.AuditLogRepository;
 import com.frwss.system.reconciliation.model.ReconciliationStatus;
 import com.frwss.system.reconciliation.repository.ReconciliationResultRepository;
@@ -8,6 +9,8 @@ import com.frwss.system.repository.UserRepository;
 import com.frwss.system.tax.repository.TaxConfigurationRepository;
 import com.frwss.system.workflow.repository.WorkflowRecordRepository;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class AdminDashboardService {
@@ -143,5 +146,9 @@ public class AdminDashboardService {
         dashboard.setSystemStatus("ONLINE");
 
         return dashboard;
+    }
+
+    public List<AuditLog> getRecentActivities() {
+        return auditRepository.findTop5ByOrderByTimestampDesc();
     }
 }

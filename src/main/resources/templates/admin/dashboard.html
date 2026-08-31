@@ -416,7 +416,7 @@
        RECENT ACTIVITY
        ============================================================ */
     .activity-card {
-        background: white;
+        background: var(--frwss-surface);
         border-radius: 16px;
         padding: 1.5rem;
         box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
@@ -427,74 +427,145 @@
     }
 
     .activity-card .activity-title {
-        font-weight: 600;
-        font-size: 1rem;
-        color: #1a2332;
-        margin-bottom: 1rem;
-        padding-bottom: 0.5rem;
-        border-bottom: 2px solid #f0f2f5;
-    }
-
-    .activity-card .activity-item {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 0.5rem 0;
-        border-bottom: 1px solid #f1f3f5;
-    }
-
-    .activity-card .activity-item:last-child {
-        border-bottom: none;
-    }
-
-    .activity-card .activity-item .activity-left {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
-
-    .activity-card .activity-item .activity-icon {
-        width: 32px;
-        height: 32px;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.9rem;
-    }
-
-    .activity-card .activity-item .activity-icon.reconciliation { background: #cfe2ff; color: #0d6efd; }
-    .activity-card .activity-item .activity-icon.workflow { background: #fff3cd; color: #856404; }
-    .activity-card .activity-item .activity-icon.approval { background: #d1e7dd; color: #198754; }
-    .activity-card .activity-item .activity-icon.rejection { background: #f8d7da; color: #dc3545; }
-    .activity-card .activity-item .activity-icon.login { background: #d1e7dd; color: #198754; }
-    .activity-card .activity-item .activity-icon.create { background: #cfe2ff; color: #0d6efd; }
-    .activity-card .activity-item .activity-icon.edit { background: #fff3cd; color: #856404; }
-    .activity-card .activity-item .activity-icon.reset { background: #f8d7da; color: #dc3545; }
-    .activity-card .activity-item .activity-icon.default { background: #e9ecef; color: #6c757d; }
-
-    .activity-card .activity-item .activity-text {
-        font-size: 0.9rem;
-        color: #1a2332;
-    }
-
-    .activity-card .activity-item .activity-text .user {
         font-weight: 600;
+        font-size: 1rem;
+        color: var(--frwss-text, var(--frwss-text-primary));
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--frwss-border);
     }
 
-    .activity-card .activity-item .activity-time {
+    .activity-card .activity-title-label {
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .activity-card .activity-title-icon {
+        color: #0d6efd;
+    }
+
+    .activity-card .activity-timeline {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .activity-card .timeline-item {
+        display: grid;
+        grid-template-columns: 76px 20px minmax(0, 1fr) auto;
+        column-gap: 0.75rem;
+        align-items: start;
+        min-height: 64px;
+        padding: 0 0 1rem;
+    }
+
+    .activity-card .timeline-item:last-child {
+        padding-bottom: 0;
+    }
+
+    .activity-card .timeline-time {
+        padding-top: 0.15rem;
+        color: var(--frwss-text-muted);
         font-size: 0.75rem;
-        color: #adb5bd;
+        font-weight: 600;
+        line-height: 1.35;
+        text-align: right;
+    }
+
+    .activity-card .timeline-marker {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        height: 100%;
+    }
+
+    .activity-card .timeline-marker::before {
+        position: absolute;
+        top: 10px;
+        bottom: -1rem;
+        width: 2px;
+        background: var(--frwss-border);
+        content: "";
+    }
+
+    .activity-card .timeline-item:last-child .timeline-marker::before {
+        display: none;
+    }
+
+    .activity-card .timeline-dot {
+        position: relative;
+        z-index: 1;
+        width: 10px;
+        height: 10px;
+        margin-top: 0.32rem;
+        border: 2px solid var(--frwss-surface);
+        border-radius: 50%;
+        background: #0d6efd;
+        box-shadow: 0 0 0 2px #cfe2ff;
+    }
+
+    .activity-card .timeline-content {
+        min-width: 0;
+    }
+
+    .activity-card .activity-event-badge {
+        display: inline-flex;
+        align-items: center;
+        margin-bottom: 0.3rem;
+        padding: 0.2rem 0.5rem;
+        border-radius: 999px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        line-height: 1.2;
+    }
+
+    .activity-card .activity-event-badge.badge-workflow {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .activity-card .activity-event-badge.badge-reconciliation,
+    .activity-card .activity-event-badge.badge-default {
+        background: #cfe2ff;
+        color: #0d6efd;
+    }
+
+    .activity-card .activity-event-badge.badge-user-login {
+        background: #d1e7dd;
+        color: #198754;
+    }
+
+    .activity-card .activity-event-badge.badge-audit {
+        background: #e9ecef;
+        color: #6c757d;
+    }
+
+    .activity-card .activity-description {
+        overflow-wrap: anywhere;
+        color: var(--frwss-text, var(--frwss-text-primary));
+        font-size: 0.85rem;
+        line-height: 1.4;
+    }
+
+    .activity-card .activity-user-pill {
+        align-self: start;
+        margin-top: 0.1rem;
+        padding: 0.25rem 0.55rem;
+        border: 1px solid var(--frwss-border);
+        border-radius: 999px;
+        background: var(--frwss-surface-hover, var(--frwss-surface-3));
+        color: var(--frwss-text-muted);
+        font-size: 0.75rem;
+        font-weight: 600;
+        line-height: 1.2;
         white-space: nowrap;
     }
 
     .activity-card .view-all-link {
-        display: block;
-        text-align: center;
-        margin-top: 0.75rem;
-        padding-top: 0.75rem;
-        border-top: 1px solid #f0f2f5;
-        font-size: 0.85rem;
+        font-size: 0.8rem;
         font-weight: 500;
         color: #0d6efd;
         text-decoration: none;
@@ -502,6 +573,53 @@
 
     .activity-card .view-all-link:hover {
         text-decoration: underline;
+    }
+
+    [data-bs-theme="dark"] .activity-card {
+        background: var(--frwss-surface);
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+    }
+
+    [data-bs-theme="dark"] .activity-card .timeline-dot {
+        box-shadow: 0 0 0 2px #1d4ed8;
+    }
+
+    [data-bs-theme="dark"] .activity-card .activity-event-badge.badge-workflow {
+        background: #4a3410;
+        color: #fbbf24;
+    }
+
+    [data-bs-theme="dark"] .activity-card .activity-event-badge.badge-reconciliation,
+    [data-bs-theme="dark"] .activity-card .activity-event-badge.badge-default {
+        background: #1e3a5f;
+        color: #93c5fd;
+    }
+
+    [data-bs-theme="dark"] .activity-card .activity-event-badge.badge-user-login {
+        background: #164e3a;
+        color: #86efac;
+    }
+
+    [data-bs-theme="dark"] .activity-card .activity-event-badge.badge-audit {
+        background: #334155;
+        color: #cbd5e1;
+    }
+
+    @media (max-width: 768px) {
+        .activity-card .timeline-item {
+            grid-template-columns: 64px 18px minmax(0, 1fr);
+            column-gap: 0.6rem;
+        }
+
+        .activity-card .timeline-time {
+            font-size: 0.7rem;
+        }
+
+        .activity-card .activity-user-pill {
+            grid-column: 3;
+            justify-self: start;
+            margin-top: 0.45rem;
+        }
     }
 
     /* ============================================================
@@ -546,6 +664,25 @@
         .chart-wrapper { height: 180px; }
         .chart-card { padding: 1rem; }
         .section-divider .divider-label { font-size: 0.85rem; }
+    }
+
+    /* Keep the shared footer visually separate from the final dashboard row. */
+    main + .frwss-footer {
+        margin-top: 2rem;
+    }
+
+    main + .frwss-footer .container-fluid {
+        max-width: 1600px;
+        margin: 0 auto;
+        padding-left: 2rem;
+        padding-right: 2rem;
+    }
+
+    @media (max-width: 768px) {
+        main + .frwss-footer .container-fluid {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
     }
 </style>
 
@@ -902,68 +1039,42 @@
             <div class="col-lg-6">
                 <div class="activity-card">
                     <div class="activity-title">
-                        <i class="bi bi-clock-history me-2" style="color: #0d6efd;"></i>
-                        Recent Activity
+                        <span class="activity-title-label">
+                            <i class="bi bi-clock-history me-2 activity-title-icon"></i>
+                            Recent Activity
+                        </span>
+                        <a th:href="@{/audit/logs}" class="view-all-link">
+                            View All <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
                     </div>
 
-                    <div th:if="${#lists.isEmpty(recentAuditLogs)}" class="text-center text-muted py-3">
+                    <div th:if="${#lists.isEmpty(recentActivities)}" class="text-center text-muted py-3">
                         <i class="bi bi-inbox" style="font-size: 2rem; display: block; margin-bottom: 0.5rem;"></i>
                         No recent activity
                     </div>
 
-                    <div th:each="log : ${recentAuditLogs}" class="activity-item">
-                        <div class="activity-left">
-                            <div class="activity-icon"
-                                 th:classappend="${log.actionType == 'LOGIN_SUCCESS' ? 'login' :
-                                                    log.actionType == 'USER_CREATED' ? 'create' :
-                                                    log.actionType == 'USER_UPDATED' ? 'edit' :
-                                                    log.actionType == 'USER_DISABLED' ? 'reset' :
-                                                    log.actionType == 'USER_ENABLED' ? 'reset' :
-                                                    log.actionType == 'PASSWORD_RESET' ? 'reset' :
-                                                    log.actionType == 'PIN_RESET' ? 'reset' :
-                                                    log.actionType == 'EXACT_MATCH_FOUND' ? 'reconciliation' :
-                                                    log.actionType == 'PARTIAL_MATCH_FOUND' ? 'reconciliation' :
-                                                    log.actionType == 'ORPHAN_RECORD_FOUND' ? 'reconciliation' :
-                                                    log.actionType == 'RECONCILIATION_STARTED' ? 'reconciliation' :
-                                                    log.actionType == 'RECONCILIATION_COMPLETED' ? 'reconciliation' :
-                                                    log.actionType == 'WORKFLOW_STATE_CHANGED' ? 'workflow' :
-                                                    log.actionType == 'APPROVAL_GRANTED' ? 'approval' :
-                                                    log.actionType == 'APPROVAL_DENIED' ? 'rejection' :
-                                                    log.actionType == 'MANUAL_MODIFICATION' ? 'workflow' :
-                                                    'default'}">
-                                <i th:class="${log.actionType == 'LOGIN_SUCCESS' ? 'bi bi-box-arrow-in-right' :
-                                                  log.actionType == 'USER_CREATED' ? 'bi bi-person-plus' :
-                                                  log.actionType == 'USER_UPDATED' ? 'bi bi-pencil' :
-                                                  log.actionType == 'USER_DISABLED' ? 'bi bi-person-x' :
-                                                  log.actionType == 'USER_ENABLED' ? 'bi bi-person-check' :
-                                                  log.actionType == 'PASSWORD_RESET' ? 'bi bi-key' :
-                                                  log.actionType == 'PIN_RESET' ? 'bi bi-keypad' :
-                                                  log.actionType == 'EXACT_MATCH_FOUND' ? 'bi bi-check-circle' :
-                                                  log.actionType == 'PARTIAL_MATCH_FOUND' ? 'bi bi-clock' :
-                                                  log.actionType == 'ORPHAN_RECORD_FOUND' ? 'bi bi-exclamation-triangle' :
-                                                  log.actionType == 'RECONCILIATION_STARTED' ? 'bi bi-play' :
-                                                  log.actionType == 'RECONCILIATION_COMPLETED' ? 'bi bi-check-all' :
-                                                  log.actionType == 'WORKFLOW_STATE_CHANGED' ? 'bi bi-arrow-right-circle' :
-                                                  log.actionType == 'APPROVAL_GRANTED' ? 'bi bi-check2' :
-                                                  log.actionType == 'APPROVAL_DENIED' ? 'bi bi-x' :
-                                                  log.actionType == 'MANUAL_MODIFICATION' ? 'bi bi-pencil' :
-                                                  'bi bi-clock'}"></i>
+                    <div class="activity-timeline" th:unless="${#lists.isEmpty(recentActivities)}">
+                        <div th:each="activity : ${recentActivities}" class="timeline-item">
+                            <time class="timeline-time"
+                                  th:datetime="${#temporals.format(activity.timestamp, 'yyyy-MM-dd''T''HH:mm:ss')}"
+                                  th:text="${#temporals.format(activity.timestamp, 'dd MMM HH:mm')}"></time>
+                            <div class="timeline-marker" aria-hidden="true">
+                                <span class="timeline-dot"></span>
                             </div>
-                            <div>
-                                <div class="activity-text">
-                                    <span class="user" th:text="${log.performedBy}"></span>
-                                    <span th:text="${log.actionType}"></span>
-                                </div>
-                                <div class="activity-time" th:text="${log.details}"></div>
+                            <div class="timeline-content">
+                                <span class="activity-event-badge"
+                                      th:classappend="${#strings.contains(activity.actionType.name(), 'WORKFLOW') ? 'badge-workflow' :
+                                                       #strings.contains(activity.actionType.name(), 'RECONCILIATION') ? 'badge-reconciliation' :
+                                                       #strings.contains(activity.actionType.name(), 'LOGIN') ? 'badge-user-login' :
+                                                       #strings.contains(activity.actionType.name(), 'AUDIT') ? 'badge-audit' :
+                                                       'badge-default'}"
+                                      th:text="${activity.actionType}"></span>
+                                <div class="activity-description" th:text="${activity.details}"></div>
                             </div>
+                            <span class="activity-user-pill" th:text="${activity.performedBy}"></span>
                         </div>
-                        <div class="activity-time" th:text="${#temporals.format(log.timestamp, 'dd MMM HH:mm')}"></div>
                     </div>
 
-                    <a th:href="@{/audit/logs}" class="view-all-link">
-                        <i class="bi bi-arrow-right me-1"></i>
-                        View All Audit Logs
-                    </a>
                 </div>
             </div>
 

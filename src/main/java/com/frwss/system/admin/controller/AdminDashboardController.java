@@ -31,6 +31,10 @@ public class AdminDashboardController {
                 "dashboard",
                 dashboardService.getDashboardData()
         );
+        model.addAttribute(
+                "recentActivities",
+                dashboardService.getRecentActivities()
+        );
 
         return "admin/dashboard";
     }
