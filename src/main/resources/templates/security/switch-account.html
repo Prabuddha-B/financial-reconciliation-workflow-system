@@ -11,15 +11,16 @@
     .main-container {
         display: flex;
         justify-content: center;
-        align-items: center;
-        min-height: calc(100vh - 200px);
+        align-items: flex-start;
         padding: 2rem;
     }
 
     .switch-card {
         max-width: 480px;
         width: 100%;
-        background: white;
+        background: var(--bs-body-bg);
+        color: var(--bs-body-color);
+        border: 1px solid var(--bs-border-color);
         border-radius: 20px;
         box-shadow: 0 8px 40px rgba(0, 0, 0, 0.08);
         padding: 2.5rem 2.5rem 2rem;
@@ -63,12 +64,18 @@
 
     /* Current Role Badge */
     .current-role-badge {
-        background: #f8f9fa;
+        background: var(--bs-tertiary-bg);
+        border: 1px solid var(--bs-border-color);
         border-radius: 10px;
         padding: 0.75rem 1rem;
         text-align: center;
         margin-bottom: 1.5rem;
         border: 1px solid #e9ecef;
+    }
+
+    [data-bs-theme="dark"] .switch-card,
+    [data-bs-theme="dark"] .switch-card * {
+        color: var(--bs-body-color);
     }
 
     .current-role-badge .label {
@@ -82,7 +89,7 @@
     .current-role-badge .value {
         font-weight: 700;
         font-size: 1.1rem;
-        color: #1a2332;
+        color: var(--bs-body-color);
         margin-top: 0.1rem;
     }
 
@@ -94,7 +101,7 @@
     .account-list .list-label {
         font-weight: 600;
         font-size: 0.9rem;
-        color: #1a2332;
+        color: var(--bs-body-color);
         margin-bottom: 0.5rem;
         display: block;
     }
@@ -142,7 +149,7 @@
 
     .account-option .account-name {
         font-weight: 600;
-        color: #1a2332;
+        color: var(--bs-body-color);
         font-size: 0.95rem;
     }
 
@@ -155,7 +162,7 @@
     .form-label {
         font-weight: 600;
         font-size: 0.9rem;
-        color: #1a2332;
+        color: var(--bs-body-color);
         margin-bottom: 0.4rem;
     }
 
@@ -170,7 +177,10 @@
         padding: 0.7rem 1rem;
         font-size: 1rem;
         transition: all 0.15s;
-        background: white;
+        background: var(--bs-body-bg);
+        color: var(--bs-body-color);
+        border-color: var(--bs-border-color);
+
     }
 
     .form-control:focus {
@@ -220,7 +230,9 @@
         font-size: 1rem;
         border: 1.5px solid #e2e8f0;
         transition: all 0.15s;
-        background: white;
+        background: var(--bs-body-bg);
+        color: var(--bs-body-color);
+        border-color: var(--bs-border-color);
         color: #495057;
         display: flex;
         align-items: center;
@@ -285,22 +297,53 @@
         margin-bottom: 0.5rem;
     }
 
+
+    .switch-card {
+        padding: 1.75rem 1.25rem 1.5rem;
+        background: var(--bs-tertiary-bg);
+        color: var(--bs-body-color);
+        border: 1px solid var(--bs-border-color);
+    }
+
+    .icon-wrapper .icon {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+
+        background: linear-gradient(
+                135deg,
+                rgba(37,99,235,0.25),
+                rgba(59,130,246,0.15)
+        );
+
+        color: #60a5fa;
+
+        border: 1px solid rgba(96,165,250,.25);
+
+        box-shadow:
+                0 0 20px rgba(37,99,235,.35),
+                inset 0 0 12px rgba(96,165,250,.15);
+    }
+
+    .icon-wrapper .icon i {
+        text-shadow:
+                0 0 10px rgba(96,165,250,.8),
+                0 0 25px rgba(96,165,250,.4);
+    }
+
     /* Responsive */
     @media (max-width: 576px) {
         .main-container {
             padding: 1rem;
             min-height: calc(100vh - 160px);
         }
-        .switch-card {
-            padding: 1.75rem 1.25rem 1.5rem;
-        }
-        .icon-wrapper .icon {
-            width: 60px;
-            height: 60px;
-            font-size: 1.8rem;
-        }
+
         .switch-title {
-            font-size: 1.25rem;
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--bs-body-color);
+            margin-bottom: 0.5rem;
         }
         .switch-subtitle {
             font-size: 0.85rem;
