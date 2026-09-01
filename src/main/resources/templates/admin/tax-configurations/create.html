@@ -17,7 +17,7 @@
     /* ============================================================
        BACKGROUND - Subtle Gradient
        ============================================================ */
-    body {
+    [data-bs-theme="light"] body {
         background: linear-gradient(135deg, #f8fafc 0%, #eef2f6 100%);
     }
 
@@ -521,11 +521,72 @@
             font-size: 0.85rem;
         }
     }
+
+    /* ============================================================
+   DARK MODE FIX
+   ============================================================ */
+
+    [data-bs-theme="dark"] .card-accent,
+    [data-bs-theme="dark"] .info-box {
+        background: var(--bs-body-bg);
+        border: 1px solid var(--bs-border-color);
+    }
+
+    [data-bs-theme="dark"] .card-header,
+    [data-bs-theme="dark"] .info-box .info-header {
+        background: var(--bs-body-bg);
+        border-color: var(--bs-border-color);
+    }
+
+    [data-bs-theme="dark"] .page-header h2,
+    [data-bs-theme="dark"] .card-header h3,
+    [data-bs-theme="dark"] .section-title,
+    [data-bs-theme="dark"] .form-label,
+    [data-bs-theme="dark"] .info-box .info-header h6,
+    [data-bs-theme="dark"] .info-box .info-text strong {
+        color: var(--bs-body-color);
+    }
+
+    [data-bs-theme="dark"] .text-muted,
+    [data-bs-theme="dark"] .info-box .info-text {
+        color: var(--bs-secondary-color) !important;
+    }
+
+    [data-bs-theme="dark"] .section-title,
+    [data-bs-theme="dark"] .form-footer,
+    [data-bs-theme="dark"] .info-box .info-item {
+        border-color: var(--bs-border-color);
+    }
+
+    [data-bs-theme="dark"] .form-control {
+        background: var(--bs-body-bg);
+        border-color: var(--bs-border-color);
+        color: var(--bs-body-color);
+    }
+
+    [data-bs-theme="dark"] .form-control::placeholder {
+        color: var(--bs-secondary-color);
+    }
+
+    [data-bs-theme="dark"] .btn-secondary-custom {
+        background: var(--bs-body-bg);
+        border-color: var(--bs-border-color);
+        color: var(--bs-body-color);
+    }
+
+    [data-bs-theme="dark"] .btn-secondary-custom:hover {
+        background: var(--bs-secondary-bg);
+        color: var(--bs-body-color);
+    }
+
+    [data-bs-theme="dark"] .info-note {
+        background: rgba(13, 110, 253, 0.15);
+    }
 </style>
 
 <body class="d-flex flex-column min-vh-100">
 
-    <div th:replace="~{fragments/navbar :: navbar}"></div>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
 
     <main class="flex-grow-1">
 
@@ -554,7 +615,7 @@
                 <div class="title-wrapper">
                     <div>
                         <h2>
-                            <i class="bi bi-plus-circle me-2"></i>
+
                             Create Tax Configuration
                         </h2>
                         <p class="text-muted mb-0">
@@ -562,9 +623,9 @@
                         </p>
                     </div>
                     <span class="badge-new">
-                            <i class="bi bi-plus-circle me-1"></i>
-                            New
-                        </span>
+                                <i class="bi bi-plus-circle me-1"></i>
+                                New
+                            </span>
                 </div>
 
             </div>
@@ -712,7 +773,7 @@
                                                       rows="3"
                                                       th:field="*{description}"
                                                       placeholder="Describe this tax configuration...">
-                                                </textarea>
+                                                    </textarea>
 
                                             <div class="invalid-feedback"
                                                  th:if="${#fields.hasErrors('description')}"

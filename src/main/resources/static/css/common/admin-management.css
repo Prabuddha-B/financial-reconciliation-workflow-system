@@ -893,3 +893,87 @@
 .page-header {
     margin-bottom: 2rem;
 }
+
+
+/* ============================================================
+   DARK MODE SUPPORT
+   ============================================================ */
+
+[data-bs-theme="dark"] .page-header h2 {
+    color: #f8f9fa !important;
+}
+
+[data-bs-theme="dark"] .page-header .text-muted {
+    color: #d1d5db !important;
+}
+
+[data-bs-theme="dark"] .card {
+    background: #1f2937 !important;
+    border: 1px solid #374151 !important;
+    box-shadow: none !important;
+}
+
+[data-bs-theme="dark"] .table thead th {
+    background: #111827 !important;
+    color: #f8f9fa !important;
+    border-bottom: 1px solid #374151 !important;
+}
+
+[data-bs-theme="dark"] .table tbody td {
+    color: #f8f9fa !important;
+    border-color: #374151 !important;
+}
+
+[data-bs-theme="dark"] .table tbody tr {
+    background: #1f2937 !important;
+}
+
+[data-bs-theme="dark"] .table tbody tr:hover {
+    background: #273449 !important;
+}
+
+[data-bs-theme="dark"] .module-text {
+    color: #f8f9fa !important;
+}
+
+
+[data-bs-theme="dark"] .category-text {
+    color: #d1d5db !important;
+}
+[data-bs-theme="dark"] .description-text {
+    color: #d1d5db !important;
+}
+
+[data-bs-theme="dark"] .tax-rate-badge {
+    background: #dbeafe !important;
+    color: #2563eb !important;
+}
+
+[data-bs-theme="dark"] .btn-back {
+    background: #1f2937 !important;
+    color: #f8f9fa !important;
+    border-color: #4b5563 !important;
+}
+
+[data-bs-theme="dark"] .btn-back:hover {
+    background: #273449 !important;
+}
+
+
+/* ==========================================================
+   UNIVERSAL TABLE TEXT FIX
+   ========================================================== */
+
+.module-text,
+.category-text,
+.description-text,
+.tax-rate-text {
+    color: var(--admin-text);
+}
+
+.table tbody td {
+    color: var(--admin-text);
+}
+
+
+
