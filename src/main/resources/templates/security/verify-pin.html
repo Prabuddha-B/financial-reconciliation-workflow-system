@@ -209,9 +209,65 @@
             padding: 0.6rem;
         }
     }
+
+    /* ==========================================
+   Dark Mode - Verify PIN Page
+   ========================================== */
+
+    [data-bs-theme="dark"] .verify-card {
+        background-color: #1f2937 !important;
+        border-color: #374151 !important;
+        color: #f8f9fa !important;
+    }
+
+    [data-bs-theme="dark"] .verify-title {
+        color: #f8f9fa !important;
+    }
+
+    [data-bs-theme="dark"] .verify-subtitle,
+    [data-bs-theme="dark"] .form-text {
+        color: #d1d5db !important;
+    }
+
+    [data-bs-theme="dark"] .form-label {
+        color: #f8f9fa !important;
+    }
+
+    [data-bs-theme="dark"] .form-label i {
+        color: #9ca3af !important;
+    }
+
+    [data-bs-theme="dark"] .form-control {
+        background-color: #111827 !important;
+        color: #f8f9fa !important;
+        border-color: #4b5563 !important;
+    }
+
+    [data-bs-theme="dark"] .form-control::placeholder {
+        color: #9ca3af !important;
+    }
+
+    [data-bs-theme="dark"] .btn-cancel {
+        background-color: #1f2937 !important;
+        color: #f8f9fa !important;
+        border-color: #4b5563 !important;
+    }
+
+    [data-bs-theme="dark"] .btn-cancel:hover {
+        background-color: #273449 !important;
+        color: #f8f9fa !important;
+    }
+
+    [data-bs-theme="dark"] .divider {
+        border-top-color: #374151 !important;
+    }
+
+    [data-bs-theme="dark"] .lock-icon {
+        background-color: rgba(13, 110, 253, 0.15) !important;
+    }
 </style>
 
-<body class="d-flex flex-column min-vh-100 bg-light">
+<body class="d-flex flex-column min-vh-100">
 
     <div th:replace="~{fragments/navbar :: navbar}"></div>
 

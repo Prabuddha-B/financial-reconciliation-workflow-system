@@ -58,6 +58,26 @@ public class UserManagementService {
         return getAllUsers(null, null,null);
     }
 
+    @Transactional(readOnly = true)
+    public long getTotalUsers() {
+        return userRepository.count();
+    }
+
+    @Transactional(readOnly = true)
+    public long getActiveUsers() {
+        return userRepository.countByEnabledTrue();
+    }
+
+    @Transactional(readOnly = true)
+    public long getDisabledUsers() {
+        return userRepository.countByEnabledFalse();
+    }
+
+    @Transactional(readOnly = true)
+    public long getAdminUsers() {
+        return userRepository.countUsersByRole("ROLE_ADMIN");
+    }
+
 
 //    Creates a new user
     @Transactional

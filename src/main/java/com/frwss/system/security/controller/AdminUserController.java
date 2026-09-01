@@ -42,6 +42,11 @@ public class AdminUserController {
                 "users",
                 userManagementService.getAllUsers(username,role,enabled));
 
+        model.addAttribute("totalUsers", userManagementService.getTotalUsers());
+        model.addAttribute("activeUsers", userManagementService.getActiveUsers());
+        model.addAttribute("disabledUsers", userManagementService.getDisabledUsers());
+        model.addAttribute("adminUsers", userManagementService.getAdminUsers());
+
         model.addAttribute("searchUsername", username);
         model.addAttribute("selectedRole", role);
         model.addAttribute("selectedStatus", enabled);

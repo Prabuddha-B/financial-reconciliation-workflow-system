@@ -3,654 +3,7 @@
 
 <head th:replace="~{fragments/header :: header('User Management')}"></head>
 
-<style>
-
-    /* Main container */
-    .main-container {
-        padding: 2rem;
-    }
-
-    /* Page header with breadcrumb style */
-    .page-header {
-        margin-bottom: 2rem;
-    }
-
-    .page-header .breadcrumb-nav {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 0.85rem;
-        color: #6c757d;
-        margin-bottom: 0.5rem;
-    }
-
-    .page-header .breadcrumb-nav a {
-        color: #0d6efd;
-        text-decoration: none;
-        font-weight: 500;
-    }
-
-    .page-header .breadcrumb-nav a:hover {
-        text-decoration: underline;
-    }
-
-    .page-header .breadcrumb-nav .separator {
-        color: #ced4da;
-    }
-
-    .page-header .breadcrumb-nav .current {
-        color: #1a2332;
-        font-weight: 600;
-    }
-
-    .page-header h2 {
-        font-weight: 700;
-        color: #1a2332;
-        font-size: 1.75rem;
-        letter-spacing: -0.3px;
-        margin-bottom: 0.25rem;
-    }
-
-    .page-header h2 i {
-        color: #0d6efd;
-    }
-
-    .page-header .text-muted {
-        font-size: 0.95rem;
-        color: #6c757d !important;
-    }
-
-    /* Card styles - matching your design */
-    .card {
-        border: none;
-        border-radius: 12px;
-        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
-        transition: box-shadow 0.2s ease;
-        background: white;
-    }
-
-    .card:hover {
-        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-    }
-
-    .card-header {
-        background: white;
-        border-bottom: 1px solid #f0f2f5;
-        padding: 1rem 1.25rem;
-        border-radius: 12px 12px 0 0 !important;
-    }
-
-    .card-header h5 {
-        font-weight: 600;
-        color: #1a2332;
-        font-size: 0.95rem;
-        margin: 0;
-    }
-
-    .card-header h5 i {
-        color: #0d6efd;
-        margin-right: 0.5rem;
-    }
-
-    .card-body {
-        padding: 1.25rem;
-    }
-
-    /* Add User button */
-    .btn-add-user {
-        padding: 0.5rem 1.25rem;
-        border-radius: 6px;
-        font-weight: 500;
-        font-size: 0.9rem;
-        background: #198754;
-        color: white;
-        border: none;
-        transition: all 0.15s;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .btn-add-user:hover {
-        background: #157347;
-        color: white;
-        transform: translateY(-1px);
-        box-shadow: 0 2px 8px rgba(25, 135, 84, 0.3);
-    }
-
-    /* Filter section */
-    .filter-section .card {
-        margin-bottom: 1.5rem;
-    }
-
-    .filter-section .form-label {
-        font-weight: 500;
-        font-size: 0.85rem;
-        color: #495057;
-        margin-bottom: 0.3rem;
-    }
-
-    .filter-section .form-control,
-    .filter-section .form-select {
-        border-radius: 6px;
-        border: 1px solid #dde1e6;
-        padding: 0.45rem 0.75rem;
-        font-size: 0.9rem;
-        transition: all 0.15s;
-        background: white;
-    }
-
-    .filter-section .form-control:focus,
-    .filter-section .form-select:focus {
-        border-color: #86b7fe;
-        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.1);
-    }
-
-    .filter-section .input-group .input-group-text {
-        background: white;
-        border: 1px solid #dde1e6;
-        border-right: none;
-        border-radius: 6px 0 0 6px;
-        color: #6c757d;
-        padding: 0.45rem 0.75rem;
-    }
-
-    .filter-section .input-group .form-control {
-        border-radius: 0 6px 6px 0;
-        border-left: none;
-    }
-
-    .btn-filter {
-        border-radius: 6px;
-        padding: 0.45rem 1.5rem;
-        font-weight: 500;
-        font-size: 0.9rem;
-        background: #0d6efd;
-        border: none;
-        color: white;
-        transition: all 0.15s;
-    }
-
-    .btn-filter:hover {
-        background: #0b5ed7;
-        transform: translateY(-1px);
-        box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);
-    }
-
-    .btn-reset {
-        border-radius: 6px;
-        padding: 0.45rem 1.25rem;
-        font-weight: 500;
-        font-size: 0.9rem;
-        border: 1px solid #dde1e6;
-        transition: all 0.15s;
-        background: white;
-        color: #495057;
-    }
-
-    .btn-reset:hover {
-        background: #f8f9fa;
-        border-color: #ced4da;
-    }
-
-    /* Table styles */
-    .table-container .card {
-        overflow: hidden;
-    }
-
-    .table {
-        margin-bottom: 0;
-        font-size: 0.9rem;
-    }
-
-    .table thead th {
-        background: #f8f9fa;
-        border-bottom: 1px solid #e9ecef;
-        font-weight: 600;
-        font-size: 0.8rem;
-        text-transform: uppercase;
-        letter-spacing: 0.3px;
-        color: #495057;
-        padding: 0.7rem 1rem;
-    }
-
-    .table tbody td {
-        padding: 0.7rem 1rem;
-        vertical-align: middle;
-        border-bottom: 1px solid #f1f3f5;
-    }
-
-    .table tbody tr {
-        transition: background-color 0.15s ease;
-    }
-
-    .table tbody tr:hover {
-        background-color: #f8f9ff;
-    }
-
-    .table tbody tr:last-child td {
-        border-bottom: none;
-    }
-
-    /* Checkbox styles */
-    .form-check-input {
-        cursor: pointer;
-        border-radius: 3px;
-        border: 1.5px solid #ced4da;
-        width: 1rem;
-        height: 1rem;
-        transition: all 0.15s;
-    }
-
-    .form-check-input:checked {
-        background-color: #0d6efd;
-        border-color: #0d6efd;
-    }
-
-    .form-check-input:focus {
-        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
-    }
-
-    /* Username */
-    .username-text {
-        font-weight: 600;
-        color: #1a2332;
-    }
-
-    /* Role badges */
-    .role-badge {
-        padding: 0.25rem 0.75rem;
-        border-radius: 50px;
-        font-weight: 500;
-        font-size: 0.8rem;
-        display: inline-block;
-    }
-
-    /* Status badges */
-    .status-badge {
-        padding: 0.25rem 0.75rem;
-        border-radius: 50px;
-        font-weight: 500;
-        font-size: 0.8rem;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-    }
-
-    .status-badge.active {
-        background: #d1e7dd;
-        color: #0f5132;
-    }
-
-    .status-badge.active .status-dot {
-        background: #198754;
-    }
-
-    .status-badge.disabled {
-        background: #e9ecef;
-        color: #495057;
-    }
-
-    .status-badge.disabled .status-dot {
-        background: #adb5bd;
-    }
-
-    .status-dot {
-        width: 5px;
-        height: 5px;
-        border-radius: 50%;
-        display: inline-block;
-    }
-
-    /* Action buttons */
-    .action-group {
-        display: flex;
-        gap: 0.3rem;
-        flex-wrap: wrap;
-        align-items: center;
-    }
-
-    .action-group .btn-action {
-        padding: 0.2rem 0.5rem;
-        font-size: 0.75rem;
-        border-radius: 4px;
-        font-weight: 500;
-        transition: all 0.15s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.25rem;
-        border: 1px solid transparent;
-        text-decoration: none;
-        cursor: pointer;
-    }
-
-    .action-group .btn-action i {
-        font-size: 0.7rem;
-    }
-
-    .action-group .btn-action:hover {
-        transform: translateY(-1px);
-    }
-
-    .action-group .btn-edit {
-        background: #e7f1ff;
-        color: #0d6efd;
-        border-color: #cfe2ff;
-    }
-
-    .action-group .btn-edit:hover {
-        background: #cfe2ff;
-    }
-
-    .action-group .btn-reset-password {
-        background: #fff3cd;
-        color: #856404;
-        border-color: #ffe69c;
-    }
-
-    .action-group .btn-reset-password:hover {
-        background: #ffe69c;
-    }
-
-    .action-group .btn-reset-pin {
-        background: #e9ecef;
-        color: #495057;
-        border-color: #dee2e6;
-    }
-
-    .action-group .btn-reset-pin:hover {
-        background: #dee2e6;
-    }
-
-    .action-group .btn-disable {
-        background: #f8d7da;
-        color: #dc3545;
-        border-color: #f5c2c7;
-    }
-
-    .action-group .btn-disable:hover {
-        background: #f5c2c7;
-    }
-
-    .action-group .btn-enable {
-        background: #d1e7dd;
-        color: #198754;
-        border-color: #a3cfbb;
-    }
-
-    .action-group .btn-enable:hover {
-        background: #a3cfbb;
-    }
-
-    /* Created date */
-    .created-date {
-        color: #6c757d;
-        font-size: 0.85rem;
-    }
-
-    /* ============================================================
-       BULK ACTIONS BAR
-       ============================================================ */
-    .bulk-actions-wrapper {
-        margin-bottom: 1rem;
-        overflow: hidden;
-        max-height: 0;
-        transition: max-height 0.3s ease, opacity 0.3s ease, margin 0.3s ease;
-        opacity: 0;
-    }
-
-    .bulk-actions-wrapper.show {
-        max-height: 80px;
-        opacity: 1;
-        margin-bottom: 1rem;
-    }
-
-    .bulk-actions-bar {
-        background: #f8f9fa;
-        border: 1px solid #e9ecef;
-        border-radius: 8px;
-        padding: 0.5rem 1rem;
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        flex-wrap: wrap;
-    }
-
-    .bulk-actions-bar .bulk-info {
-        display: flex;
-        align-items: center;
-        gap: 0.4rem;
-        font-weight: 500;
-        font-size: 0.85rem;
-        color: #1a2332;
-        padding-right: 1rem;
-        border-right: 1px solid #dee2e6;
-    }
-
-    .bulk-actions-bar .bulk-info i {
-        color: #0d6efd;
-        font-size: 1rem;
-    }
-
-    .bulk-actions-bar .bulk-info .count {
-        color: #0d6efd;
-        font-weight: 700;
-    }
-
-    .bulk-actions-bar .bulk-buttons {
-        display: flex;
-        gap: 0.3rem;
-        flex-wrap: wrap;
-        flex: 1;
-    }
-
-    .bulk-actions-bar .bulk-btn {
-        padding: 0.25rem 0.7rem;
-        font-size: 0.75rem;
-        font-weight: 500;
-        border-radius: 4px;
-        border: 1px solid transparent;
-        transition: all 0.15s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.3rem;
-        cursor: pointer;
-        background: white;
-        color: #495057;
-        border-color: #dee2e6;
-    }
-
-    .bulk-actions-bar .bulk-btn:hover {
-        transform: translateY(-1px);
-    }
-
-    .bulk-actions-bar .bulk-btn.btn-enable {
-        background: #d1e7dd;
-        color: #0f5132;
-        border-color: #a3cfbb;
-    }
-
-    .bulk-actions-bar .bulk-btn.btn-enable:hover {
-        background: #a3cfbb;
-    }
-
-    .bulk-actions-bar .bulk-btn.btn-disable {
-        background: #f8d7da;
-        color: #721c24;
-        border-color: #f5c2c7;
-    }
-
-    .bulk-actions-bar .bulk-btn.btn-disable:hover {
-        background: #f5c2c7;
-    }
-
-    .bulk-actions-bar .bulk-btn.btn-reset {
-        background: #fff3cd;
-        color: #856404;
-        border-color: #ffe69c;
-    }
-
-    .bulk-actions-bar .bulk-btn.btn-reset:hover {
-        background: #ffe69c;
-    }
-
-    .bulk-actions-bar .bulk-close {
-        background: none;
-        border: none;
-        color: #adb5bd;
-        font-size: 0.9rem;
-        padding: 0.1rem 0.3rem;
-        cursor: pointer;
-        transition: all 0.15s ease;
-        border-radius: 4px;
-        line-height: 1;
-    }
-
-    .bulk-actions-bar .bulk-close:hover {
-        color: #dc3545;
-        background: #f8f9fa;
-    }
-
-    /* Alert messages */
-    .alert {
-        border: none;
-        border-radius: 8px;
-        padding: 0.75rem 1rem;
-        font-weight: 500;
-        font-size: 0.9rem;
-    }
-
-    .alert-success {
-        background: #d1e7dd;
-        color: #0f5132;
-    }
-
-    .alert-danger {
-        background: #f8d7da;
-        color: #721c24;
-    }
-
-    .alert i {
-        font-size: 1rem;
-    }
-
-    /* Modal */
-    .modal-content {
-        border-radius: 12px;
-        border: none;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-    }
-
-    .modal-header {
-        border-bottom: 1px solid #e9ecef;
-        padding: 1rem 1.25rem;
-    }
-
-    .modal-body {
-        padding: 1.25rem;
-    }
-
-    .modal-footer {
-        border-top: 1px solid #e9ecef;
-        padding: 1rem 1.25rem;
-    }
-
-    /* Responsive */
-    @media (max-width: 992px) {
-        .main-container {
-            padding: 1.5rem;
-        }
-        .action-group {
-            gap: 0.25rem;
-        }
-        .action-group .btn-action {
-            padding: 0.15rem 0.4rem;
-            font-size: 0.7rem;
-        }
-        .action-group .btn-action i {
-            font-size: 0.65rem;
-        }
-    }
-
-    @media (max-width: 768px) {
-        .main-container {
-            padding: 1rem;
-        }
-        .card-body {
-            padding: 1rem;
-        }
-        .page-header h2 {
-            font-size: 1.4rem;
-        }
-        .btn-add-user {
-            padding: 0.4rem 1rem;
-            font-size: 0.8rem;
-        }
-        .table thead th,
-        .table tbody td {
-            padding: 0.4rem 0.5rem;
-            font-size: 0.8rem;
-        }
-        .bulk-actions-bar {
-            flex-direction: column;
-            align-items: stretch;
-            gap: 0.4rem;
-            padding: 0.5rem;
-        }
-        .bulk-actions-bar .bulk-info {
-            border-right: none;
-            padding-right: 0;
-            border-bottom: 1px solid #dee2e6;
-            padding-bottom: 0.4rem;
-        }
-        .bulk-actions-bar .bulk-buttons {
-            gap: 0.3rem;
-        }
-        .bulk-actions-bar .bulk-btn {
-            font-size: 0.7rem;
-            padding: 0.2rem 0.5rem;
-        }
-        .bulk-actions-wrapper.show {
-            max-height: 120px;
-        }
-    }
-
-    @media (max-width: 576px) {
-        .main-container {
-            padding: 0.5rem;
-        }
-        .action-group .btn-action .btn-text {
-            display: none;
-        }
-        .action-group .btn-action {
-            padding: 0.15rem 0.3rem;
-            font-size: 0.65rem;
-        }
-        .table thead th,
-        .table tbody td {
-            padding: 0.3rem 0.3rem;
-            font-size: 0.75rem;
-        }
-        .username-text {
-            font-size: 0.8rem;
-        }
-        .role-badge,
-        .status-badge {
-            font-size: 0.65rem;
-            padding: 0.15rem 0.4rem;
-        }
-        .bulk-actions-bar .bulk-btn {
-            font-size: 0.6rem;
-            padding: 0.15rem 0.4rem;
-        }
-        .bulk-actions-bar .bulk-info {
-            font-size: 0.75rem;
-        }
-        .bulk-actions-wrapper.show {
-            max-height: 150px;
-        }
-    }
-</style>
+<link rel="stylesheet" th:href="@{/css/common/admin-management.css}">
 
 <body class="d-flex flex-column min-vh-100 bg-light">
 
@@ -692,30 +45,160 @@
 
 
             <!-- PAGE HEADER -->
+            <div class="page-header mb-4">
 
-            <div class="page-header">
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
 
-                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
                     <div>
-                        <h2>
-                            <i class="bi bi-people-fill me-2"></i>
+                        <h1 class="page-title mb-2">
                             User Management
-                        </h2>
-                        <p class="text-muted mb-0">
-                            Manage system users, roles and account status
+                        </h1>
+
+                        <p class="page-subtitle mb-0">
+                            Manage system users, roles and account lifecycle
                         </p>
                     </div>
-                    <a th:href="@{/admin/users/create}" class="btn-add-user">
+
+                    <a th:href="@{/admin/users/create}"
+                       class="btn-add-user">
                         <i class="bi bi-person-plus-fill"></i>
                         Add User
                     </a>
+
                 </div>
 
             </div>
 
+            <!-- USER SUMMARY CARDS -->
+            <div class="row g-3 mb-4">
+
+                <div class="col-lg-3 col-md-6">
+
+                    <div class="card stats-card h-100">
+
+                        <div class="card-body">
+
+                            <div class="d-flex align-items-center gap-3">
+
+                                <div class="stats-icon primary">
+                                    <i class="bi bi-people-fill"></i>
+                                </div>
+
+                                <div>
+                                    <h3 class="stats-value mb-0"
+                                        th:text="${totalUsers}">
+                                        0
+                                    </h3>
+
+                                    <small class="stats-label">
+                                        Total Users
+                                    </small>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+
+                    <div class="card stats-card h-100">
+
+                        <div class="card-body">
+
+                            <div class="d-flex align-items-center gap-3">
+
+                                <div class="stats-icon success">
+                                    <i class="bi bi-person-check-fill"></i>
+                                </div>
+
+                                <div>
+                                    <h3 class="stats-value mb-0"
+                                        th:text="${activeUsers}">
+                                        0
+                                    </h3>
+
+                                    <small class="stats-label">
+                                        Active Users
+                                    </small>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+
+                    <div class="card stats-card h-100">
+
+                        <div class="card-body">
+
+                            <div class="d-flex align-items-center gap-3">
+
+                                <div class="stats-icon danger">
+                                    <i class="bi bi-person-x-fill"></i>
+                                </div>
+
+                                <div>
+                                    <h3 class="stats-value mb-0"
+                                        th:text="${disabledUsers}">
+                                        0
+                                    </h3>
+
+                                    <small class="stats-label">
+                                        Disabled Users
+                                    </small>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+
+                    <div class="card stats-card h-100">
+
+                        <div class="card-body">
+
+                            <div class="d-flex align-items-center gap-3">
+
+                                <div class="stats-icon purple">
+                                    <i class="bi bi-shield-lock-fill"></i>
+                                </div>
+
+                                <div>
+                                    <h3 class="stats-value mb-0"
+                                        th:text="${adminUsers}">
+                                        0
+                                    </h3>
+
+                                    <small class="stats-label">
+                                        Administrators
+                                    </small>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
 
             <!-- FILTER SECTION -->
-
             <div class="filter-section">
 
                 <div class="card">
@@ -734,30 +217,35 @@
 
                             <div class="row g-3 align-items-end">
 
-                                <!-- Username -->
-                                <div class="col-md-4">
+                                <!-- Search -->
+
+                                <div class="col-lg-4">
 
                                     <label class="form-label">
-                                        <i class="bi bi-person me-1"></i>
-                                        Username
+                                        <i class="bi bi-search me-1"></i>
+                                        Search Users
                                     </label>
 
                                     <div class="input-group">
-                                        <span class="input-group-text">
-                                            <i class="bi bi-search"></i>
-                                        </span>
+
+                            <span class="input-group-text">
+                                <i class="bi bi-search"></i>
+                            </span>
+
                                         <input
                                                 type="text"
                                                 class="form-control"
                                                 name="username"
                                                 placeholder="Search username..."
                                                 th:value="${searchUsername}">
+
                                     </div>
 
                                 </div>
 
                                 <!-- Role -->
-                                <div class="col-md-3">
+
+                                <div class="col-lg-3">
 
                                     <label class="form-label">
                                         <i class="bi bi-tag me-1"></i>
@@ -794,7 +282,8 @@
                                 </div>
 
                                 <!-- Status -->
-                                <div class="col-md-3">
+
+                                <div class="col-lg-3">
 
                                     <label class="form-label">
                                         <i class="bi bi-circle me-1"></i>
@@ -820,10 +309,12 @@
 
                                 </div>
 
-                                <!-- Buttons -->
-                                <div class="col-md-2 d-flex gap-2">
+                                <!-- Actions -->
 
-                                    <button class="btn-filter flex-grow-1">
+                                <div class="col-lg-2 d-flex gap-2">
+
+                                    <button type="submit"
+                                            class="btn-filter flex-grow-1">
                                         <i class="bi bi-search me-1"></i>
                                         Filter
                                     </button>
@@ -844,7 +335,6 @@
                 </div>
 
             </div>
-
 
             <!-- BULK ACTIONS BAR -->
             <div id="bulkActionsWrapper" class="bulk-actions-wrapper">
@@ -869,7 +359,6 @@
                     </button>
                 </div>
             </div>
-
 
             <!-- TABLE -->
             <div class="table-container">
@@ -1032,7 +521,6 @@
 
 
     <!-- CONFIRMATION MODAL -->
-
     <div class="modal fade" id="bulkConfirmModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -1054,7 +542,6 @@
     <div th:replace="~{fragments/footer :: footer}"></div>
 
     <!-- JAVASCRIPT-->
-
     <script th:inline="javascript">
         // ============================================================
         // Bulk Selection
