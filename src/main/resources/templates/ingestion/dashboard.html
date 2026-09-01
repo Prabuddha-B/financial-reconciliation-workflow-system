@@ -4,21 +4,257 @@
 
 <head th:replace="~{fragments/header :: header('Data Ingestion Dashboard')}"></head>
 
-<body class="bg-light">
+<style>
 
-    <!--  Reusable Navigation Bar -->
+
+
+    .ingestion-header{
+        background: linear-gradient(
+                135deg,
+                rgba(37,99,235,.10),
+                rgba(37,99,235,.03)
+        );
+
+        border:1px solid rgba(37,99,235,.15);
+
+        border-radius:24px;
+
+        padding:2.5rem;
+
+        position:relative;
+
+        overflow:hidden;
+    }
+
+    .ingestion-header::before{
+        content:'';
+
+        position:absolute;
+
+        top:-100px;
+        right:-100px;
+
+        width:250px;
+        height:250px;
+
+        background:rgba(37,99,235,.08);
+
+        border-radius:50%;
+    }
+
+    .module-icon{
+        width:64px;
+        height:64px;
+
+        border-radius:18px;
+
+        display:flex;
+        align-items:center;
+        justify-content:center;
+
+        background:#2563EB;
+        color:#fff;
+
+        font-size:1.8rem;
+
+        box-shadow:0 10px 30px rgba(37,99,235,.30);
+    }
+
+    .module-title{
+        font-size:3rem;
+        font-weight:800;
+        line-height:1.1;
+    }
+
+    .module-description{
+        max-width:750px;
+
+        font-size:1.1rem;
+
+        color:var(--bs-secondary-color);
+    }
+
+    .module-badge{
+        display:inline-flex;
+
+        align-items:center;
+
+        padding:.5rem 1rem;
+
+        border-radius:999px;
+
+        background:rgba(37,99,235,.12);
+
+        color:#2563EB;
+
+        font-weight:600;
+
+        font-size:.9rem;
+    }
+
+    /* DARK MODE */
+
+    [data-bs-theme="dark"] .ingestion-header{
+
+        background:linear-gradient(
+                135deg,
+                rgba(37,99,235,.18),
+                rgba(37,99,235,.05)
+        );
+
+        border-color:rgba(37,99,235,.25);
+    }
+
+    [data-bs-theme="dark"] .module-description{
+        color:#94a3b8;
+    }
+
+    /* ==========================================
+   INGESTION ACTION CARDS
+========================================== */
+
+    .ingestion-action-card{
+        border-radius:18px;
+        transition:all .25s ease;
+        overflow:hidden;
+    }
+
+    .ingestion-action-card:hover{
+        transform:translateY(-4px);
+    }
+
+    .ingestion-upload-card{
+        border-top:4px solid #2563EB !important;
+    }
+
+    .ingestion-manual-card{
+        border-top:4px solid #16A34A !important;
+    }
+
+    .action-icon{
+        width:64px;
+        height:64px;
+
+        border-radius:16px;
+
+        display:flex;
+        align-items:center;
+        justify-content:center;
+
+        font-size:1.75rem;
+    }
+
+    /* Dark Mode */
+
+    [data-bs-theme="dark"] .ingestion-action-card{
+
+        background:var(--bs-dark);
+
+        border:1px solid rgba(255,255,255,.05) !important;
+    }
+
+    [data-bs-theme="dark"] .ingestion-action-card:hover{
+
+        border-color:rgba(37,99,235,.25) !important;
+
+        box-shadow:0 12px 30px rgba(0,0,0,.25);
+    }
+
+    /* ==========================================
+   INGESTION STATISTICS
+========================================== */
+
+    .ingestion-stat-card{
+        border:none;
+        border-radius:18px;
+        overflow:hidden;
+        transition:all .25s ease;
+        box-shadow:0 .125rem .5rem rgba(0,0,0,.05);
+    }
+
+    .ingestion-stat-card:hover{
+        transform:translateY(-3px);
+    }
+
+    .stat-total{
+        border-top:4px solid #2563EB;
+    }
+
+    .stat-success{
+        border-top:4px solid #16A34A;
+    }
+
+    .stat-danger{
+        border-top:4px solid #DC2626;
+    }
+
+    .stat-icon{
+        width:64px;
+        height:64px;
+
+        border-radius:16px;
+
+        display:flex;
+        align-items:center;
+        justify-content:center;
+
+        font-size:1.6rem;
+    }
+
+    .stat-label{
+        font-size:.85rem;
+        text-transform:uppercase;
+        letter-spacing:.08em;
+        font-weight:700;
+        color:var(--bs-secondary-color);
+        margin-bottom:.5rem;
+    }
+
+    .stat-value{
+        font-size:3rem;
+        font-weight:800;
+        line-height:1;
+        margin-bottom:.5rem;
+    }
+
+    .stat-description{
+        color:var(--bs-secondary-color);
+        max-width:220px;
+    }
+
+    /* DARK MODE */
+
+    [data-bs-theme="dark"] .ingestion-stat-card{
+        background:var(--bs-dark);
+        border-left:none;
+    }
+
+    [data-bs-theme="dark"] .stat-description{
+        color:#94a3b8;
+    }
+</style>
+
+<body>
+
     <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-    <!-- ============== Main Page Container ================================= -->
+
     <div class="container py-4 py-lg-5">
 
-        <!-- ============== Page Header =============== -->
+        <!-- ================= Header ================= -->
         <div class="d-flex justify-content-between align-items-start mb-5">
+
             <div>
 
-                <h1 class="display-6 fw-bold mb-2">
+                <h1 class="display-5 fw-bold mb-2">
                     Data Ingestion Dashboard
                 </h1>
+
+                <div class="mb-3">
+
+
+
+                </div>
 
                 <p class="text-secondary fs-5 mb-0">
                     Upload, validate and review receipt data files before reconciliation.
@@ -26,222 +262,303 @@
 
             </div>
 
-            <div class="d-flex flex-column align-items-end gap-2">
+            <div>
 
-                <a th:href="@{/}" class="btn btn-outline-secondary">
+                <a th:href="@{/}"
+                   class="btn btn-outline-secondary px-4">
                     <i class="bi bi-arrow-left me-2"></i>
-                    Back to Dashboard
+                    Dashboard
                 </a>
 
-                <span class="badge rounded-pill bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 fs-6 fw-semibold">
-                    Ingestion Module
-                </span>
             </div>
 
         </div>
 
-
-        <!-- =========== Primary Actions ============ -->
+        <!-- ================= Primary Actions ================= -->
         <div class="row g-4 mb-5">
 
             <!-- Upload File -->
-            <div class="col-md-6">
-                <div class="card shadow-sm h-100 border-0">
+            <div class="col-lg-6">
 
-                    <div class="card-body text-center p-5">
+                <div class="card ingestion-action-card ingestion-upload-card h-100 border-0 shadow-sm">
 
-                        <div class="mb-3">
-                            <div class="rounded-3 bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center" style="width:70px;height:70px;">
-                                <i class="bi bi-cloud-arrow-up fs-1"></i>
+                    <div class="card-body p-4">
+
+                        <div class="d-flex justify-content-between align-items-start mb-4">
+
+                            <div class="action-icon bg-primary-subtle text-primary">
+                                <i class="bi bi-cloud-arrow-up"></i>
                             </div>
+
+                            <span class="badge rounded-pill bg-primary-subtle text-primary">
+                        Upload
+                    </span>
+
                         </div>
 
-                        <h4 class="fw-semibold">
+                        <h4 class="fw-bold mb-3">
                             Upload New File
                         </h4>
 
                         <p class="text-muted mb-4">
-                            Upload CSV or Excel files for automated validation and processing.
+                            Import CSV or Excel files for automated validation,
+                            ingestion and reconciliation preparation.
                         </p>
 
-                        <a href="/ingestion/upload" class="btn btn-primary px-4">
+                        <div class="d-flex align-items-center gap-4 mb-4">
+
+                            <div class="small text-muted">
+                                <i class="bi bi-file-earmark-spreadsheet me-2"></i>
+                                CSV / XLSX
+                            </div>
+
+                            <div class="small text-muted">
+                                <i class="bi bi-shield-check me-2"></i>
+                                Validation Enabled
+                            </div>
+
+                        </div>
+
+                        <a href="/ingestion/upload"
+                           class="btn btn-primary px-4">
+                            <i class="bi bi-upload me-2"></i>
                             Go to Upload
                         </a>
 
                     </div>
+
                 </div>
+
             </div>
 
             <!-- Manual Entry -->
-            <div class="col-md-6">
-                <div class="card shadow-sm h-100 border-0">
+            <div class="col-lg-6">
 
-                    <div class="card-body text-center p-5">
+                <div class="card ingestion-action-card ingestion-manual-card h-100 border-0 shadow-sm">
 
-                        <div class="mb-3">
+                    <div class="card-body p-4">
 
-                            <div class="rounded-3 bg-success-subtle text-success d-inline-flex align-items-center justify-content-center" style="width:70px;height:70px;">
-                                <i class="bi bi-keyboard fs-1"></i>
+                        <div class="d-flex justify-content-between align-items-start mb-4">
+
+                            <div class="action-icon bg-success-subtle text-success">
+                                <i class="bi bi-keyboard"></i>
                             </div>
+
+                            <span class="badge rounded-pill bg-success-subtle text-success">
+                        Manual
+                    </span>
 
                         </div>
 
-                        <h4 class="fw-semibold">
+                        <h4 class="fw-bold mb-3">
                             Manual Entry
                         </h4>
 
                         <p class="text-muted mb-4">
-                            Create individual receipt records manually when file upload is unavailable.
+                            Create receipt records individually when source files
+                            are unavailable or require manual correction.
                         </p>
 
-                        <a href="/ingestion/manual-entry" class="btn btn-outline-success px-4">
+                        <div class="d-flex align-items-center gap-4 mb-4">
+
+                            <div class="small text-muted">
+                                <i class="bi bi-pencil-square me-2"></i>
+                                Single Record
+                            </div>
+
+                            <div class="small text-muted">
+                                <i class="bi bi-clock-history me-2"></i>
+                                Instant Save
+                            </div>
+
+                        </div>
+
+                        <a href="/ingestion/manual-entry"
+                           class="btn btn-outline-success px-4">
+                            <i class="bi bi-pencil-square me-2"></i>
                             Manual Entry
                         </a>
 
                     </div>
+
                 </div>
+
             </div>
 
         </div>
 
-
-        <!-- ========= Dashboard Statistics ========== -->
+        <!-- ================= Ingestion Statistics ================= -->
         <div class="row g-4 mb-5">
 
             <!-- Total Records -->
-            <div class="col-12 col-md-4">
+            <div class="col-lg-4 col-md-6">
 
-                <div class="card shadow-sm h-100 border-0">
-                    <div class="card-body d-flex gap-4 p-4">
+                <div class="card ingestion-stat-card stat-total h-100">
 
-                        <div class="rounded-3 bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center" style="width:3.5rem;height:3.5rem;">
-                            <i class="bi bi-database fs-4"></i>
+                    <div class="card-body">
+
+                        <div class="d-flex justify-content-between align-items-start">
+
+                            <div>
+
+                                <div class="stat-label">
+                                    Total Records
+                                </div>
+
+                                <div class="stat-value"
+                                     th:text="${total != null ? total : 0}">
+                                    0
+                                </div>
+
+                                <div class="stat-description">
+                                    Records available in the ingestion repository
+                                </div>
+
+                            </div>
+
+                            <div class="stat-icon bg-primary-subtle text-primary">
+                                <i class="bi bi-database"></i>
+                            </div>
+
                         </div>
 
-                        <div>
-                            <div class="text-muted small text-uppercase fw-semibold mb-2">
-                                Total Records
-                            </div>
-
-                            <div class="display-6 fw-semibold" th:text="${total != null ? total : 0}">
-                                0
-                            </div>
-
-                            <div class="text-muted small">
-                                Records stored in the system
-                            </div>
-                        </div>
                     </div>
-                </div>
-            </div>
 
+                </div>
+
+            </div>
 
             <!-- Valid Records -->
-            <div class="col-12 col-md-4">
+            <div class="col-lg-4 col-md-6">
 
-                <div class="card shadow-sm h-100 border-success-subtle">
+                <div class="card ingestion-stat-card stat-success h-100">
 
-                    <div class="card-body d-flex gap-4 p-4">
+                    <div class="card-body">
 
-                        <div class="rounded-3 bg-success-subtle text-success d-inline-flex align-items-center justify-content-center" style="width:3.5rem;height:3.5rem;">
-                            <i class="bi bi-check-circle fs-4"></i>
+                        <div class="d-flex justify-content-between align-items-start">
+
+                            <div>
+
+                                <div class="stat-label">
+                                    Valid Records
+                                </div>
+
+                                <div class="stat-value text-success"
+                                     th:text="${validCount != null ? validCount : 0}">
+                                    0
+                                </div>
+
+                                <div class="stat-description">
+                                    Successfully passed validation checks
+                                </div>
+
+                            </div>
+
+                            <div class="stat-icon bg-success-subtle text-success">
+                                <i class="bi bi-check-circle"></i>
+                            </div>
+
                         </div>
 
-                        <div>
-
-                            <div class="text-muted small text-uppercase fw-semibold mb-2">
-                                Valid Records
-                            </div>
-
-                            <div class="display-6 fw-semibold text-success" th:text="${validCount != null ? validCount : 0}">
-                                0
-                            </div>
-
-                            <div class="text-muted small">
-                                Successfully validated records
-                            </div>
-
-                        </div>
                     </div>
+
                 </div>
+
             </div>
 
-
             <!-- Invalid Records -->
-            <div class="col-12 col-md-4">
+            <div class="col-lg-4 col-md-12">
 
-                <div class="card shadow-sm h-100 border-danger-subtle">
+                <div class="card ingestion-stat-card stat-danger h-100">
 
-                    <div class="card-body d-flex gap-4 p-4">
+                    <div class="card-body">
 
-                        <div class="rounded-3 bg-danger-subtle text-danger d-inline-flex align-items-center justify-content-center" style="width:3.5rem;height:3.5rem;">
-                            <i class="bi bi-exclamation-circle fs-4"></i>
+                        <div class="d-flex justify-content-between align-items-start">
+
+                            <div>
+
+                                <div class="stat-label">
+                                    Invalid Records
+                                </div>
+
+                                <div class="stat-value text-danger"
+                                     th:text="${invalidCount != null ? invalidCount : 0}">
+                                    0
+                                </div>
+
+                                <div class="stat-description">
+                                    Records requiring review or correction
+                                </div>
+
+                            </div>
+
+                            <div class="stat-icon bg-danger-subtle text-danger">
+                                <i class="bi bi-exclamation-circle"></i>
+                            </div>
+
                         </div>
 
-                        <div>
-
-                            <div class="text-muted small text-uppercase fw-semibold mb-2">
-                                Invalid Records
-                            </div>
-
-                            <div class="display-6 fw-semibold text-danger" th:text="${invalidCount != null ? invalidCount : 0}">
-                                0
-                            </div>
-
-                            <div class="text-muted small">
-                                Failed validation checks
-                            </div>
-                        </div>
                     </div>
+
                 </div>
+
             </div>
 
         </div>
 
-
-        <!-- ======= Validation Rules ======= -->
+        <!-- ======= Ingestion Guidelines ======= -->
         <div class="card shadow-sm border-0 mb-4">
 
-            <div class="card-header bg-white">
+            <div class="card-header">
                 <h5 class="fw-semibold mb-0">
-                    Validation Rules
+                    <i class="bi bi-shield-check me-2 text-primary"></i>
+                    Data Validation Guidelines
                 </h5>
-
             </div>
 
             <div class="card-body">
 
-                <ul class="mb-0">
-                    <li>Accepted file formats: CSV and XLSX</li>
-                    <li>Reference Number is required.</li>
-                    <li>Payer Name is required.</li>
-                    <li>Amount must be greater than zero.</li>
-                    <li>Uploaded data must satisfy all validation rules before processing.</li>
-                </ul>
+                <div class="row g-4">
 
-            </div>
+                    <div class="col-md-6">
+                        <h6 class="fw-semibold mb-3">Accepted File Requirements</h6>
 
-        </div>
+                        <ul class="mb-0">
+                            <li>Supported formats: CSV and XLSX</li>
+                            <li>Reference Number is mandatory</li>
+                            <li>Payer Name is required</li>
+                            <li>Amount must be greater than zero</li>
+                        </ul>
+                    </div>
 
+                    <div class="col-md-6">
+                        <h6 class="fw-semibold mb-3">Processing Status</h6>
 
-        <!-- ======== System Status ============= -->
-        <div class="alert alert-info shadow-sm d-flex align-items-center">
-            <i class="bi bi-info-circle-fill me-3 fs-4"></i>
-            <div>
-                <strong>System Status</strong>
-                <div>
-                    System is ready. Upload a receipt file to begin the ingestion process.
+                        <div class="border rounded p-3">
+
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                <strong>System Ready</strong>
+                            </div>
+
+                            <small class="text-muted">
+                                Upload a receipt file or create a manual record to begin
+                                the ingestion and validation workflow.
+                            </small>
+
+                        </div>
+                    </div>
+
                 </div>
+
             </div>
+
         </div>
 
     </div>
 
     <!-- Footer -->
     <div th:replace="~{fragments/footer :: footer}"></div>
-    <!-- ========================================== -->
-    <!-- INCLUDE SCRIPTS FRAGMENT                   -->
-    <!-- ========================================== -->
     <div th:replace="~{fragments/scripts :: badgeStyles}"></div>
     <div th:replace="~{fragments/scripts :: badgeScripts}"></div>
 </body>
