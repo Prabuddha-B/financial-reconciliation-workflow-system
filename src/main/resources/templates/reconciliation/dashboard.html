@@ -1,219 +1,276 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-  <title>Reconciliation Dashboard</title>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
-  <style>
-    /* ============================================================
-       EXPANDABLE ROW STYLES
-       ============================================================ */
+<head th:replace="~{fragments/header :: header('Reconciliation Dashboard')}"></head>
 
-    /* Clickable row indicator */
-    .clickable-row {
-      cursor: pointer;
-      transition: background-color 0.2s ease;
-    }
-    .clickable-row:hover {
-      background-color: #f0f7ff !important;
-    }
-    .clickable-row .expand-icon {
-      transition: transform 0.3s ease;
-      display: inline-block;
-    }
-    .clickable-row .expand-icon.expanded {
-      transform: rotate(90deg);
-    }
+<style>
 
-    /* Expandable detail row */
-    .detail-row {
-      background-color: #f8f9fa;
-      display: none;
-    }
-    .detail-row.show {
-      display: table-row;
-    }
+  /* ============================================================
+     RECONCILIATION STAT CARDS
+     (matches the pattern used on Workflow Approvals so both
+     modules read as one visual language)
+     ============================================================ */
 
-    /* Detail card styling */
-    .detail-card {
-      border: none;
-      border-radius: 8px;
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
-      margin: 8px 0;
-    }
-    .detail-card .card-header {
-      background: transparent;
-      border-bottom: 2px solid #e9ecef;
-      padding: 12px 16px;
-      font-weight: 600;
-    }
-    .detail-card .card-body {
-      padding: 16px;
-    }
+  .reconciliation-stat-card {
+    background: var(--frwss-surface-2);
+    border: 1px solid var(--frwss-border);
+    border-radius: var(--frwss-radius-lg);
+    padding: 1.75rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1.25rem;
+    transition: transform var(--frwss-transition-normal), box-shadow var(--frwss-transition-normal);
+    box-shadow: var(--frwss-shadow-sm);
+  }
 
-    .detail-badge {
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
-    .detail-badge.exact { background: #d1e7dd; color: #0f5132; }
-    .detail-badge.partial { background: #fff3cd; color: #856404; }
-    .detail-badge.orphan { background: #f8d7da; color: #721c24; }
-    .detail-badge.manual { background: #cfe2ff; color: #0d6efd; }
+  .reconciliation-stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--frwss-shadow-md);
+  }
 
-    .match-arrow {
-      color: #6c757d;
-      font-size: 1.2rem;
-      padding: 0 8px;
-    }
+  .reconciliation-stat-card.warning { border-color: rgba(var(--bs-warning-rgb), .4); }
+  .reconciliation-stat-card.success { border-color: rgba(var(--bs-success-rgb), .4); }
+  .reconciliation-stat-card.info    { border-color: rgba(var(--bs-info-rgb), .4); }
 
-    .confidence-bar {
-      height: 8px;
-      border-radius: 4px;
-      background: #e9ecef;
-      overflow: hidden;
-      margin-top: 4px;
-    }
-    .confidence-bar .fill {
-      height: 100%;
-      border-radius: 4px;
-      transition: width 0.6s ease;
-    }
-    .confidence-bar .fill.high { background: #198754; }
-    .confidence-bar .fill.medium { background: #ffc107; }
-    .confidence-bar .fill.low { background: #dc3545; }
+  .reconciliation-stat-card .stat-icon {
+    width: 3.25rem;
+    height: 3.25rem;
+    border-radius: var(--frwss-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 1.35rem;
+  }
 
-    .confidence-legend {
-      display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
-      margin-top: 8px;
-    }
-    .confidence-legend .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.85rem;
-    }
-    .confidence-legend .color-dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      display: inline-block;
-    }
-    .confidence-legend .color-dot.green { background: #198754; }
-    .confidence-legend .color-dot.yellow { background: #ffc107; }
-    .confidence-legend .color-dot.red { background: #dc3545; }
+  .reconciliation-stat-card .stat-label {
+    font-size: .8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--frwss-text-muted);
+    margin-bottom: .25rem;
+  }
 
-    .field-match {
-      display: flex;
-      align-items: center;
-      padding: 4px 0;
-      border-bottom: 1px solid #f1f3f5;
-    }
-    .field-match:last-child {
-      border-bottom: none;
-    }
-    .field-match .field-label {
-      width: 120px;
-      font-weight: 500;
-      color: #495057;
-    }
-    .field-match .field-value {
-      flex: 1;
-      font-family: monospace;
-      font-size: 0.9rem;
-    }
-    .field-match .field-status {
-      width: 80px;
-      text-align: right;
-    }
-    .field-match .field-status .match { color: #198754; }
-    .field-match .field-status .mismatch { color: #dc3545; }
-    .field-match .field-status .partial { color: #ffc107; }
+  .reconciliation-stat-card .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: .35rem;
+    color: var(--frwss-text-primary);
+  }
 
-    .reason-box {
-      background: #f0f2f5;
-      border-radius: 6px;
-      padding: 12px 16px;
-      font-size: 0.9rem;
-      color: #495057;
-      border-left: 4px solid #0d6efd;
-    }
-    .reason-box.partial { border-left-color: #ffc107; }
-    .reason-box.orphan { border-left-color: #dc3545; }
-    .reason-box.exact { border-left-color: #198754; }
+  .reconciliation-stat-card .stat-description {
+    font-size: .85rem;
+    color: var(--frwss-text-muted);
+  }
 
-    .match-status {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 2px 10px;
-      border-radius: 12px;
-      font-size: 0.8rem;
-      font-weight: 500;
-    }
-    .match-status.exact {
-      background: #d1e7dd;
-      color: #0f5132;
-    }
-    .match-status.partial {
-      background: #fff3cd;
-      color: #856404;
-    }
-    .match-status.none {
-      background: #f8d7da;
-      color: #721c24;
-    }
+  /* ============================================================
+     SECONDARY NAV (Orphans / Manual Review / Bulk Results / Approvals)
+     Replaces a row of equally-weighted buttons with a lighter,
+     single navigation strip.
+     ============================================================ */
 
-    .badge-confidence {
-      display: inline-block;
-      padding: 2px 10px;
-      border-radius: 12px;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
-    .badge-confidence.high {
-      background: #d1e7dd;
-      color: #0f5132;
-    }
-    .badge-confidence.medium {
-      background: #fff3cd;
-      color: #856404;
-    }
-    .badge-confidence.low {
-      background: #f8d7da;
-      color: #721c24;
-    }
+  .reconciliation-subnav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+  }
 
-    /* Field match status badges */
-    .field-match-badge {
-      display: inline-block;
-      padding: 1px 10px;
-      border-radius: 12px;
-      font-size: 0.7rem;
-      font-weight: 600;
-    }
-    .field-match-badge.exact {
-      background: #d1e7dd;
-      color: #0f5132;
-    }
-    .field-match-badge.partial {
-      background: #fff3cd;
-      color: #856404;
-    }
-    .field-match-badge.none {
-      background: #f8d7da;
-      color: #721c24;
-    }
-  </style>
-</head>
+  .reconciliation-subnav .nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .45rem .9rem;
+    border-radius: var(--frwss-radius-xl);
+    font-size: .875rem;
+    font-weight: 500;
+    color: var(--frwss-text-secondary);
+    background: var(--frwss-surface-3);
+    border: 1px solid transparent;
+    transition: background var(--frwss-transition-fast), color var(--frwss-transition-fast);
+  }
 
-<body class="bg-light">
+  .reconciliation-subnav .nav-link:hover {
+    background: var(--frwss-surface-2);
+    border-color: var(--frwss-border);
+    color: var(--frwss-text-primary);
+  }
+
+  /* ============================================================
+     RESULTS TABLE ROW
+     ============================================================ */
+
+  .reconciliation-row {
+    cursor: pointer;
+    transition: background-color .15s ease;
+  }
+
+  .reconciliation-row:hover {
+    background-color: var(--frwss-surface-3);
+  }
+
+  .badge-confidence {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: .75rem;
+    font-weight: 600;
+  }
+  .badge-confidence.high   { background: #d1e7dd; color: #0f5132; }
+  .badge-confidence.medium { background: #fff3cd; color: #856404; }
+  .badge-confidence.low    { background: #f8d7da; color: #721c24; }
+
+  /* ============================================================
+     OFFCANVAS DETAIL PANEL
+     ============================================================ */
+
+  #reconciliationDetailOffcanvas {
+    width: min(560px, 100%);
+  }
+
+  .detail-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: .75rem;
+    font-weight: 600;
+  }
+  .detail-badge.exact   { background: #d1e7dd; color: #0f5132; }
+  .detail-badge.partial { background: #fff3cd; color: #856404; }
+  .detail-badge.orphan  { background: #f8d7da; color: #721c24; }
+  .detail-badge.manual  { background: #cfe2ff; color: #0d6efd; }
+
+  .match-arrow {
+    color: var(--frwss-text-muted);
+    font-size: 1.1rem;
+    padding: 0 6px;
+  }
+
+  .confidence-bar {
+    height: 8px;
+    border-radius: 4px;
+    background: var(--frwss-surface-3);
+    overflow: hidden;
+    margin-top: 4px;
+  }
+  .confidence-bar .fill {
+    height: 100%;
+    border-radius: 4px;
+  }
+  .confidence-bar .fill.high   { background: #198754; }
+  .confidence-bar .fill.medium { background: #ffc107; }
+  .confidence-bar .fill.low    { background: #dc3545; }
+
+  .confidence-legend {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+  .confidence-legend .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: .8rem;
+    color: var(--frwss-text-muted);
+  }
+  .confidence-legend .color-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .confidence-legend .color-dot.green  { background: #198754; }
+  .confidence-legend .color-dot.yellow { background: #ffc107; }
+  .confidence-legend .color-dot.red    { background: #dc3545; }
+
+  .field-match {
+    display: flex;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--frwss-border);
+  }
+  .field-match:last-child { border-bottom: none; }
+  .field-match .field-label {
+    width: 110px;
+    font-weight: 500;
+    color: var(--frwss-text-secondary);
+    font-size: .875rem;
+  }
+  .field-match .field-value {
+    flex: 1;
+    font-family: monospace;
+    font-size: .85rem;
+  }
+  .field-match .field-status { width: 90px; text-align: right; font-size: .8rem; }
+  .field-match .field-status .match    { color: #198754; }
+  .field-match .field-status .mismatch { color: #dc3545; }
+  .field-match .field-status .partial  { color: #856404; }
+
+  .field-match-badge {
+    display: inline-block;
+    padding: 1px 10px;
+    border-radius: 12px;
+    font-size: .7rem;
+    font-weight: 600;
+  }
+  .field-match-badge.exact   { background: #d1e7dd; color: #0f5132; }
+  .field-match-badge.partial { background: #fff3cd; color: #856404; }
+  .field-match-badge.none    { background: #f8d7da; color: #721c24; }
+
+  .reason-box {
+    background: var(--frwss-surface-3);
+    border-radius: var(--frwss-radius-sm);
+    padding: 12px 16px;
+    font-size: .875rem;
+    color: var(--frwss-text-secondary);
+    border-left: 4px solid var(--frwss-primary);
+  }
+  .reason-box.partial { border-left-color: #ffc107; }
+  .reason-box.orphan  { border-left-color: #dc3545; }
+  .reason-box.exact   { border-left-color: #198754; }
+
+  /* ============================================================
+     RUN RECONCILIATION MODE PICKER (modal)
+     ============================================================ */
+
+  .reconciliation-mode-option {
+    display: flex;
+    align-items: flex-start;
+    gap: .75rem;
+    padding: .9rem 1rem;
+    border: 1px solid var(--frwss-border);
+    border-radius: var(--frwss-radius-md);
+    cursor: pointer;
+    transition: border-color var(--frwss-transition-fast), background var(--frwss-transition-fast);
+  }
+
+  .reconciliation-mode-option:hover {
+    background: var(--frwss-surface-3);
+  }
+
+  .reconciliation-mode-option.selected {
+    border-color: var(--frwss-primary);
+    background: rgba(37, 99, 235, .05);
+  }
+
+  .reconciliation-mode-option input[type="radio"] {
+    margin-top: .3rem;
+  }
+
+  .reconciliation-mode-option .mode-title {
+    font-weight: 600;
+    color: var(--frwss-text-primary);
+  }
+
+  .reconciliation-mode-option .mode-description {
+    font-size: .82rem;
+    color: var(--frwss-text-muted);
+  }
+
+</style>
+
+<body>
 
 <!-- Nav Bar -->
 <div th:replace="~{fragments/navbar :: navbar}"></div>
@@ -221,56 +278,39 @@
 <div class="container py-4 py-lg-5">
 
   <!-- ===================== Page Header ===================== -->
-  <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+  <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-start gap-3 mb-3">
     <div>
-      <h1 class="h3 mb-2">Reconciliation Dashboard</h1>
-      <p class="text-muted mb-0">
-        Exact and partial matching based on Reference No, Amount, and Date Tolerance
+      <h1 class="display-6 fw-bold mb-2">Reconciliation Dashboard</h1>
+      <p class="text-secondary fs-5 mb-1">
+        Match accounting records against payroll, receipt, and stock purchase data.
       </p>
     </div>
 
-    <div class="d-flex flex-wrap gap-2">
-      <form th:action="@{/reconciliation/run-exact}" method="post" class="d-inline">
-        <button type="submit" class="btn btn-primary">
-          <i class="bi bi-check2-all me-1"></i>Run Exact Reconciliation
-        </button>
-      </form>
-
-      <form th:action="@{/reconciliation/run-partial}" method="post" class="d-inline">
-        <button type="submit" class="btn btn-warning">
-          <i class="bi bi-clock-history me-1"></i>Run Partial Reconciliation
-        </button>
-      </form>
-
-      <form th:action="@{/reconciliation/run-one-to-many}" method="post" class="d-inline">
-        <div class="input-group">
-          <input type="number" name="tolerancePercent" value="5"
-                 class="form-control form-control-sm" style="width: 60px;"
-                 min="1" max="20" placeholder="%">
-          <button type="submit" class="btn btn-info">
-            <i class="bi bi-diagram-3 me-1"></i>Run One-to-Many
-          </button>
-        </div>
-      </form>
-
-      <a href="/reconciliation/orphans" class="btn btn-outline-warning">
-        <i class="bi bi-search me-1"></i>View Orphans
-      </a>
-
-      <a href="/reconciliation/manual-review" class="btn btn-outline-primary">
-        <i class="bi bi-pencil-square me-1"></i>Manual Review
-      </a>
-      <a href="/workflow/approvals" class="btn btn-outline-success">
-        <i class="bi bi-check2-square me-1"></i>Workflow Approvals
-        <span class="badge bg-success text-white ms-1"
-              th:text="${#lists.size(pendingApprovalResults)}">0</span>
-      </a>
-
-      <a href="/reconciliation/bulk-results" class="btn btn-outline-info">
-        <i class="bi bi-diagram-3 me-1"></i>Bulk Results
-      </a>
+    <!-- Single entry point for all reconciliation runs; mode is chosen in the dialog -->
+    <div>
+      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#runReconciliationModal">
+        <i class="bi bi-play-fill me-1"></i>Run Reconciliation
+      </button>
     </div>
   </div>
+
+  <!-- ===================== Secondary Navigation ===================== -->
+  <nav class="reconciliation-subnav mb-4">
+    <a href="/reconciliation/orphans" class="nav-link">
+      <i class="bi bi-search"></i>Orphans
+    </a>
+    <a href="/reconciliation/manual-review" class="nav-link">
+      <i class="bi bi-pencil-square"></i>Manual Review
+    </a>
+    <a href="/reconciliation/bulk-results" class="nav-link">
+      <i class="bi bi-diagram-3"></i>Bulk Results
+    </a>
+    <a href="/workflow/approvals" class="nav-link">
+      <i class="bi bi-check2-square"></i>Workflow Approvals
+      <span class="badge bg-success text-white ms-1"
+            th:text="${#lists.size(pendingApprovalResults)}">0</span>
+    </a>
+  </nav>
 
   <!-- ===================== Success Message ===================== -->
   <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show shadow-sm d-flex align-items-start gap-3" role="alert">
@@ -280,72 +320,56 @@
   </div>
 
   <!-- ===================== Reconciliation Summary Dashboard ===================== -->
-
-  <div class="row g-3 g-lg-4 mb-4">
+  <div class="row g-4 mb-5">
 
     <div class="col-12 col-md-6 col-xl-3">
-      <div class="card shadow-sm h-100 border-0">
-        <div class="card-body d-flex gap-3">
-          <div class="flex-shrink-0 rounded-3 bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center"
-               style="width: 3rem; height: 3rem;">
-            <i class="bi bi-list-check fs-4"></i>
-          </div>
-          <div>
-            <div class="text-muted small text-uppercase fw-semibold mb-1">Total Results</div>
-            <div class="display-6 fw-semibold lh-1 mb-1" th:text="${#lists.size(allResults)}">0</div>
-            <div class="text-muted small">All reconciliation records</div>
-          </div>
+      <div class="reconciliation-stat-card h-100">
+        <div class="stat-icon bg-primary-subtle text-primary">
+          <i class="bi bi-list-check"></i>
+        </div>
+        <div>
+          <div class="stat-label">Total Results</div>
+          <div class="stat-value" th:text="${#lists.size(allResults)}">0</div>
+          <div class="stat-description">All reconciliation records</div>
         </div>
       </div>
     </div>
 
     <div class="col-12 col-md-6 col-xl-3">
-      <div class="card shadow-sm h-100 border-success-subtle">
-        <div class="card-body d-flex gap-3">
-          <div class="flex-shrink-0 rounded-3 bg-success-subtle text-success d-inline-flex align-items-center justify-content-center"
-               style="width: 3rem; height: 3rem;">
-            <i class="bi bi-check-circle fs-4"></i>
-          </div>
-          <div>
-            <div class="text-muted small text-uppercase fw-semibold mb-1">Exact Matches</div>
-            <div class="display-6 fw-semibold lh-1 mb-1 text-success"
-                 th:text="${#lists.size(exactResults)}">0</div>
-            <div class="text-muted small">Perfect matches found</div>
-          </div>
+      <div class="reconciliation-stat-card success h-100">
+        <div class="stat-icon bg-success-subtle text-success">
+          <i class="bi bi-check-circle"></i>
+        </div>
+        <div>
+          <div class="stat-label">Exact Matches</div>
+          <div class="stat-value text-success" th:text="${#lists.size(exactResults)}">0</div>
+          <div class="stat-description">Perfect matches found</div>
         </div>
       </div>
     </div>
 
     <div class="col-12 col-md-6 col-xl-3">
-      <div class="card shadow-sm h-100 border-warning-subtle">
-        <div class="card-body d-flex gap-3">
-          <div class="flex-shrink-0 rounded-3 bg-warning-subtle text-warning-emphasis d-inline-flex align-items-center justify-content-center"
-               style="width: 3rem; height: 3rem;">
-            <i class="bi bi-exclamation-triangle fs-4"></i>
-          </div>
-          <div>
-            <div class="text-muted small text-uppercase fw-semibold mb-1">Orphan Records</div>
-            <div class="display-6 fw-semibold lh-1 mb-1 text-warning"
-                 th:text="${#lists.size(orphanResults)}">0</div>
-            <div class="text-muted small">Need manual attention</div>
-          </div>
+      <div class="reconciliation-stat-card warning h-100">
+        <div class="stat-icon bg-warning-subtle text-warning-emphasis">
+          <i class="bi bi-exclamation-triangle"></i>
+        </div>
+        <div>
+          <div class="stat-label">Orphan Records</div>
+          <div class="stat-value text-warning" th:text="${#lists.size(orphanResults)}">0</div>
+          <div class="stat-description">Need manual attention</div>
         </div>
       </div>
     </div>
 
     <div class="col-12 col-md-6 col-xl-3">
-      <div class="card shadow-sm h-100 border-info-subtle">
-        <div class="card-body d-flex gap-3">
-          <div class="flex-shrink-0 rounded-3 bg-info-subtle text-info d-inline-flex align-items-center justify-content-center"
-               style="width: 3rem; height: 3rem;">
-            <i class="bi bi-clock-history fs-4"></i>
-          </div>
-          <div>
-            <div class="text-muted small text-uppercase fw-semibold mb-1">Partial Matches</div>
-            <div class="display-6 fw-semibold lh-1 mb-1 text-info"
-                 th:text="${#lists.size(partialResults)}">0</div>
-            <div class="text-muted small">Matched with tolerance</div>
-          </div>
+      <div class="reconciliation-stat-card info h-100">
+        <div class="stat-icon bg-info-subtle text-info">
+          <i class="bi bi-clock-history"></i>
+        </div>
+        <div>
+          <div class="stat-label">Partial Matches</div>
+          <div class="stat-value text-info" th:text="${#lists.size(partialResults)}">0</div>
+          <div class="stat-description">Matched with tolerance</div>
         </div>
       </div>
     </div>
@@ -353,7 +377,6 @@
   </div>
 
   <!-- ===================== Filter Section ===================== -->
-
   <div class="card shadow-sm mb-3">
     <div class="card-header bg-white py-3">
       <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
@@ -365,16 +388,12 @@
     </div>
 
     <div class="card-body">
-
       <form method="get" th:action="@{/reconciliation}" class="row g-3 align-items-end">
 
         <div class="col-12 col-md-4">
           <label class="form-label">Filter by Status</label>
           <select name="status" class="form-select">
-            <option value="ALL" th:selected="${selectedStatus == 'ALL'}">
-              All Results
-            </option>
-
+            <option value="ALL" th:selected="${selectedStatus == 'ALL'}">All Results</option>
             <option th:each="statusOption : ${statuses}"
                     th:value="${statusOption.name()}"
                     th:text="${statusOption.name()}"
@@ -398,7 +417,6 @@
           <button type="submit" class="btn btn-primary">
             <i class="bi bi-funnel me-1"></i>Apply Filter
           </button>
-
           <a href="/reconciliation" class="btn btn-outline-secondary ms-2">
             <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
           </a>
@@ -409,7 +427,6 @@
   </div>
 
   <!-- ===================== Results Table ===================== -->
-
   <div class="card shadow-sm">
     <div class="card-header bg-white py-3">
       <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
@@ -431,11 +448,9 @@
 
     <div class="card-body p-0">
       <div class="table-responsive">
-
         <table class="table table-hover mb-0 align-middle" id="reconciliationTable">
           <thead class="table-light text-uppercase small text-muted">
           <tr>
-            <th style="width: 40px;"></th>
             <th class="ps-3">ID</th>
             <th>Accounting Record</th>
             <th>Matched Record</th>
@@ -448,304 +463,64 @@
           </thead>
 
           <tbody>
-          <!-- SINGLE LOOP - renders main row AND detail row together -->
-          <th:block th:each="result : ${results}">
-            <!-- Main Row -->
-            <tr th:data-result-id="${result.id}" class="clickable-row">
-              <td class="text-center">
-                  <span class="expand-icon" th:id="'expandIcon_' + ${result.id}">
-                    <i class="bi bi-chevron-right"></i>
-                  </span>
-              </td>
-
-              <td class="fw-semibold ps-3" th:text="${result.id}">1</td>
-              <td th:text="${result.accountingRecordId}">ACC001</td>
-              <td th:text="${result.matchedRecordId ?: '-'}">PAY001</td>
-              <td th:text="${result.matchedSourceType}">PAYROLL</td>
-              <td>
-                  <span th:if="${result.status.name() == 'EXACT'}"
-                        class="badge rounded-pill bg-success-subtle text-success-emphasis border border-success-subtle"
-                        th:text="${result.status}">
-                  </span>
-                <span th:if="${result.status.name() == 'PARTIAL'}"
-                      class="badge rounded-pill bg-info-subtle text-info-emphasis border border-info-subtle"
-                      th:text="${result.status}">
-                  </span>
-                <span th:if="${result.status.name() == 'ORPHAN'}"
-                      class="badge rounded-pill bg-warning-subtle text-warning-emphasis border border-warning-subtle"
-                      th:text="${result.status}">
-                  </span>
-                <span th:if="${result.status.name() == 'MANUALLY_RESOLVED'}"
-                      class="badge rounded-pill bg-primary-subtle text-primary-emphasis border border-primary-subtle"
-                      th:text="${result.status}">
-                  </span>
-                <span th:if="${result.status.name() == 'PENDING_APPROVAL'}"
-                      class="badge rounded-pill bg-warning-subtle text-warning-emphasis border border-warning-subtle"
-                      th:text="${result.status}">
-                  </span>
-                <span th:if="${result.status.name() == 'APPROVED'}"
-                      class="badge rounded-pill bg-success-subtle text-success-emphasis border border-success-subtle"
-                      th:text="${result.status}">
-                  </span>
-                <span th:if="${result.status.name() == 'REJECTED'}"
-                      class="badge rounded-pill bg-danger-subtle text-danger-emphasis border border-danger-subtle"
-                      th:text="${result.status}">
-                  </span>
-                <span th:if="${result.status.name() != 'EXACT'
-                              and result.status.name() != 'ORPHAN'
-                              and result.status.name() != 'PARTIAL'
-                              and result.status.name() != 'MANUALLY_RESOLVED'
-                              and result.status.name() != 'PENDING_APPROVAL'
-                              and result.status.name() != 'APPROVED'
-                              and result.status.name() != 'REJECTED'}"
-                      class="badge bg-secondary"
-                      th:text="${result.status}">
-                  </span>
-              </td>
-
-              <td>
-                  <span class="badge-confidence"
-                        th:classappend="${result.confidenceScore >= 80 ? 'high' : (result.confidenceScore >= 50 ? 'medium' : 'low')}"
-                        th:text="${result.confidenceScore + '%'}">
-                  </span>
-              </td>
-              <td th:text="${result.workflowId ?: '-'}">-</td>
-              <td class="text-md-end pe-3">
-                <a th:if="${result.status.name() == 'ORPHAN'}"
-                   th:href="@{/reconciliation/orphans/{id}/candidates(id=${result.id})}"
-                   class="btn btn-sm btn-outline-warning">
-                  <i class="bi bi-search me-1"></i>Resolve
-                </a>
-                <span th:if="${result.status.name() != 'ORPHAN'}" class="text-muted small">-</span>
-              </td>
-            </tr>
-
-            <!-- Detail Row - IMMEDIATELY AFTER the main row for THIS result -->
-            <tr th:id="'detail_' + ${result.id}" class="detail-row">
-              <td colspan="9" style="padding: 0;">
-                <div class="container-fluid p-3">
-                  <div class="row">
-                    <div class="col-12">
-                      <div class="detail-card card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <span>
-                              <i class="bi bi-info-circle me-2"></i>
-                              Details for <strong th:text="${result.accountingRecordId}"></strong>
-                            </span>
-                          <span>
-                              <span class="detail-badge"
-                                    th:classappend="${result.status.name() == 'EXACT' ? 'exact' : (result.status.name() == 'PARTIAL' ? 'partial' : (result.status.name() == 'ORPHAN' ? 'orphan' : 'manual'))}"
-                                    th:text="${result.status}">
-                              </span>
-                            </span>
-                        </div>
-                        <div class="card-body">
-                          <div class="row">
-                            <!-- Left Column -->
-                            <div class="col-lg-6">
-                              <h6 class="fw-bold mb-3">
-                                <i class="bi bi-diagram-2 me-2 text-primary"></i>Match Details
-                              </h6>
-
-                              <div class="reason-box"
-                                   th:classappend="${result.status.name() == 'EXACT' ? 'exact' : (result.status.name() == 'PARTIAL' ? 'partial' : 'orphan')}">
-                                <i th:if="${result.status.name() == 'EXACT'}" class="bi bi-check-circle text-success me-2"></i>
-                                <i th:if="${result.status.name() == 'PARTIAL'}" class="bi bi-exclamation-triangle text-warning me-2"></i>
-                                <i th:if="${result.status.name() == 'ORPHAN'}" class="bi bi-x-circle text-danger me-2"></i>
-                                <span th:text="${result.remarks}">Match reasoning goes here</span>
-                              </div>
-
-                              <h6 class="fw-bold mt-3 mb-2">
-                                <i class="bi bi-list-ul me-2 text-primary"></i>Field Comparison
-                              </h6>
-                              <div class="border rounded p-2">
-                                <div class="field-match">
-                                  <span class="field-label">Reference No</span>
-                                  <span class="field-value">
-                                      <span th:text="${result.accountingRecordId}">ACC-001</span>
-                                      <span class="match-arrow">→</span>
-                                      <span th:text="${result.matchedRecordId ?: '—'}">PAY-001</span>
-                                    </span>
-                                  <span class="field-status">
-                                      <span th:if="${result.status.name() == 'EXACT'}" class="match">✅ Match</span>
-                                      <span th:if="${result.status.name() == 'PARTIAL'}" class="partial">⚠️ Partial</span>
-                                      <span th:if="${result.status.name() == 'ORPHAN'}" class="mismatch">❌ No Match</span>
-                                    </span>
-                                </div>
-                                <div class="field-match">
-                                  <span class="field-label">Amount</span>
-                                  <span class="field-value">
-                                      <span th:text="${result.accountingRecordId}">1,500.00</span>
-                                      <span class="match-arrow">→</span>
-                                      <span th:text="${result.matchedRecordId ?: '—'}">1,500.00</span>
-                                    </span>
-                                  <span class="field-status">
-                                      <span th:if="${result.status.name() == 'EXACT'}" class="match">✅ Match</span>
-                                      <span th:if="${result.status.name() == 'PARTIAL'}" class="partial">⚠️ Partial</span>
-                                      <span th:if="${result.status.name() == 'ORPHAN'}" class="mismatch">❌ No Match</span>
-                                    </span>
-                                </div>
-                                <div class="field-match">
-                                  <span class="field-label">Date</span>
-                                  <span class="field-value">
-                                      <span th:text="${result.accountingRecordId}">2026-07-01</span>
-                                      <span class="match-arrow">→</span>
-                                      <span th:text="${result.matchedRecordId ?: '—'}">2026-07-01</span>
-                                    </span>
-                                  <span class="field-status">
-                                      <span th:if="${result.status.name() == 'EXACT'}" class="match">✅ Match</span>
-                                      <span th:if="${result.status.name() == 'PARTIAL'}" class="partial">⚠️ Partial</span>
-                                      <span th:if="${result.status.name() == 'ORPHAN'}" class="mismatch">❌ No Match</span>
-                                    </span>
-                                </div>
-                              </div>
-
-                              <!-- Confidence Score Breakdown - FIXED -->
-                              <h6 class="fw-bold mt-3 mb-2">
-                                <i class="bi bi-graph-up-arrow me-2 text-primary"></i>Confidence Breakdown
-                              </h6>
-                              <div class="border rounded p-3">
-                                <!-- Overall Confidence -->
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                  <span class="fw-semibold">Overall Confidence</span>
-                                  <span class="fw-bold fs-5" th:text="${result.confidenceScore + '%'}">100%</span>
-                                </div>
-
-                                <!-- Confidence Bar -->
-                                <div class="confidence-bar">
-                                  <div class="fill"
-                                       th:classappend="${result.confidenceScore >= 80 ? 'high' : (result.confidenceScore >= 50 ? 'medium' : 'low')}"
-                                       th:style="'width: ' + ${result.confidenceScore} + '%'">
-                                  </div>
-                                </div>
-
-                                <!-- Confidence Legend -->
-                                <div class="confidence-legend">
-                                  <span class="legend-item">
-                                    <span class="color-dot green"></span>
-                                    High (80-100%)
-                                  </span>
-                                  <span class="legend-item">
-                                    <span class="color-dot yellow"></span>
-                                    Medium (50-79%)
-                                  </span>
-                                  <span class="legend-item">
-                                    <span class="color-dot red"></span>
-                                    Low (0-49%)
-                                  </span>
-                                </div>
-
-                                <!-- Individual Field Match Statuses -->
-                                <div class="mt-3 pt-2 border-top">
-                                  <div class="row g-2">
-                                    <!-- Reference Match -->
-                                    <div class="col-12 col-md-4">
-                                      <div class="d-flex align-items-center gap-2">
-                                        <span th:if="${result.status.name() == 'EXACT'}" class="text-success fs-5">●</span>
-                                        <span th:if="${result.status.name() == 'PARTIAL'}" class="text-success fs-5">●</span>
-                                        <span th:if="${result.status.name() == 'ORPHAN'}" class="text-danger fs-5">●</span>
-                                        <span class="fw-semibold">Reference</span>
-                                        <span class="field-match-badge exact" th:if="${result.status.name() == 'EXACT'}">Exact</span>
-                                        <span class="field-match-badge exact" th:if="${result.status.name() == 'PARTIAL'}">Matched</span>
-                                        <span class="field-match-badge none" th:if="${result.status.name() == 'ORPHAN'}">No Match</span>
-                                      </div>
-                                    </div>
-
-                                    <!-- Amount Match -->
-                                    <div class="col-12 col-md-4">
-                                      <div class="d-flex align-items-center gap-2">
-                                        <span th:if="${result.status.name() == 'EXACT'}" class="text-success fs-5">●</span>
-                                        <span th:if="${result.status.name() == 'PARTIAL'}" class="text-success fs-5">●</span>
-                                        <span th:if="${result.status.name() == 'ORPHAN'}" class="text-danger fs-5">●</span>
-                                        <span class="fw-semibold">Amount</span>
-                                        <span class="field-match-badge exact" th:if="${result.status.name() == 'EXACT'}">Exact</span>
-                                        <span class="field-match-badge exact" th:if="${result.status.name() == 'PARTIAL'}">Matched</span>
-                                        <span class="field-match-badge none" th:if="${result.status.name() == 'ORPHAN'}">No Match</span>
-                                      </div>
-                                    </div>
-
-                                    <!-- Date Match -->
-                                    <div class="col-12 col-md-4">
-                                      <div class="d-flex align-items-center gap-2">
-                                        <span th:if="${result.status.name() == 'EXACT'}" class="text-success fs-5">●</span>
-                                        <span th:if="${result.status.name() == 'PARTIAL'}" class="text-warning fs-5">●</span>
-                                        <span th:if="${result.status.name() == 'ORPHAN'}" class="text-danger fs-5">●</span>
-                                        <span class="fw-semibold">Date</span>
-                                        <span class="field-match-badge exact" th:if="${result.status.name() == 'EXACT'}">Exact</span>
-                                        <span class="field-match-badge partial" th:if="${result.status.name() == 'PARTIAL'}">Partial</span>
-                                        <span class="field-match-badge none" th:if="${result.status.name() == 'ORPHAN'}">No Match</span>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-
-                            <!-- Right Column -->
-                            <div class="col-lg-6">
-                              <h6 class="fw-bold mb-3">
-                                <i class="bi bi-file-earmark-text me-2 text-primary"></i>Source Details
-                              </h6>
-                              <div class="border rounded p-2">
-                                <div class="row">
-                                  <div class="col-6">
-                                    <div class="text-muted small">Source Type</div>
-                                    <div th:text="${result.matchedSourceType ?: 'NONE'}">PAYROLL</div>
-                                  </div>
-                                  <div class="col-6">
-                                    <div class="text-muted small">Matched Record ID</div>
-                                    <div th:text="${result.matchedRecordId ?: '-'}">PAY-001</div>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <h6 class="fw-bold mt-3 mb-2">
-                                <i class="bi bi-clock-history me-2 text-primary"></i>Reconciliation Info
-                              </h6>
-                              <div class="border rounded p-2">
-                                <div class="row">
-                                  <div class="col-6">
-                                    <div class="text-muted small">Reconciled By</div>
-                                    <div th:text="${result.reconciledBy}">admin</div>
-                                  </div>
-                                  <div class="col-6">
-                                    <div class="text-muted small">Reconciled At</div>
-                                    <div th:text="${#temporals.format(result.reconciledAt, 'yyyy-MM-dd HH:mm')}">2026-07-01 10:30</div>
-                                  </div>
-                                </div>
-                                <div class="row mt-2">
-                                  <div class="col-12">
-                                    <div class="text-muted small">Remarks</div>
-                                    <div th:text="${result.remarks}">No remarks</div>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div class="mt-3">
-                                <a th:href="@{/audit/logs?entityType=ReconciliationResult&entityId=} + ${result.id}"
-                                   class="btn btn-sm btn-outline-secondary">
-                                  <i class="bi bi-clipboard-data me-1"></i>View Audit Trail
-                                </a>
-                                <a th:if="${result.workflowId}"
-                                   th:href="@{/workflow/status/{id}(id=${result.workflowId})}"
-                                   class="btn btn-sm btn-outline-primary ms-2">
-                                  <i class="bi bi-diagram-3 me-1"></i>View Workflow
-                                </a>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </td>
-            </tr>
-          </th:block>
+          <tr th:each="result : ${results}" class="reconciliation-row" th:data-result-id="${result.id}">
+            <td class="fw-semibold ps-3" th:text="${result.id}">1</td>
+            <td th:text="${result.accountingRecordId}">ACC001</td>
+            <td th:text="${result.matchedRecordId ?: '-'}">PAY001</td>
+            <td th:text="${result.matchedSourceType}">PAYROLL</td>
+            <td>
+              <span th:if="${result.status.name() == 'EXACT'}"
+                    class="badge rounded-pill bg-success-subtle text-success-emphasis border border-success-subtle"
+                    th:text="${result.status}"></span>
+              <span th:if="${result.status.name() == 'PARTIAL'}"
+                    class="badge rounded-pill bg-info-subtle text-info-emphasis border border-info-subtle"
+                    th:text="${result.status}"></span>
+              <span th:if="${result.status.name() == 'ORPHAN'}"
+                    class="badge rounded-pill bg-warning-subtle text-warning-emphasis border border-warning-subtle"
+                    th:text="${result.status}"></span>
+              <span th:if="${result.status.name() == 'MANUALLY_RESOLVED'}"
+                    class="badge rounded-pill bg-primary-subtle text-primary-emphasis border border-primary-subtle"
+                    th:text="${result.status}"></span>
+              <span th:if="${result.status.name() == 'PENDING_APPROVAL'}"
+                    class="badge rounded-pill bg-warning-subtle text-warning-emphasis border border-warning-subtle"
+                    th:text="${result.status}"></span>
+              <span th:if="${result.status.name() == 'APPROVED'}"
+                    class="badge rounded-pill bg-success-subtle text-success-emphasis border border-success-subtle"
+                    th:text="${result.status}"></span>
+              <span th:if="${result.status.name() == 'REJECTED'}"
+                    class="badge rounded-pill bg-danger-subtle text-danger-emphasis border border-danger-subtle"
+                    th:text="${result.status}"></span>
+              <span th:if="${result.status.name() != 'EXACT'
+                            and result.status.name() != 'ORPHAN'
+                            and result.status.name() != 'PARTIAL'
+                            and result.status.name() != 'MANUALLY_RESOLVED'
+                            and result.status.name() != 'PENDING_APPROVAL'
+                            and result.status.name() != 'APPROVED'
+                            and result.status.name() != 'REJECTED'}"
+                    class="badge bg-secondary"
+                    th:text="${result.status}"></span>
+            </td>
+            <td>
+              <span class="badge-confidence"
+                    th:classappend="${result.confidenceScore >= 80 ? 'high' : (result.confidenceScore >= 50 ? 'medium' : 'low')}"
+                    th:text="${result.confidenceScore + '%'}"></span>
+            </td>
+            <td th:text="${result.workflowId ?: '-'}">-</td>
+            <td class="text-md-end pe-3">
+              <a th:if="${result.status.name() == 'ORPHAN'}"
+                 th:href="@{/reconciliation/orphans/{id}/candidates(id=${result.id})}"
+                 class="btn btn-sm btn-outline-warning">
+                <i class="bi bi-search me-1"></i>Resolve
+              </a>
+              <span th:if="${result.status.name() != 'ORPHAN'}" class="text-muted small">
+                <i class="bi bi-chevron-right"></i>
+              </span>
+            </td>
+          </tr>
 
           <!-- Empty State -->
           <tr th:if="${#lists.isEmpty(results)}">
-            <td colspan="9" class="text-center p-5">
+            <td colspan="8" class="text-center p-5">
               <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary-subtle text-primary mb-3"
                    style="width: 3.5rem; height: 3.5rem;">
                 <i class="bi bi-inbox fs-3"></i>
@@ -758,9 +533,188 @@
           </tr>
           </tbody>
         </table>
-
       </div>
     </div>
+  </div>
+
+  <!-- Hidden per-row detail content, cloned into the offcanvas on row click.
+       Kept in <template> tags so nothing here is rendered inline or affects layout. -->
+  <div id="reconciliationDetailTemplates" hidden>
+    <template th:each="result : ${results}" th:id="'detail-tpl-' + ${result.id}">
+
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="text-muted small">Accounting Record</div>
+        <span class="detail-badge"
+              th:classappend="${result.status.name() == 'EXACT' ? 'exact' : (result.status.name() == 'PARTIAL' ? 'partial' : (result.status.name() == 'ORPHAN' ? 'orphan' : 'manual'))}"
+              th:text="${result.status}"></span>
+      </div>
+      <h5 class="fw-bold mb-3" th:text="${result.accountingRecordId}">ACC-001</h5>
+
+      <h6 class="fw-bold mb-2">
+        <i class="bi bi-diagram-2 me-2 text-primary"></i>Match Details
+      </h6>
+      <div class="reason-box mb-3"
+           th:classappend="${result.status.name() == 'EXACT' ? 'exact' : (result.status.name() == 'PARTIAL' ? 'partial' : 'orphan')}">
+        <i th:if="${result.status.name() == 'EXACT'}" class="bi bi-check-circle text-success me-2"></i>
+        <i th:if="${result.status.name() == 'PARTIAL'}" class="bi bi-exclamation-triangle text-warning me-2"></i>
+        <i th:if="${result.status.name() == 'ORPHAN'}" class="bi bi-x-circle text-danger me-2"></i>
+        <span th:text="${result.remarks}">Match reasoning goes here</span>
+      </div>
+
+      <h6 class="fw-bold mb-2">
+        <i class="bi bi-list-ul me-2 text-primary"></i>Field Comparison
+      </h6>
+      <div class="border rounded p-2 mb-3">
+        <div class="field-match">
+          <span class="field-label">Reference No</span>
+          <span class="field-value">
+            <span th:text="${result.accountingRecordId}">ACC-001</span>
+            <span class="match-arrow">→</span>
+            <span th:text="${result.matchedRecordId ?: '—'}">PAY-001</span>
+          </span>
+          <span class="field-status">
+            <span th:if="${result.status.name() == 'EXACT'}" class="match">✅ Match</span>
+            <span th:if="${result.status.name() == 'PARTIAL'}" class="partial">⚠️ Partial</span>
+            <span th:if="${result.status.name() == 'ORPHAN'}" class="mismatch">❌ No Match</span>
+          </span>
+        </div>
+        <div class="field-match">
+          <span class="field-label">Amount</span>
+          <span class="field-value">
+            <span th:text="${result.accountingRecordId}">1,500.00</span>
+            <span class="match-arrow">→</span>
+            <span th:text="${result.matchedRecordId ?: '—'}">1,500.00</span>
+          </span>
+          <span class="field-status">
+            <span th:if="${result.status.name() == 'EXACT'}" class="match">✅ Match</span>
+            <span th:if="${result.status.name() == 'PARTIAL'}" class="partial">⚠️ Partial</span>
+            <span th:if="${result.status.name() == 'ORPHAN'}" class="mismatch">❌ No Match</span>
+          </span>
+        </div>
+        <div class="field-match">
+          <span class="field-label">Date</span>
+          <span class="field-value">
+            <span th:text="${result.accountingRecordId}">2026-07-01</span>
+            <span class="match-arrow">→</span>
+            <span th:text="${result.matchedRecordId ?: '—'}">2026-07-01</span>
+          </span>
+          <span class="field-status">
+            <span th:if="${result.status.name() == 'EXACT'}" class="match">✅ Match</span>
+            <span th:if="${result.status.name() == 'PARTIAL'}" class="partial">⚠️ Partial</span>
+            <span th:if="${result.status.name() == 'ORPHAN'}" class="mismatch">❌ No Match</span>
+          </span>
+        </div>
+      </div>
+
+      <h6 class="fw-bold mb-2">
+        <i class="bi bi-graph-up-arrow me-2 text-primary"></i>Confidence Breakdown
+      </h6>
+      <div class="border rounded p-3 mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="fw-semibold">Overall Confidence</span>
+          <span class="fw-bold fs-5" th:text="${result.confidenceScore + '%'}">100%</span>
+        </div>
+        <div class="confidence-bar">
+          <div class="fill"
+               th:classappend="${result.confidenceScore >= 80 ? 'high' : (result.confidenceScore >= 50 ? 'medium' : 'low')}"
+               th:style="'width: ' + ${result.confidenceScore} + '%'"></div>
+        </div>
+        <div class="confidence-legend">
+          <span class="legend-item"><span class="color-dot green"></span>High (80-100%)</span>
+          <span class="legend-item"><span class="color-dot yellow"></span>Medium (50-79%)</span>
+          <span class="legend-item"><span class="color-dot red"></span>Low (0-49%)</span>
+        </div>
+
+        <div class="mt-3 pt-2 border-top">
+          <div class="row g-2">
+            <div class="col-12 col-md-4">
+              <div class="d-flex align-items-center gap-2">
+                <span th:if="${result.status.name() == 'EXACT'}" class="text-success fs-5">●</span>
+                <span th:if="${result.status.name() == 'PARTIAL'}" class="text-success fs-5">●</span>
+                <span th:if="${result.status.name() == 'ORPHAN'}" class="text-danger fs-5">●</span>
+                <span class="fw-semibold">Reference</span>
+                <span class="field-match-badge exact" th:if="${result.status.name() == 'EXACT'}">Exact</span>
+                <span class="field-match-badge exact" th:if="${result.status.name() == 'PARTIAL'}">Matched</span>
+                <span class="field-match-badge none" th:if="${result.status.name() == 'ORPHAN'}">No Match</span>
+              </div>
+            </div>
+            <div class="col-12 col-md-4">
+              <div class="d-flex align-items-center gap-2">
+                <span th:if="${result.status.name() == 'EXACT'}" class="text-success fs-5">●</span>
+                <span th:if="${result.status.name() == 'PARTIAL'}" class="text-success fs-5">●</span>
+                <span th:if="${result.status.name() == 'ORPHAN'}" class="text-danger fs-5">●</span>
+                <span class="fw-semibold">Amount</span>
+                <span class="field-match-badge exact" th:if="${result.status.name() == 'EXACT'}">Exact</span>
+                <span class="field-match-badge exact" th:if="${result.status.name() == 'PARTIAL'}">Matched</span>
+                <span class="field-match-badge none" th:if="${result.status.name() == 'ORPHAN'}">No Match</span>
+              </div>
+            </div>
+            <div class="col-12 col-md-4">
+              <div class="d-flex align-items-center gap-2">
+                <span th:if="${result.status.name() == 'EXACT'}" class="text-success fs-5">●</span>
+                <span th:if="${result.status.name() == 'PARTIAL'}" class="text-warning fs-5">●</span>
+                <span th:if="${result.status.name() == 'ORPHAN'}" class="text-danger fs-5">●</span>
+                <span class="fw-semibold">Date</span>
+                <span class="field-match-badge exact" th:if="${result.status.name() == 'EXACT'}">Exact</span>
+                <span class="field-match-badge partial" th:if="${result.status.name() == 'PARTIAL'}">Partial</span>
+                <span class="field-match-badge none" th:if="${result.status.name() == 'ORPHAN'}">No Match</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h6 class="fw-bold mb-2">
+        <i class="bi bi-file-earmark-text me-2 text-primary"></i>Source Details
+      </h6>
+      <div class="border rounded p-2 mb-3">
+        <div class="row">
+          <div class="col-6">
+            <div class="text-muted small">Source Type</div>
+            <div th:text="${result.matchedSourceType ?: 'NONE'}">PAYROLL</div>
+          </div>
+          <div class="col-6">
+            <div class="text-muted small">Matched Record ID</div>
+            <div th:text="${result.matchedRecordId ?: '-'}">PAY-001</div>
+          </div>
+        </div>
+      </div>
+
+      <h6 class="fw-bold mb-2">
+        <i class="bi bi-clock-history me-2 text-primary"></i>Reconciliation Info
+      </h6>
+      <div class="border rounded p-2 mb-3">
+        <div class="row">
+          <div class="col-6">
+            <div class="text-muted small">Reconciled By</div>
+            <div th:text="${result.reconciledBy}">admin</div>
+          </div>
+          <div class="col-6">
+            <div class="text-muted small">Reconciled At</div>
+            <div th:text="${#temporals.format(result.reconciledAt, 'yyyy-MM-dd HH:mm')}">2026-07-01 10:30</div>
+          </div>
+        </div>
+        <div class="row mt-2">
+          <div class="col-12">
+            <div class="text-muted small">Remarks</div>
+            <div th:text="${result.remarks}">No remarks</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex gap-2">
+        <a th:href="@{/audit/logs?entityType=ReconciliationResult&entityId=} + ${result.id}"
+           class="btn btn-sm btn-outline-secondary">
+          <i class="bi bi-clipboard-data me-1"></i>View Audit Trail
+        </a>
+        <a th:if="${result.workflowId}"
+           th:href="@{/workflow/status/{id}(id=${result.workflowId})}"
+           class="btn btn-sm btn-outline-primary">
+          <i class="bi bi-diagram-3 me-1"></i>View Workflow
+        </a>
+      </div>
+
+    </template>
   </div>
 
   <!-- ===================== Quick Actions ===================== -->
@@ -811,49 +765,127 @@
 
 </div>
 
+<!-- ===================== Run Reconciliation Dialog ===================== -->
+<div class="modal fade" id="runReconciliationModal" tabindex="-1" aria-labelledby="runReconciliationModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title" id="runReconciliationModalLabel">Run Reconciliation</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <form id="runReconciliationForm" method="post" th:action="@{/reconciliation/run-exact}">
+
+        <div class="modal-body d-flex flex-column gap-2">
+
+          <label class="reconciliation-mode-option selected">
+            <input type="radio" name="reconciliationMode" value="exact"
+                   th:data-action="@{/reconciliation/run-exact}" checked>
+            <div>
+              <div class="mode-title"><i class="bi bi-check2-all me-2 text-primary"></i>Exact Match</div>
+              <div class="mode-description">
+                Matches records with an identical Reference No, Amount, and Date.
+              </div>
+            </div>
+          </label>
+
+          <label class="reconciliation-mode-option">
+            <input type="radio" name="reconciliationMode" value="partial"
+                   th:data-action="@{/reconciliation/run-partial}">
+            <div>
+              <div class="mode-title"><i class="bi bi-clock-history me-2 text-warning"></i>Partial Match</div>
+              <div class="mode-description">
+                Matches on Reference No and Amount, allowing a small tolerance on Date.
+              </div>
+            </div>
+          </label>
+
+          <label class="reconciliation-mode-option">
+            <input type="radio" name="reconciliationMode" value="one-to-many"
+                   th:data-action="@{/reconciliation/run-one-to-many}">
+            <div class="flex-grow-1">
+              <div class="mode-title"><i class="bi bi-diagram-3 me-2 text-info"></i>One-to-Many Match</div>
+              <div class="mode-description">
+                Groups multiple candidate records against one accounting record within a percentage tolerance.
+              </div>
+              <div class="input-group input-group-sm mt-2" style="max-width: 160px;" onclick="event.preventDefault()">
+                <span class="input-group-text">Tolerance</span>
+                <input type="number" name="tolerancePercent" id="tolerancePercentInput"
+                       value="5" min="1" max="20" class="form-control" disabled>
+                <span class="input-group-text">%</span>
+              </div>
+            </div>
+          </label>
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-play-fill me-1"></i>Run
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<!-- ===================== Detail Slide-over Panel ===================== -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="reconciliationDetailOffcanvas"
+     aria-labelledby="reconciliationOffcanvasTitle">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title" id="reconciliationOffcanvasTitle">Result Details</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body" id="reconciliationOffcanvasBody">
+    <!-- Populated via JS from the matching <template> above -->
+  </div>
+</div>
+
 <!-- Footer -->
 <div th:replace="~{fragments/footer :: footer}"></div>
 
 <!-- ========================================== -->
-<!-- SCRIPTS - Expandable Rows -->
+<!-- SCRIPTS - Row click opens the detail panel -->
 <!-- ========================================== -->
 <script>
-  function toggleDetail(resultId) {
-    var detailRow = document.getElementById('detail_' + resultId);
-    var expandIcon = document.getElementById('expandIcon_' + resultId);
+  document.addEventListener('DOMContentLoaded', function () {
+    var offcanvasEl = document.getElementById('reconciliationDetailOffcanvas');
+    var offcanvasBody = document.getElementById('reconciliationOffcanvasBody');
+    var offcanvasTitle = document.getElementById('reconciliationOffcanvasTitle');
+    var offcanvas = offcanvasEl ? new bootstrap.Offcanvas(offcanvasEl) : null;
 
-    if (!detailRow) {
-      return;
-    }
-
-    var isExpanded = detailRow.classList.contains('show');
-
-    // Close all expanded rows
-    document.querySelectorAll('.detail-row.show').forEach(function(row) {
-      row.classList.remove('show');
+    // Run Reconciliation dialog: mode picker drives the form action and
+    // which fields get submitted.
+    var runForm = document.getElementById('runReconciliationForm');
+    var toleranceInput = document.getElementById('tolerancePercentInput');
+    document.querySelectorAll('input[name="reconciliationMode"]').forEach(function (radio) {
+      radio.addEventListener('change', function () {
+        runForm.action = radio.getAttribute('data-action');
+        toleranceInput.disabled = radio.value !== 'one-to-many';
+        document.querySelectorAll('.reconciliation-mode-option').forEach(function (option) {
+          option.classList.toggle('selected', option.contains(radio));
+        });
+      });
     });
-    document.querySelectorAll('.expand-icon.expanded').forEach(function(icon) {
-      icon.classList.remove('expanded');
-    });
 
-    if (!isExpanded) {
-      detailRow.classList.add('show');
-      if (expandIcon) {
-        expandIcon.classList.add('expanded');
-      }
-    }
-  }
-
-  document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.clickable-row').forEach(function(row) {
-      row.addEventListener('click', function(event) {
+    document.querySelectorAll('.reconciliation-row').forEach(function (row) {
+      row.addEventListener('click', function (event) {
         if (event.target.closest('a') || event.target.closest('button')) {
           return;
         }
-        var resultId = this.getAttribute('data-result-id');
-        if (resultId) {
-          toggleDetail(resultId);
+        var resultId = row.getAttribute('data-result-id');
+        var template = document.getElementById('detail-tpl-' + resultId);
+        if (!template || !offcanvas) {
+          return;
         }
+        offcanvasBody.innerHTML = '';
+        offcanvasBody.appendChild(template.content.cloneNode(true));
+        offcanvasTitle.textContent = 'Result #' + resultId;
+        offcanvas.show();
       });
     });
   });
