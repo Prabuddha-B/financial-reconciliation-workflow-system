@@ -17,6 +17,7 @@ import com.frwss.system.tax.model.TaxConfiguration;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 
 
@@ -360,6 +361,299 @@ class TaxEstimationServiceTest {
 
         verify(taxConfigurationRepository)
                 .findAllActiveCategories();
+    }
+
+    // =========================================================================
+    // estimateTax() edge and failure paths
+    // =========================================================================
+
+    @Test
+    @DisplayName("Should estimate zero tax for a zero amount")
+    void estimateTax_zeroAmount_returnsZeroTax() {
+
+        // ---------------------------------------------------------------------
+        // Arrange
+        // ---------------------------------------------------------------------
+
+        TaxEstimationRequestDto request = request("PAYROLL", "SALARY", BigDecimal.ZERO);
+        TaxConfiguration configuration = configuration(new BigDecimal("18"));
+        when(taxConfigurationRepository.findActiveByModuleAndCategory("PAYROLL", "SALARY"))
+                .thenReturn(Optional.of(configuration));
+        when(securityContextAdapter.getCurrentUsername()).thenReturn("admin");
+
+        // ---------------------------------------------------------------------
+        // Act
+        // ---------------------------------------------------------------------
+
+        TaxEstimationResponseDto response = taxEstimationService.estimateTax(request);
+
+        // ---------------------------------------------------------------------
+        // Assert
+        // ---------------------------------------------------------------------
+
+        assertEquals(
+                0,
+                BigDecimal.ZERO.setScale(2).compareTo(response.getEstimatedTax())
+        );
+        assertEquals(
+                0,
+                BigDecimal.ZERO.compareTo(response.getTotalWithTax())
+        );
+    }
+
+    @Test
+    @DisplayName("Should calculate negative tax for a negative amount as currently implemented")
+    void estimateTax_negativeAmount_returnsNegativeTax() {
+
+        // ---------------------------------------------------------------------
+        // Arrange
+        // ---------------------------------------------------------------------
+
+        TaxEstimationRequestDto request = request("PAYROLL", "SALARY", new BigDecimal("-100"));
+        when(taxConfigurationRepository.findActiveByModuleAndCategory("PAYROLL", "SALARY"))
+                .thenReturn(Optional.of(configuration(new BigDecimal("10"))));
+        when(securityContextAdapter.getCurrentUsername()).thenReturn("admin");
+
+        // ---------------------------------------------------------------------
+        // Act
+        // ---------------------------------------------------------------------
+
+        TaxEstimationResponseDto response = taxEstimationService.estimateTax(request);
+
+        // ---------------------------------------------------------------------
+        // Assert
+        // ---------------------------------------------------------------------
+
+        assertEquals(
+                new BigDecimal("-10.00"),
+                response.getEstimatedTax()
+        );
+        assertEquals(
+                0,
+                new BigDecimal("-110").compareTo(response.getTotalWithTax())
+        );
+    }
+
+    @Test
+    @DisplayName("Should calculate tax for a large amount")
+    void estimateTax_largeAmount_returnsEstimatedTax() {
+
+        // ---------------------------------------------------------------------
+        // Arrange
+        // ---------------------------------------------------------------------
+
+        TaxEstimationRequestDto request = request(
+                "FINANCE",
+                "VAT",
+                new BigDecimal("999999999999999999.99")
+        );
+        when(taxConfigurationRepository.findActiveByModuleAndCategory("FINANCE", "VAT"))
+                .thenReturn(Optional.of(configuration(new BigDecimal("18"))));
+        when(securityContextAdapter.getCurrentUsername()).thenReturn("admin");
+
+        // ---------------------------------------------------------------------
+        // Act
+        // ---------------------------------------------------------------------
+
+        TaxEstimationResponseDto response = taxEstimationService.estimateTax(request);
+
+        // ---------------------------------------------------------------------
+        // Assert
+        // ---------------------------------------------------------------------
+
+        assertEquals(
+                new BigDecimal("179999999999999999.9982").setScale(2, RoundingMode.HALF_UP),
+                response.getEstimatedTax()
+        );
+    }
+
+    @Test
+    @DisplayName("Should round tax using half up rounding")
+    void estimateTax_fractionalTaxAmount_roundsHalfUp() {
+
+        // ---------------------------------------------------------------------
+        // Arrange
+        // ---------------------------------------------------------------------
+
+        TaxEstimationRequestDto request = request("FINANCE", "VAT", new BigDecimal("10.00"));
+        when(taxConfigurationRepository.findActiveByModuleAndCategory("FINANCE", "VAT"))
+                .thenReturn(Optional.of(configuration(new BigDecimal("2.55"))));
+        when(securityContextAdapter.getCurrentUsername()).thenReturn("admin");
+
+        // ---------------------------------------------------------------------
+        // Act
+        // ---------------------------------------------------------------------
+
+        TaxEstimationResponseDto response = taxEstimationService.estimateTax(request);
+
+        // ---------------------------------------------------------------------
+        // Assert
+        // ---------------------------------------------------------------------
+
+        assertEquals(
+                new BigDecimal("0.26"),
+                response.getEstimatedTax()
+        );
+        assertEquals(
+                new BigDecimal("10.26"),
+                response.getTotalWithTax()
+        );
+    }
+
+    @Test
+    @DisplayName("Should return an error response for an inactive configuration")
+    void estimateTax_inactiveConfiguration_returnsErrorResponse() {
+
+        // ---------------------------------------------------------------------
+        // Arrange
+        // ---------------------------------------------------------------------
+
+        TaxEstimationRequestDto request = request("PAYROLL", "BONUS", new BigDecimal("1000"));
+        when(taxConfigurationRepository.findActiveByModuleAndCategory("PAYROLL", "BONUS"))
+                .thenReturn(Optional.empty());
+        when(securityContextAdapter.getCurrentUsername()).thenReturn("admin");
+
+        // ---------------------------------------------------------------------
+        // Act
+        // ---------------------------------------------------------------------
+
+        TaxEstimationResponseDto response = taxEstimationService.estimateTax(request);
+
+        // ---------------------------------------------------------------------
+        // Assert
+        // ---------------------------------------------------------------------
+
+        assertEquals(
+                BigDecimal.ZERO,
+                response.getTaxRate()
+        );
+        assertTrue(
+                response.getDisclaimer().contains("No active tax configuration found.")
+        );
+    }
+
+    @Test
+    @DisplayName("Should use the latest category rate when multiple configurations share a category")
+    void getTaxRatesByModule_multipleConfigurations_returnsCategoryMap() {
+
+        // ---------------------------------------------------------------------
+        // Arrange
+        // ---------------------------------------------------------------------
+
+        TaxConfiguration first = configuration(new BigDecimal("10"));
+        first.setCategory("VAT");
+        TaxConfiguration second = configuration(new BigDecimal("15"));
+        second.setCategory("VAT");
+        when(taxConfigurationRepository.findActiveByModule("FINANCE"))
+                .thenReturn(List.of(first, second));
+
+        // ---------------------------------------------------------------------
+        // Act
+        // ---------------------------------------------------------------------
+
+        Map<String, BigDecimal> result = taxEstimationService.getTaxRatesByModule("FINANCE");
+
+        // ---------------------------------------------------------------------
+        // Assert
+        // ---------------------------------------------------------------------
+
+        assertEquals(
+                1,
+                result.size()
+        );
+        assertEquals(
+                new BigDecimal("15"),
+                result.get("VAT")
+        );
+    }
+
+    @Test
+    @DisplayName("Should propagate repository failures while finding tax configuration")
+    void estimateTax_repositoryFailure_returnsErrorResponse() {
+
+        // ---------------------------------------------------------------------
+        // Arrange
+        // ---------------------------------------------------------------------
+
+        TaxEstimationRequestDto request = request("PAYROLL", "SALARY", new BigDecimal("1000"));
+        when(taxConfigurationRepository.findActiveByModuleAndCategory("PAYROLL", "SALARY"))
+                .thenThrow(new RuntimeException("Repository failure"));
+        when(securityContextAdapter.getCurrentUsername()).thenReturn("admin");
+
+        // ---------------------------------------------------------------------
+        // Act
+        // ---------------------------------------------------------------------
+
+        TaxEstimationResponseDto response = taxEstimationService.estimateTax(request);
+
+        // ---------------------------------------------------------------------
+        // Assert
+        // ---------------------------------------------------------------------
+
+        assertTrue(
+                response.getDisclaimer().contains("Repository failure")
+        );
+        verify(auditService).log(
+                eq(AuditActionType.TAX_ESTIMATION_ERROR),
+                anyString(),
+                anyString(),
+                anyString(),
+                contains("Repository failure")
+        );
+    }
+
+    @Test
+    @DisplayName("Should return an error response when audit logging fails")
+    void estimateTax_auditFailure_returnsErrorResponse() {
+
+        // ---------------------------------------------------------------------
+        // Arrange
+        // ---------------------------------------------------------------------
+
+        TaxEstimationRequestDto request = request("PAYROLL", "SALARY", new BigDecimal("1000"));
+        when(taxConfigurationRepository.findActiveByModuleAndCategory("PAYROLL", "SALARY"))
+                .thenReturn(Optional.of(configuration(new BigDecimal("10"))));
+        when(securityContextAdapter.getCurrentUsername()).thenReturn("admin");
+        doThrow(new RuntimeException("Audit failure"))
+                .when(auditService)
+                .log(eq(AuditActionType.TAX_ESTIMATION), anyString(), anyString(), anyString(), anyString());
+
+        // ---------------------------------------------------------------------
+        // Act
+        // ---------------------------------------------------------------------
+
+        TaxEstimationResponseDto response = taxEstimationService.estimateTax(request);
+
+        // ---------------------------------------------------------------------
+        // Assert
+        // ---------------------------------------------------------------------
+
+        assertTrue(
+                response.getDisclaimer().contains("Audit failure")
+        );
+        verify(auditService).log(
+                eq(AuditActionType.TAX_ESTIMATION_ERROR),
+                anyString(),
+                anyString(),
+                anyString(),
+                contains("Audit failure")
+        );
+    }
+
+    private TaxEstimationRequestDto request(String module, String category, BigDecimal amount) {
+        TaxEstimationRequestDto request = new TaxEstimationRequestDto();
+        request.setModule(module);
+        request.setCategory(category);
+        request.setAmount(amount);
+        return request;
+    }
+
+    private TaxConfiguration configuration(BigDecimal taxRate) {
+        TaxConfiguration configuration = new TaxConfiguration();
+        configuration.setModule("PAYROLL");
+        configuration.setCategory("SALARY");
+        configuration.setTaxRate(taxRate);
+        return configuration;
     }
 
 }

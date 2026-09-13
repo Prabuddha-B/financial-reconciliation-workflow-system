@@ -349,4 +349,150 @@ class WorkflowViewControllerTest {
                 "Workflow update failed",
                 model.getAttribute("errorMessage"));
     }
+    @Test
+    @DisplayName("Should display approvals page when there are no workflows")
+    void showWorkflowApprovals_emptyWorkflows_returnsApprovalView() {
+        // ---------------------------------------------------------------------
+        // Arrange
+        // ---------------------------------------------------------------------
+        Model model = new ConcurrentModel();
+        when(workflowService.getAllWorkflows()).thenReturn(List.of());
+
+        // ---------------------------------------------------------------------
+        // Act
+        // ---------------------------------------------------------------------
+        String view = workflowViewController.showWorkflowApprovals(model);
+
+        // ---------------------------------------------------------------------
+        // Assert
+        // ---------------------------------------------------------------------
+        assertEquals("workflow/approvals", view);
+        assertEquals(0L, model.getAttribute("needsAttentionCount"));
+    }
+
+    @Test
+    @DisplayName("Should display status page with an empty history")
+    void showWorkflowStatus_emptyHistory_returnsStatusView() {
+        // ---------------------------------------------------------------------
+        // Arrange
+        // ---------------------------------------------------------------------
+        Long workflowId = 1L;
+        Model model = new ConcurrentModel();
+        when(workflowService.getWorkflowHistory(workflowId)).thenReturn(List.of());
+        when(workflowService.getWorkflowById(workflowId)).thenReturn(new WorkflowResponseDto());
+        when(workflowService.getLatestWorkflowActivity(workflowId)).thenReturn(null);
+
+        // ---------------------------------------------------------------------
+        // Act
+        // ---------------------------------------------------------------------
+        String view = workflowViewController.showWorkflowStatus(workflowId, model);
+
+        // ---------------------------------------------------------------------
+        // Assert
+        // ---------------------------------------------------------------------
+        assertEquals("workflow/status", view);
+        assertNull(model.getAttribute("lastUpdated"));
+        assertNull(model.getAttribute("latestTransition"));
+    }
+
+    @Test
+    @DisplayName("Should ignore null transition times")
+    void showWorkflowStatus_nullTransitionTime_returnsStatusView() {
+        // ---------------------------------------------------------------------
+        // Arrange
+        // ---------------------------------------------------------------------
+        Long workflowId = 1L;
+        Model model = new ConcurrentModel();
+        WorkflowHistoryResponseDto history = new WorkflowHistoryResponseDto();
+        history.setTransitionTime(null);
+        when(workflowService.getWorkflowHistory(workflowId)).thenReturn(List.of(history));
+        when(workflowService.getWorkflowById(workflowId)).thenReturn(new WorkflowResponseDto());
+        when(workflowService.getLatestWorkflowActivity(workflowId)).thenReturn(history);
+
+        // ---------------------------------------------------------------------
+        // Act
+        // ---------------------------------------------------------------------
+        String view = workflowViewController.showWorkflowStatus(workflowId, model);
+
+        // ---------------------------------------------------------------------
+        // Assert
+        // ---------------------------------------------------------------------
+        assertEquals("workflow/status", view);
+        assertNull(model.getAttribute("lastUpdated"));
+    }
+
+    @Test
+    @DisplayName("Should allow administrators to review workflows")
+    void updateWorkflowState_adminReview_redirectsToStatusPage() {
+        // ---------------------------------------------------------------------
+        // Arrange
+        // ---------------------------------------------------------------------
+        Long workflowId = 1L;
+        Model model = new ConcurrentModel();
+        WorkflowStateUpdateRequestDto request = new WorkflowStateUpdateRequestDto();
+        request.setNewState(WorkflowState.REVIEWED);
+        when(securityContextAdapter.getCurrentUsername()).thenReturn("admin");
+        when(securityContextAdapter.getCurrentUserRole()).thenReturn("ADMIN");
+
+        // ---------------------------------------------------------------------
+        // Act
+        // ---------------------------------------------------------------------
+        String view = workflowViewController.updateWorkflowState(workflowId, request, model);
+
+        // ---------------------------------------------------------------------
+        // Assert
+        // ---------------------------------------------------------------------
+        assertEquals("redirect:/workflow/status/1", view);
+        verify(workflowService).updateWorkflowState(workflowId, request);
+    }
+
+    @Test
+    @DisplayName("Should allow auditors to verify workflows")
+    void updateWorkflowState_auditorVerification_redirectsToStatusPage() {
+        // ---------------------------------------------------------------------
+        // Arrange
+        // ---------------------------------------------------------------------
+        Long workflowId = 1L;
+        Model model = new ConcurrentModel();
+        WorkflowStateUpdateRequestDto request = new WorkflowStateUpdateRequestDto();
+        request.setNewState(WorkflowState.VERIFIED);
+        when(securityContextAdapter.getCurrentUsername()).thenReturn("auditor");
+        when(securityContextAdapter.getCurrentUserRole()).thenReturn("AUDITOR");
+
+        // ---------------------------------------------------------------------
+        // Act
+        // ---------------------------------------------------------------------
+        String view = workflowViewController.updateWorkflowState(workflowId, request, model);
+
+        // ---------------------------------------------------------------------
+        // Assert
+        // ---------------------------------------------------------------------
+        assertEquals("redirect:/workflow/status/1", view);
+        verify(workflowService).updateWorkflowState(workflowId, request);
+    }
+
+    @Test
+    @DisplayName("Should allow administrators to reject workflows")
+    void updateWorkflowState_adminRejection_redirectsToStatusPage() {
+        // ---------------------------------------------------------------------
+        // Arrange
+        // ---------------------------------------------------------------------
+        Long workflowId = 1L;
+        Model model = new ConcurrentModel();
+        WorkflowStateUpdateRequestDto request = new WorkflowStateUpdateRequestDto();
+        request.setNewState(WorkflowState.REJECTED);
+        when(securityContextAdapter.getCurrentUsername()).thenReturn("admin");
+        when(securityContextAdapter.getCurrentUserRole()).thenReturn("ADMIN");
+
+        // ---------------------------------------------------------------------
+        // Act
+        // ---------------------------------------------------------------------
+        String view = workflowViewController.updateWorkflowState(workflowId, request, model);
+
+        // ---------------------------------------------------------------------
+        // Assert
+        // ---------------------------------------------------------------------
+        assertEquals("redirect:/workflow/status/1", view);
+        verify(workflowService).updateWorkflowState(workflowId, request);
+    }
 }

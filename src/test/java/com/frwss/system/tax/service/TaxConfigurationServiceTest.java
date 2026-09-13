@@ -238,4 +238,207 @@ class TaxConfigurationServiceTest {
                 contains("PAYROLL")
         );
     }
+
+    @Test
+    @DisplayName("Should persist a null tax rate as currently implemented")
+    void updateTaxRate_nullTaxRate_persistsValue() {
+
+        // ---------------------------------------------------------------------
+        // Arrange
+        // ---------------------------------------------------------------------
+
+        Long id = 1L;
+        TaxConfiguration configuration = configuration(id);
+        when(taxConfigurationRepository.findById(id)).thenReturn(Optional.of(configuration));
+        when(securityContextAdapter.getCurrentUsername()).thenReturn("admin");
+
+        // ---------------------------------------------------------------------
+        // Act
+        // ---------------------------------------------------------------------
+
+        taxConfigurationService.updateTaxRate(id, null, "Null rate");
+
+        // ---------------------------------------------------------------------
+        // Assert
+        // ---------------------------------------------------------------------
+
+        assertNull(
+                configuration.getTaxRate()
+        );
+        verify(taxConfigurationRepository).save(configuration);
+    }
+
+    @Test
+    @DisplayName("Should persist a negative tax rate as currently implemented")
+    void updateTaxRate_negativeTaxRate_persistsValue() {
+
+        // ---------------------------------------------------------------------
+        // Arrange
+        // ---------------------------------------------------------------------
+
+        Long id = 1L;
+        TaxConfiguration configuration = configuration(id);
+        when(taxConfigurationRepository.findById(id)).thenReturn(Optional.of(configuration));
+        when(securityContextAdapter.getCurrentUsername()).thenReturn("admin");
+
+        // ---------------------------------------------------------------------
+        // Act
+        // ---------------------------------------------------------------------
+
+        taxConfigurationService.updateTaxRate(id, new BigDecimal("-1"), "Negative rate");
+
+        // ---------------------------------------------------------------------
+        // Assert
+        // ---------------------------------------------------------------------
+
+        assertEquals(
+                new BigDecimal("-1"),
+                configuration.getTaxRate()
+        );
+        verify(taxConfigurationRepository).save(configuration);
+    }
+
+    @Test
+    @DisplayName("Should persist a tax rate greater than one hundred as currently implemented")
+    void updateTaxRate_rateAboveOneHundred_persistsValue() {
+
+        // ---------------------------------------------------------------------
+        // Arrange
+        // ---------------------------------------------------------------------
+
+        Long id = 1L;
+        TaxConfiguration configuration = configuration(id);
+        when(taxConfigurationRepository.findById(id)).thenReturn(Optional.of(configuration));
+        when(securityContextAdapter.getCurrentUsername()).thenReturn("admin");
+
+        // ---------------------------------------------------------------------
+        // Act
+        // ---------------------------------------------------------------------
+
+        taxConfigurationService.updateTaxRate(id, new BigDecimal("100.01"), "High rate");
+
+        // ---------------------------------------------------------------------
+        // Assert
+        // ---------------------------------------------------------------------
+
+        assertEquals(
+                new BigDecimal("100.01"),
+                configuration.getTaxRate()
+        );
+        verify(taxConfigurationRepository).save(configuration);
+    }
+
+    @Test
+    @DisplayName("Should propagate repository failures")
+    void updateTaxRate_repositoryFailure_propagatesException() {
+
+        // ---------------------------------------------------------------------
+        // Arrange
+        // ---------------------------------------------------------------------
+
+        Long id = 1L;
+        TaxConfiguration configuration = configuration(id);
+        when(taxConfigurationRepository.findById(id)).thenReturn(Optional.of(configuration));
+        when(taxConfigurationRepository.save(configuration))
+                .thenThrow(new RuntimeException("Repository failure"));
+
+        // ---------------------------------------------------------------------
+        // Act
+        // ---------------------------------------------------------------------
+
+        RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> taxConfigurationService.updateTaxRate(id, new BigDecimal("18"), "Updated")
+        );
+
+        // ---------------------------------------------------------------------
+        // Assert
+        // ---------------------------------------------------------------------
+
+        assertEquals(
+                "Repository failure",
+                exception.getMessage()
+        );
+        verifyNoInteractions(auditService);
+    }
+
+    @Test
+    @DisplayName("Should propagate audit failures")
+    void updateTaxRate_auditFailure_propagatesException() {
+
+        // ---------------------------------------------------------------------
+        // Arrange
+        // ---------------------------------------------------------------------
+
+        Long id = 1L;
+        TaxConfiguration configuration = configuration(id);
+        when(taxConfigurationRepository.findById(id)).thenReturn(Optional.of(configuration));
+        when(securityContextAdapter.getCurrentUsername()).thenReturn("admin");
+        doThrow(new RuntimeException("Audit failure"))
+                .when(auditService)
+                .log(any(), any(), any(), any(), any());
+
+        // ---------------------------------------------------------------------
+        // Act
+        // ---------------------------------------------------------------------
+
+        RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> taxConfigurationService.updateTaxRate(id, new BigDecimal("18"), "Updated")
+        );
+
+        // ---------------------------------------------------------------------
+        // Assert
+        // ---------------------------------------------------------------------
+
+        assertEquals(
+                "Audit failure",
+                exception.getMessage()
+        );
+        verify(taxConfigurationRepository).save(configuration);
+    }
+
+    @Test
+    @DisplayName("Should propagate security context failures")
+    void updateTaxRate_securityContextFailure_propagatesException() {
+
+        // ---------------------------------------------------------------------
+        // Arrange
+        // ---------------------------------------------------------------------
+
+        Long id = 1L;
+        TaxConfiguration configuration = configuration(id);
+        when(taxConfigurationRepository.findById(id)).thenReturn(Optional.of(configuration));
+        doThrow(new RuntimeException("Security context failure"))
+                .when(securityContextAdapter)
+                .getCurrentUsername();
+
+        // ---------------------------------------------------------------------
+        // Act
+        // ---------------------------------------------------------------------
+
+        RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> taxConfigurationService.updateTaxRate(id, new BigDecimal("18"), "Updated")
+        );
+
+        // ---------------------------------------------------------------------
+        // Assert
+        // ---------------------------------------------------------------------
+
+        assertEquals(
+                "Security context failure",
+                exception.getMessage()
+        );
+        verify(taxConfigurationRepository).save(configuration);
+        verifyNoInteractions(auditService);
+    }
+
+    private TaxConfiguration configuration(Long id) {
+        TaxConfiguration configuration = new TaxConfiguration();
+        configuration.setId(id);
+        configuration.setModule("PAYROLL");
+        configuration.setCategory("SALARY");
+        return configuration;
+    }
 }

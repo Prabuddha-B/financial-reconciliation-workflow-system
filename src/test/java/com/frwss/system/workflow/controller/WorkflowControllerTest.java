@@ -216,4 +216,207 @@ class WorkflowControllerTest {
                 .getAllWorkflows();
     }
 
+    @Test
+    @DisplayName("Should propagate workflow creation service exceptions")
+    void createWorkflow_serviceFailure_propagatesException() {
+
+        // ---------------------------------------------------------------------
+        // Arrange
+        // ---------------------------------------------------------------------
+
+        when(workflowService.createWorkflow(null))
+                .thenThrow(new RuntimeException("Creation failed"));
+
+        // ---------------------------------------------------------------------
+        // Act
+        // ---------------------------------------------------------------------
+
+        RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> workflowController.createWorkflow(null)
+        );
+
+        // ---------------------------------------------------------------------
+        // Assert
+        // ---------------------------------------------------------------------
+
+        assertEquals(
+                "Creation failed",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    @DisplayName("Should propagate update exceptions for an invalid ID")
+    void updateWorkflowState_invalidId_serviceFailure_propagatesException() {
+
+        // ---------------------------------------------------------------------
+        // Arrange
+        // ---------------------------------------------------------------------
+
+        when(workflowService.updateWorkflowState(-1L, null))
+                .thenThrow(new RuntimeException("Invalid workflow ID"));
+
+        // ---------------------------------------------------------------------
+        // Act
+        // ---------------------------------------------------------------------
+
+        RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> workflowController.updateWorkflowState(-1L, null)
+        );
+
+        // ---------------------------------------------------------------------
+        // Assert
+        // ---------------------------------------------------------------------
+
+        assertEquals(
+                "Invalid workflow ID",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    @DisplayName("Should pass a null update DTO to the service")
+    void updateWorkflowState_nullDto_delegatesToService() {
+
+        // ---------------------------------------------------------------------
+        // Arrange
+        // ---------------------------------------------------------------------
+
+        WorkflowResponseDto response = new WorkflowResponseDto();
+        response.setWorkflowId(1L);
+        when(workflowService.updateWorkflowState(1L, null))
+                .thenReturn(response);
+
+        // ---------------------------------------------------------------------
+        // Act
+        // ---------------------------------------------------------------------
+
+        WorkflowResponseDto result = workflowController.updateWorkflowState(1L, null);
+
+        // ---------------------------------------------------------------------
+        // Assert
+        // ---------------------------------------------------------------------
+
+        assertEquals(
+                1L,
+                result.getWorkflowId()
+        );
+        verify(workflowService).updateWorkflowState(1L, null);
+    }
+
+    @Test
+    @DisplayName("Should return an empty history for an invalid ID response")
+    void getWorkflowHistory_invalidId_returnsEmptyResponse() {
+
+        // ---------------------------------------------------------------------
+        // Arrange
+        // ---------------------------------------------------------------------
+
+        when(workflowService.getWorkflowHistory(-1L))
+                .thenReturn(List.of());
+
+        // ---------------------------------------------------------------------
+        // Act
+        // ---------------------------------------------------------------------
+
+        List<WorkflowHistoryResponseDto> result = workflowController.getWorkflowHistory(-1L);
+
+        // ---------------------------------------------------------------------
+        // Assert
+        // ---------------------------------------------------------------------
+
+        assertTrue(
+                result.isEmpty()
+        );
+        verify(workflowService).getWorkflowHistory(-1L);
+    }
+
+    @Test
+    @DisplayName("Should propagate workflow lookup exceptions")
+    void getWorkflowById_invalidId_serviceFailure_propagatesException() {
+
+        // ---------------------------------------------------------------------
+        // Arrange
+        // ---------------------------------------------------------------------
+
+        when(workflowService.getWorkflowById(-1L))
+                .thenThrow(new RuntimeException("Workflow not found"));
+
+        // ---------------------------------------------------------------------
+        // Act
+        // ---------------------------------------------------------------------
+
+        RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> workflowController.getWorkflowById(-1L)
+        );
+
+        // ---------------------------------------------------------------------
+        // Assert
+        // ---------------------------------------------------------------------
+
+        assertEquals(
+                "Workflow not found",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    @DisplayName("Should return an empty workflow response")
+    void getAllWorkflows_emptyResponse_returnsEmptyList() {
+
+        // ---------------------------------------------------------------------
+        // Arrange
+        // ---------------------------------------------------------------------
+
+        when(workflowService.getAllWorkflows())
+                .thenReturn(List.of());
+
+        // ---------------------------------------------------------------------
+        // Act
+        // ---------------------------------------------------------------------
+
+        List<WorkflowResponseDto> result = workflowController.getAllWorkflows();
+
+        // ---------------------------------------------------------------------
+        // Assert
+        // ---------------------------------------------------------------------
+
+        assertTrue(
+                result.isEmpty()
+        );
+        verify(workflowService).getAllWorkflows();
+    }
+
+    @Test
+    @DisplayName("Should propagate workflow list service exceptions")
+    void getAllWorkflows_serviceFailure_propagatesException() {
+
+        // ---------------------------------------------------------------------
+        // Arrange
+        // ---------------------------------------------------------------------
+
+        when(workflowService.getAllWorkflows())
+                .thenThrow(new RuntimeException("Workflow list failed"));
+
+        // ---------------------------------------------------------------------
+        // Act
+        // ---------------------------------------------------------------------
+
+        RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> workflowController.getAllWorkflows()
+        );
+
+        // ---------------------------------------------------------------------
+        // Assert
+        // ---------------------------------------------------------------------
+
+        assertEquals(
+                "Workflow list failed",
+                exception.getMessage()
+        );
+    }
 }

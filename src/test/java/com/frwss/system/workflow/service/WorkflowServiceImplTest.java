@@ -990,4 +990,246 @@ class WorkflowServiceImplTest {
         assertEquals(transitionTime, response.getTransitionTime());
     }
 
+    // =========================================================================
+    // Additional failure and transition paths
+    // =========================================================================
+
+    @Test
+    @DisplayName("Should reject a transition from a null current state")
+    void updateWorkflowState_nullCurrentState_throwsInvalidTransitionException() {
+
+        // ---------------------------------------------------------------------
+        // Arrange
+        // ---------------------------------------------------------------------
+
+        WorkflowRecord record = new WorkflowRecord();
+        record.setWorkflowId(1L);
+        record.setCreatedBy("creator");
+        record.setCurrentState(null);
+        WorkflowStateUpdateRequestDto request = updateRequest(WorkflowState.REVIEWED, "reviewer", "Reviewed");
+        when(workflowRecordRepository.findById(1L)).thenReturn(Optional.of(record));
+
+        // ---------------------------------------------------------------------
+        // Act
+        // ---------------------------------------------------------------------
+
+        InvalidWorkflowTransitionException exception = assertThrows(
+                InvalidWorkflowTransitionException.class,
+                () -> workflowService.updateWorkflowState(1L, request)
+        );
+
+        // ---------------------------------------------------------------------
+        // Assert
+        // ---------------------------------------------------------------------
+
+        assertEquals(
+                "Segregation of Duties Violation: Users cannot verify records they previously reviewed.",
+                exception.getMessage()
+        );
+        verify(workflowRecordRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Should reject a transition to a null state")
+    void updateWorkflowState_nullNewState_throwsInvalidTransitionException() {
+
+        // ---------------------------------------------------------------------
+        // Arrange
+        // ---------------------------------------------------------------------
+
+        WorkflowRecord record = workflowRecord(WorkflowState.ENTERED, "WORKFLOW");
+        WorkflowStateUpdateRequestDto request = updateRequest(null, "reviewer", "Reviewed");
+        when(workflowRecordRepository.findById(1L)).thenReturn(Optional.of(record));
+
+        // ---------------------------------------------------------------------
+        // Act
+        // ---------------------------------------------------------------------
+
+        InvalidWorkflowTransitionException exception = assertThrows(
+                InvalidWorkflowTransitionException.class,
+                () -> workflowService.updateWorkflowState(1L, request)
+        );
+
+        // ---------------------------------------------------------------------
+        // Assert
+        // ---------------------------------------------------------------------
+
+        assertEquals(
+                "Segregation of Duties Violation: Users cannot verify records they previously reviewed.",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    @DisplayName("Should propagate workflow creation repository failures")
+    void createWorkflow_repositoryFailure_propagatesException() {
+
+        // ---------------------------------------------------------------------
+        // Arrange
+        // ---------------------------------------------------------------------
+
+        WorkflowRequestDto request = new WorkflowRequestDto();
+        request.setSourceType("WORKFLOW");
+        request.setSourceRecordId("1001");
+        request.setCreatedBy("creator");
+        when(workflowRecordRepository.save(any(WorkflowRecord.class)))
+                .thenThrow(new RuntimeException("Database unavailable"));
+
+        // ---------------------------------------------------------------------
+        // Act
+        // ---------------------------------------------------------------------
+
+        RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> workflowService.createWorkflow(request)
+        );
+
+        // ---------------------------------------------------------------------
+        // Assert
+        // ---------------------------------------------------------------------
+
+        assertEquals(
+                "Database unavailable",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    @DisplayName("Should propagate workflow update repository failures")
+    void updateWorkflowState_repositoryFailure_propagatesException() {
+
+        // ---------------------------------------------------------------------
+        // Arrange
+        // ---------------------------------------------------------------------
+
+        WorkflowRecord record = workflowRecord(WorkflowState.ENTERED, "WORKFLOW");
+        WorkflowStateUpdateRequestDto request = updateRequest(WorkflowState.REVIEWED, "reviewer", "Reviewed");
+        when(workflowRecordRepository.findById(1L)).thenReturn(Optional.of(record));
+        when(workflowTransitionLogRepository.findTopByWorkflowIdOrderByTransitionTimeDesc(1L))
+                .thenReturn(null);
+        when(workflowRecordRepository.save(any(WorkflowRecord.class)))
+                .thenThrow(new RuntimeException("Workflow save failed"));
+
+        // ---------------------------------------------------------------------
+        // Act
+        // ---------------------------------------------------------------------
+
+        RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> workflowService.updateWorkflowState(1L, request)
+        );
+
+        // ---------------------------------------------------------------------
+        // Assert
+        // ---------------------------------------------------------------------
+
+        assertEquals(
+                "Workflow save failed",
+                exception.getMessage()
+        );
+        verify(workflowTransitionLogRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Should propagate reconciliation failures")
+    void updateWorkflowState_reconciliationFailure_propagatesException() {
+
+        // ---------------------------------------------------------------------
+        // Arrange
+        // ---------------------------------------------------------------------
+
+        WorkflowRecord record = workflowRecord(WorkflowState.REVIEWED, "RECONCILIATION");
+        record.setSourceRecordId("1001");
+        WorkflowStateUpdateRequestDto request = updateRequest(WorkflowState.VERIFIED, "auditor", "Verified");
+        when(workflowRecordRepository.findById(1L)).thenReturn(Optional.of(record));
+        when(workflowTransitionLogRepository.findTopByWorkflowIdOrderByTransitionTimeDesc(1L))
+                .thenReturn(null);
+        when(workflowRecordRepository.save(any(WorkflowRecord.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        doThrow(new RuntimeException("Reconciliation failed"))
+                .when(reconciliationService)
+                .approveManualResolution(1001L, "auditor");
+
+        // ---------------------------------------------------------------------
+        // Act
+        // ---------------------------------------------------------------------
+
+        RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> workflowService.updateWorkflowState(1L, request)
+        );
+
+        // ---------------------------------------------------------------------
+        // Assert
+        // ---------------------------------------------------------------------
+
+        assertEquals(
+                "Reconciliation failed",
+                exception.getMessage()
+        );
+        verify(reconciliationService).approveManualResolution(1001L, "auditor");
+        verify(auditService, never()).log(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    @DisplayName("Should propagate audit failures")
+    void updateWorkflowState_auditFailure_propagatesException() {
+
+        // ---------------------------------------------------------------------
+        // Arrange
+        // ---------------------------------------------------------------------
+
+        WorkflowRecord record = workflowRecord(WorkflowState.ENTERED, "WORKFLOW");
+        WorkflowStateUpdateRequestDto request = updateRequest(WorkflowState.REVIEWED, "reviewer", "Reviewed");
+        when(workflowRecordRepository.findById(1L)).thenReturn(Optional.of(record));
+        when(workflowTransitionLogRepository.findTopByWorkflowIdOrderByTransitionTimeDesc(1L))
+                .thenReturn(null);
+        when(workflowRecordRepository.save(any(WorkflowRecord.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        doThrow(new RuntimeException("Audit failed"))
+                .when(auditService)
+                .log(any(), any(), any(), any(), any());
+
+        // ---------------------------------------------------------------------
+        // Act
+        // ---------------------------------------------------------------------
+
+        RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> workflowService.updateWorkflowState(1L, request)
+        );
+
+        // ---------------------------------------------------------------------
+        // Assert
+        // ---------------------------------------------------------------------
+
+        assertEquals(
+                "Audit failed",
+                exception.getMessage()
+        );
+        verify(workflowTransitionLogRepository).save(any(WorkflowTransitionLog.class));
+    }
+
+    private WorkflowRecord workflowRecord(WorkflowState state, String sourceType) {
+        WorkflowRecord record = new WorkflowRecord();
+        record.setWorkflowId(1L);
+        record.setSourceType(sourceType);
+        record.setSourceRecordId("1001");
+        record.setCreatedBy("creator");
+        record.setCurrentState(state);
+        return record;
+    }
+
+    private WorkflowStateUpdateRequestDto updateRequest(
+            WorkflowState state,
+            String performedBy,
+            String justification
+    ) {
+        WorkflowStateUpdateRequestDto request = new WorkflowStateUpdateRequestDto();
+        request.setNewState(state);
+        request.setPerformedBy(performedBy);
+        request.setJustification(justification);
+        return request;
+    }
+
 }

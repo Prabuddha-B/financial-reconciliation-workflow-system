@@ -73,6 +73,56 @@ class IngestionControllerTest {
         assertEquals(2L, model.getAttribute("invalidCount"));
     }
 
+    @Test
+    @DisplayName("Should display ingestion dashboard through dashboard endpoint")
+    void dashboard_returnsDashboardView() {
+
+        // ---------------------------------------------------------------------
+        // Arrange
+        // ---------------------------------------------------------------------
+
+        Model model = new ConcurrentModel();
+        when(ingestionService.getDashboardSummary())
+                .thenReturn(new IngestionService.DashboardSummary(4, 3, 1));
+
+        // ---------------------------------------------------------------------
+        // Act
+        // ---------------------------------------------------------------------
+
+        String view = ingestionController.dashboard(model);
+
+        // ---------------------------------------------------------------------
+        // Assert
+        // ---------------------------------------------------------------------
+
+        assertEquals("ingestion/dashboard", view);
+        assertEquals(4L, model.getAttribute("total"));
+        verify(ingestionService).getDashboardSummary();
+    }
+
+    @Test
+    @DisplayName("Should display the upload page")
+    void showUploadPage_returnsUploadView() {
+
+        // ---------------------------------------------------------------------
+        // Arrange
+        // ---------------------------------------------------------------------
+
+        Model model = new ConcurrentModel();
+
+        // ---------------------------------------------------------------------
+        // Act
+        // ---------------------------------------------------------------------
+
+        String view = ingestionController.showUploadPage(model);
+
+        // ---------------------------------------------------------------------
+        // Assert
+        // ---------------------------------------------------------------------
+
+        assertEquals("ingestion/upload", view);
+    }
+
     // =========================================================================
     // previewFile()
     // =========================================================================
@@ -157,6 +207,71 @@ class IngestionControllerTest {
         );
     }
 
+    @Test
+    @DisplayName("Should return upload page when the file is null")
+    void previewFile_nullFile_returnsUploadPage() {
+
+        // ---------------------------------------------------------------------
+        // Arrange
+        // ---------------------------------------------------------------------
+
+        Model model = new ConcurrentModel();
+        HttpSession session = new MockHttpSession();
+
+        // ---------------------------------------------------------------------
+        // Act
+        // ---------------------------------------------------------------------
+
+        String view = ingestionController.previewFile(null, "RECEIPT", model, session);
+
+        // ---------------------------------------------------------------------
+        // Assert
+        // ---------------------------------------------------------------------
+
+        assertEquals("ingestion/upload", view);
+        assertEquals(
+                "Please select a file before uploading.",
+                model.getAttribute("error")
+        );
+        verifyNoInteractions(ingestionService);
+    }
+
+    @Test
+    @DisplayName("Should return upload page when preview processing fails")
+    void previewFile_serviceFailure_returnsUploadPage() throws Exception {
+
+        // ---------------------------------------------------------------------
+        // Arrange
+        // ---------------------------------------------------------------------
+
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "records.csv",
+                "text/csv",
+                "data".getBytes(StandardCharsets.UTF_8)
+        );
+        Model model = new ConcurrentModel();
+        HttpSession session = new MockHttpSession();
+        when(ingestionService.processFileForPreview(file, "RECEIPT"))
+                .thenThrow(new RuntimeException("Preview failure"));
+
+        // ---------------------------------------------------------------------
+        // Act
+        // ---------------------------------------------------------------------
+
+        String view = ingestionController.previewFile(file, "RECEIPT", model, session);
+
+        // ---------------------------------------------------------------------
+        // Assert
+        // ---------------------------------------------------------------------
+
+        assertEquals("ingestion/upload", view);
+        assertEquals(
+                "Preview failed: Preview failure",
+                model.getAttribute("error")
+        );
+    }
+
     // =========================================================================
     // saveFile()
     // =========================================================================
@@ -237,6 +352,71 @@ class IngestionControllerTest {
         );
     }
 
+    @Test
+    @DisplayName("Should include duplicate and invalid counts in save message")
+    void saveFile_duplicatesAndInvalidRecords_includesCounts() {
+
+        // ---------------------------------------------------------------------
+        // Arrange
+        // ---------------------------------------------------------------------
+
+        HttpSession session = new MockHttpSession();
+        session.setAttribute("pendingType", "RECEIPT");
+        session.setAttribute("pendingRecords", List.of("record"));
+        RedirectAttributes ra = new RedirectAttributesModelMap();
+        when(ingestionService.saveProcessedRecords(anyList(), eq("RECEIPT")))
+                .thenReturn(new IngestionService.SaveSummary(2, 3, 4));
+
+        // ---------------------------------------------------------------------
+        // Act
+        // ---------------------------------------------------------------------
+
+        ingestionController.saveFile(session, ra);
+
+        // ---------------------------------------------------------------------
+        // Assert
+        // ---------------------------------------------------------------------
+
+        String message = ra.getFlashAttributes().get("message").toString();
+        assertTrue(message.contains("Saved 2 records"));
+        assertTrue(message.contains("Skipped 3 duplicate records"));
+        assertTrue(message.contains("Skipped 4 invalid records"));
+        assertNull(session.getAttribute("pendingRecords"));
+        assertNull(session.getAttribute("pendingType"));
+    }
+
+    @Test
+    @DisplayName("Should return save failure in flash attributes")
+    void saveFile_serviceFailure_returnsError() {
+
+        // ---------------------------------------------------------------------
+        // Arrange
+        // ---------------------------------------------------------------------
+
+        HttpSession session = new MockHttpSession();
+        session.setAttribute("pendingType", "RECEIPT");
+        session.setAttribute("pendingRecords", List.of("record"));
+        RedirectAttributes ra = new RedirectAttributesModelMap();
+        when(ingestionService.saveProcessedRecords(anyList(), eq("RECEIPT")))
+                .thenThrow(new RuntimeException("Save failure"));
+
+        // ---------------------------------------------------------------------
+        // Act
+        // ---------------------------------------------------------------------
+
+        ingestionController.saveFile(session, ra);
+
+        // ---------------------------------------------------------------------
+        // Assert
+        // ---------------------------------------------------------------------
+
+        assertEquals(
+                "Save failed: Save failure",
+                ra.getFlashAttributes().get("error")
+        );
+        assertNotNull(session.getAttribute("pendingRecords"));
+    }
+
     // =========================================================================
     // handleFileUpload()
     // =========================================================================
@@ -279,6 +459,41 @@ class IngestionControllerTest {
         assertTrue(
                 ra.getFlashAttributes()
                         .containsKey("message")
+        );
+    }
+
+    @Test
+    @DisplayName("Should return CSV processing failure in flash attributes")
+    void handleFileUpload_serviceFailure_returnsError() throws Exception {
+
+        // ---------------------------------------------------------------------
+        // Arrange
+        // ---------------------------------------------------------------------
+
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "records.csv",
+                "text/csv",
+                "data".getBytes(StandardCharsets.UTF_8)
+        );
+        RedirectAttributes ra = new RedirectAttributesModelMap();
+        doThrow(new RuntimeException("CSV failure"))
+                .when(ingestionService)
+                .processCSV(file);
+
+        // ---------------------------------------------------------------------
+        // Act
+        // ---------------------------------------------------------------------
+
+        ingestionController.handleFileUpload(file, ra);
+
+        // ---------------------------------------------------------------------
+        // Assert
+        // ---------------------------------------------------------------------
+
+        assertEquals(
+                "Failed to process: CSV failure",
+                ra.getFlashAttributes().get("error")
         );
     }
 
