@@ -1,0 +1,36 @@
+receipt_id,reference_no,payer_name,amount,receipt_date,entered_by
+RCT-0004,RC-2026-004,Colombo Pharmacy,119330.75,2026-10-02,accountant1
+RCT-0030,RC-2026-X03,Colombo Pharmacy,32105.01,2026-09-20,clerk1
+RCT-0005,RC-2026-005,Galle Exports,227280.22,2026-09-19,clerk2
+RCT-0029,RC-2026-X02,Kandy Textiles,66805.76,2026-09-22,clerk1
+RCT-0008,RC-2026-008,Lanka Foods,226299.60,2026-09-24,clerk1
+RCT-0031,RC-2026-X04,Galle Exports,21783.11,2026-10-05,clerk1
+RCT-0010,RC-2026-010,Hill Country Tea,5052.42,2026-10-08,clerk1
+RCT-0034,RC-2026-X07,Ceylon Traders,41105.46,2026-09-20,clerk1
+RCT-0022,PO-2026-B01-001,Negombo Seafoods,1000.00,2026-09-19,accountant1
+RCT-0015,RC-2026-P01,Sigiriya Tours,64728.58,2026-09-21,clerk2
+RCT-0002,RC-2026-002,Sigiriya Tours,165632.46,2026-10-09,accountant1
+RCT-0025,PO-2026-C01-001,Lanka Foods,700.00,2026-09-09,accountant1
+RCT-0033,RC-2026-X06,Island Hardware,49419.63,2026-09-03,accountant1
+RCT-0003,RC-2026-003,Kandy Textiles,93184.29,2026-09-13,accountant1
+RCT-0032,RC-2026-X05,Island Hardware,57612.47,2026-09-08,clerk1
+RCT-0011,RC-2026-011,Lanka Foods,199473.80,2026-09-16,accountant1
+RCT-0026,PO-2026-C01-002,Kandy Textiles,500.00,2026-09-09,accountant1
+RCT-0027,PO-2026-C01-003,Lanka Foods,300.00,2026-09-09,accountant1
+RCT-0017,RC-2026-P03,Kandy Textiles,88542.74,2026-10-02,clerk1
+RCT-0006,RC-2026-006,Kandy Textiles,112420.51,2026-10-03,clerk2
+RCT-0018,RC-2026-FAR1,Island Hardware,44636.51,2026-09-27,clerk1
+RCT-0012,RC-2026-012,Galle Exports,189204.48,2026-09-18,clerk1
+RCT-0014,RC-2026-014,Hill Country Tea,181515.80,2026-09-09,clerk1
+RCT-0016,RC-2026-P02,Hill Country Tea,80801.05,2026-09-25,clerk2
+RCT-0028,RC-2026-X01,Colombo Pharmacy,79665.48,2026-09-04,clerk2
+RCT-0020,PO-2026-A01-002,Blue Lagoon Hotel,350.00,2026-10-06,accountant1
+RCT-0001,RC-2026-001,Ceylon Traders,54620.18,2026-09-18,clerk1
+RCT-0021,PO-2026-A01-003,Negombo Seafoods,250.00,2026-10-06,accountant1
+RCT-0024,PO-2026-B01-003,Hill Country Tea,400.00,2026-09-19,accountant1
+RCT-0007,RC-2026-007,Lanka Foods,241980.61,2026-10-01,accountant1
+RCT-0013,RC-2026-013,Negombo Seafoods,81793.47,2026-10-08,clerk2
+RCT-0009,RC-2026-009,Sigiriya Tours,214876.13,2026-09-10,clerk1
+RCT-0023,PO-2026-B01-002,Kandy Textiles,500.00,2026-09-19,accountant1
+RCT-0035,RC-2026-X08,Colombo Pharmacy,37649.00,2026-09-23,clerk1
+RCT-0019,PO-2026-A01-001,Negombo Seafoods,400.00,2026-10-06,accountant1
