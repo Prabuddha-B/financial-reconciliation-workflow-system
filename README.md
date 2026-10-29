@@ -350,12 +350,13 @@ Uploads are limited to **20 MB** per file.
 
 **Group A – CSC3213 Project in Computer Science I**, University of Peradeniya
 
-| Member | Contributions |
+
+| Team Member | Registration Number |
 |---|---|
-| **Navindu Rajamanthri** | |
-| **Prabuddha Bandara** | |
-| **Ruvishan** | |
-| **Nikhila Eranda** | |
+| Navindu Rajamanthri | S/21/468 |
+| Prabuddha Bandara | S/21/324 |
+| Sandaru Ruvishan | S/21/347 |
+| Nikhila Eranda | S/21/348 |
 
 
 ---
