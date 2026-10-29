@@ -1,179 +1,121 @@
-# Financial Reconciliation and Workflow Support System (FRWSS)
+# FRWSS Testing Contribution — `testing-Prabuddha`
 
-A centralized enterprise-style reconciliation and workflow management platform developed as a final-year undergraduate capstone project for CSC3213 – Project in Computer Science I.
+## 1. Branch Purpose
 
-The system focuses on:
+`testing-Prabuddha` is a development branch within the **Financial Reconciliation and Workflow Support System (FRWSS)** repository. It consolidates unit-test work, additional domain/data-class tests, and integration-test scenarios for the existing application.
 
-- Financial data ingestion
-- Reconciliation workflows
-- Auditability
-- Workflow approvals
-- Exception tracking
-- Immutable audit support
+This branch is **not a separate application**. Its purpose is to improve confidence in existing FRWSS functionality through automated tests. The system remains a reconciliation and workflow layer; tests do not execute real payments or transfers.
 
-> **IMPORTANT**
->
-> This system DOES NOT process real financial transactions or payments.  
-> It is strictly a reconciliation and workflow support platform.
+## 2. Individual Contribution
 
----
+The testing work on this branch includes the following areas.
 
-# Project Overview
+### Unit tests
 
-The Financial Reconciliation and Workflow Support System (FRWSS) is designed to streamline organizational reconciliation operations by integrating multiple financial data sources into a centralized workflow-driven environment.
+- **Manual entry:** `ManualEntryControllerTest`
+- **Ingestion:** `IngestionServiceTest`, `IngestionControllerTest`
+- **Workflow:** `WorkflowServiceImplTest`, `WorkflowControllerTest`, `WorkflowViewControllerTest`
+- **Tax:** `TaxConfigurationServiceTest`, `TaxEstimationServiceTest`, `AdminTaxConfigurationControllerTest`, `TaxEstimationControllerTest`
+- **Security:** `SecurityContextAdapterTest`
+- **Model advice:** `GlobalModelAttributesAdviceTest`
+- **Entities and domain models:** `AccountingRecordTest`, `StockPurchaseTest`, `UserTest`, `TaxConfigurationTest`, `WorkflowRecordTest`, `WorkflowTransitionLogTest`
+- **DTOs:** `ManualEntryFormTest`, `WorkflowRequestDtoTest`, `WorkflowResponseDtoTest`, `WorkflowHistoryResponseDtoTest`, `WorkflowStateUpdateRequestDtoTest`, `TaxEstimationRequestDtoTest`, `TaxEstimationResponseDtoTest`
+- **Repositories:** `UserRepositoryTest`, `TaxConfigurationRepositoryTest`, `WorkflowRecordRepositoryTest`, `WorkflowTransitionLogRepositoryTest`
+- **Enums and exceptions:** `WorkflowStateTest`, `WorkflowNotFoundExceptionTest`, `InvalidWorkflowTransitionExceptionTest`
+- **Application bootstrap:** `FrwssSystemApplicationTest`
 
-The platform supports:
+Some test classes already existed and were extended. This list identifies the test classes involved in this contribution and does not imply that every class was written entirely from scratch.
 
-- Automated data ingestion
-- Manual financial record entry
-- Validation and duplicate detection
-- Workflow-based review processes
-- Audit-ready traceability
-- Administrative oversight
+### Integration tests
 
----
+- `IngestionIntegrationTest` — exercises receipt CSV preview/validation and persistence through the real ingestion service and repository.
+- `WorkflowIntegrationTest` — covers workflow operations and persistence.
+- `TaxConfigurationIntegrationTest` — covers tax-configuration operations and persistence.
 
-# Core Features
+The ingestion integration test was observed passing in the IDE. The workflow and tax integration tests were added, but their final combined result should be confirmed by running the complete test suite.
 
-## Ingestion Module
+## 3. Testing Approach and Tools
 
-- CSV ingestion
-- XLSX ingestion
-- Automated ingestion pipeline
-- Manual financial record entry
-- Validation workflows
-- Duplicate detection
+The tests use the project's Java/Spring testing stack:
 
-## Workflow Management
+- **JUnit 5** for test cases and assertions.
+- **Mockito** for isolating units of code and verifying interactions with dependencies.
+- **Spring Boot Test** for application-context and integration testing.
+- **MockMultipartFile** for simulating uploaded CSV files in ingestion tests.
+- **Spring test utilities**, such as `ConcurrentModel`, for controller unit tests.
+- **Test database configuration** in `src/test/resources/application-test.properties` for tests that require a Spring application context and database.
 
-- Workflow state transitions
-- Approval/review pipeline
-- Task tracking
-- Exception management
+Unit tests focus on individual methods, validation rules, branches, returned values, and dependency interactions. Integration tests exercise multiple application components together, including persistence where configured.
 
-## Audit & Traceability
+## 4. How to Run the Tests
 
-- Immutable audit logs
-- Historical tracking
-- Reconciliation tracking
-- Activity monitoring
+Run commands from the repository root, where `pom.xml` and the Maven wrapper are located.
 
-## User Management
+### Run the complete test suite (Windows PowerShell)
 
-- Role-based access control (RBAC)
-- User authentication
-- Access restriction by role
-
----
-
-# Technology Stack
-
-## Backend
-
-- Java 17
-- Spring Boot
-- Spring MVC
-- Spring Data JPA
-- Hibernate
-
-## Frontend
-
-- Thymeleaf
-- Bootstrap 5
-- HTML5
-- CSS3
-- JavaScript
-
-## Database
-
-- MySQL
-
-## Build & Dependency Management
-
-- Maven
-
-## Version Control
-
-- Git
-- GitHub
-
----
-
-# Project Structure
-
-```text
-src/
-├── main/
-│   ├── java/com/frwss/system/
-│   │   ├── controller/
-│   │   ├── service/
-│   │   ├── repository/
-│   │   ├── model/
-│   │   ├── dto/
-│   │   └── config/
-│   │
-│   └── resources/
-│       ├── templates/
-│       ├── static/
-│       └── application.properties
-│
-└── test/
+```powershell
+.\mvnw.cmd test
 ```
 
----
+### Clean and run the complete test suite
 
-# Package Standard
-
-The project follows the standardized package namespace:
-
-```java
-com.frwss.system
+```powershell
+.\mvnw.cmd clean test
 ```
 
-All modules and future development should strictly follow this structure.
+### Run a single test class
 
----
+For example:
 
-# Current Integrated Modules
+```powershell
+.\mvnw.cmd -Dtest=ManualEntryControllerTest test
+```
 
-## Completed
+Run an integration test individually:
 
-- Ingestion frontend
-- Manual entry workflows
-- Backend ingestion services
-- Repository integration
-- Package standardization
-- CSV/XLSX support
-- Validation support
+```powershell
+.\mvnw.cmd -Dtest=IngestionIntegrationTest test
+```
 
+On other operating systems, use `./mvnw test`.
 
----
+If an integration test fails during Spring context startup, check the active test profile, `src/test/resources/application-test.properties`, database configuration, and test dependencies in `pom.xml`. Do not put production credentials in test configuration or commit secrets.
 
+## 5. Results and Evidence
 
-# Future Enhancements
+The following results were observed during development:
 
-- Hash-chain audit logging
-- AI-assisted anomaly detection
-- Advanced reconciliation analytics
-- Dashboard visualizations
-- Docker deployment
+- The IDE reported **200 tests passed** in one unit-test run.
+- `IngestionIntegrationTest` subsequently reported **1 test passed** after the test database configuration and CSV trimming expectation were corrected.
+- A focused run of `AdminTaxConfigurationControllerTest` passed after its calls were updated to match the controller's three-parameter method signature, including `BindingResult`.
 
----
+These are results from separate runs, not a claim that all tests were executed together in one final run. Record the final combined test count and outcome from the latest successful ` .\mvnw.cmd clean test` run on the branch being assessed.
 
-# Contributors
+### Known limitations
 
-- Group A – CSC3213 Project in Computer Science I
-- University of Peradeniya
+- The available development evidence does not establish that all three integration tests pass together after every merge.
+- No JaCoCo coverage percentage is reported; coverage instrumentation was intentionally not used.
+- Tests using mocked repositories verify interaction with those dependencies; database-backed tests are needed to verify actual persistence.
+- `IngestionControllerTest` is currently located under the existing misspelled test package directory `contoller`. If the package is reorganized, update the declaration and path together and rerun the suite.
 
----
+## 6. Traceability
 
-# Academic Context
+Review this testing work alongside the project's existing requirements and planning documents:
 
-This project is developed as part of the undergraduate Computer Science curriculum using Agile/Prototyping methodology.
+- **Project scope:** `CSC3213_21_Group_A_Project_Charter.pdf`
+- **Software requirements:** `Group_A_SRS.pdf`
+- **Requirements traceability:** `Group_A_RTM_v1.pdf`
+- **Work breakdown and planned activities:** `Group_A_WBS_v1.pdf`
 
----
+Use the RTM to map each tested requirement to its test class or test method. Requirement IDs are not reproduced here because they have not been verified against the current RTM. If the repository or submission contains a test plan or test evidence document, add a link using its actual path.
 
-# License
+## 7. Branch Context
 
-Academic Use Only.  
-Not intended for production financial operations.
+This README documents the testing contribution associated with `testing-Prabuddha`. The branch belongs to the same FRWSS Git repository; it is not a separate application.
+
+Before submitting or merging this branch:
+
+1. Run `.\mvnw.cmd clean test`.
+2. Confirm the final test count and that the build reports `BUILD SUCCESS`.
+3. Review `git status` and commit the intended test files and test configuration.
+4. Save the final test output or IDE screenshot as submission evidence.
