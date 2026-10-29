@@ -1,179 +1,199 @@
-# Financial Reconciliation and Workflow Support System (FRWSS)
+# FRWSS — Workflow Feature Branch
 
-A centralized enterprise-style reconciliation and workflow management platform developed as a final-year undergraduate capstone project for CSC3213 – Project in Computer Science I.
+**Branch:** `feature/workflow-Prabuddha`  
+**Project:** Financial Reconciliation and Workflow Support System (FRWSS)  
 
-The system focuses on:
 
-- Financial data ingestion
-- Reconciliation workflows
-- Auditability
-- Workflow approvals
-- Exception tracking
-- Immutable audit support
+## 1. Branch Purpose
 
-> **IMPORTANT**
->
-> This system DOES NOT process real financial transactions or payments.  
-> It is strictly a reconciliation and workflow support platform.
+This branch contains workflow-management implementation for FRWSS. The workflow module provides a controlled lifecycle for records submitted to review, verification, or rejection. It connects workflow state changes with transition history, role-aware web interactions, and the system audit service.
 
----
+FRWSS is a reconciliation and workflow support system. It does **not** execute real financial transactions, payments, or transfers.
 
-# Project Overview
+> **Contribution attribution note:** This README describes functionality present in the supplied branch snapshot. A ZIP snapshot does not establish which lines were authored by a particular contributor or whether every file differs from the parent branch. Commit history or a branch diff is required for definitive attribution.
 
-The Financial Reconciliation and Workflow Support System (FRWSS) is designed to streamline organizational reconciliation operations by integrating multiple financial data sources into a centralized workflow-driven environment.
+## 2. Workflow Functionality Present in This Branch
 
-The platform supports:
+### Workflow lifecycle
 
-- Automated data ingestion
-- Manual financial record entry
-- Validation and duplicate detection
-- Workflow-based review processes
-- Audit-ready traceability
-- Administrative oversight
+The workflow state model defines these states:
 
----
+- `ENTERED` — initial state when a workflow record is created.
+- `REVIEWED` — record has passed the review stage.
+- `VERIFIED` — record has been verified.
+- `REJECTED` — record has been rejected after review.
 
-# Core Features
+The transition validator permits the following transitions:
 
-## Ingestion Module
+| Current state | Requested state | Supported |
+|---|---|---|
+| `ENTERED` | `REVIEWED` | Yes |
+| `REVIEWED` | `VERIFIED` | Yes |
+| `REVIEWED` | `REJECTED` | Yes |
+| Any other transition | Any other state | No |
 
-- CSV ingestion
-- XLSX ingestion
-- Automated ingestion pipeline
-- Manual financial record entry
-- Validation workflows
-- Duplicate detection
+### Separation of responsibilities
 
-## Workflow Management
+The workflow implementation uses a layered structure:
 
-- Workflow state transitions
-- Approval/review pipeline
-- Task tracking
-- Exception management
+- **Controllers** expose REST endpoints and render Thymeleaf workflow pages.
+- **Service layer** implements workflow creation, state changes, history retrieval, and latest-activity retrieval.
+- **Repositories** persist workflow records and transition logs through Spring Data JPA.
+- **Entities and DTOs** represent persisted workflow state and request/response data.
+- **Transition validator** centralizes the allowed state-transition rules.
+- **Audit integration** records workflow state changes through the application's audit service.
+- **Reconciliation integration** forwards verified or rejected manual-resolution outcomes to the reconciliation service when the workflow source type is `RECONCILIATION`.
 
-## Audit & Traceability
+### Review controls visible in the implementation
 
-- Immutable audit logs
-- Historical tracking
-- Reconciliation tracking
-- Activity monitoring
+The workflow service checks that:
+- a requested state transition is allowed;
+- a justification is supplied;
+- the workflow creator does not review or approve their own workflow;
+- the same user does not perform consecutive transitions.
 
-## User Management
+The workflow web controller also applies role checks: users with `APPROVER` or `ADMIN` roles can perform the review transition, while users with `AUDITOR` or `ADMIN` roles can verify or reject workflows. These controls are part of the current implementation and should be validated against the project's final security requirements.
 
-- Role-based access control (RBAC)
-- User authentication
-- Access restriction by role
+### Transition history
 
----
+Each successful state change creates a `WorkflowTransitionLog` entry containing:
+- workflow identifier;
+- previous and new states;
+- acting user;
+- justification;
+- transition timestamp.
 
-# Technology Stack
+This supports inspection of the workflow's state-change history. The transition log is separate from the application's audit service; do not describe the workflow transition table alone as a cryptographic hash-chain.
 
-## Backend
+## 3. Main Workflow Files
+
+| File or package | Responsibility |
+|---|---|
+| `workflow/controller/WorkflowController.java` | REST API for creating, listing, retrieving, and updating workflow records and reading history |
+| `workflow/controller/WorkflowViewController.java` | Thymeleaf page routes and form-driven state transitions |
+| `workflow/service/WorkflowService.java` | Workflow service contract |
+| `workflow/service/WorkflowServiceImpl.java` | Workflow business logic and audit/reconciliation integration |
+| `workflow/validation/WorkflowTransitionValidator.java` | Allowed state-transition rules |
+| `workflow/model/WorkflowRecord.java` | Current workflow state and source-record metadata |
+| `workflow/model/WorkflowState.java` | Workflow state enumeration |
+| `workflow/model/WorkflowTransitionLog.java` | Persistent state-transition history |
+| `workflow/repository/WorkflowRecordRepository.java` | Workflow record persistence and source lookup |
+| `workflow/repository/WorkflowTransitionLogRepository.java` | Transition-history persistence and latest-transition lookup |
+| `src/main/resources/templates/workflow/approvals.html` | Workflow approvals page |
+| `src/main/resources/templates/workflow/status.html` | Workflow status and history page |
+
+The package namespace is `com.frwss.system.workflow`.
+
+## 4. Workflow Endpoints
+
+The REST controller is rooted at `/api/workflows`.
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| `POST` | `/api/workflows` | Create a workflow record |
+| `GET` | `/api/workflows` | Retrieve all workflow records |
+| `GET` | `/api/workflows/{workflowId}` | Retrieve one workflow |
+| `GET` | `/api/workflows/{workflowId}/history` | Retrieve transition history |
+| `PUT` | `/api/workflows/{workflowId}/state` | Request a workflow state change |
+
+The web interface provides these routes:
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| `GET` | `/workflow/approvals` | Display workflow approval records |
+| `GET` | `/workflow/status/{workflowId}` | Display workflow state and transition history |
+| `POST` | `/workflow/{workflowId}/transition` | Submit a state transition from the web interface |
+
+The exact accessibility of these routes depends on the application's active Spring Security configuration.
+
+## 5. Technology Stack
+
+The supplied project configuration identifies the following technologies:
 
 - Java 17
 - Spring Boot
 - Spring MVC
-- Spring Data JPA
-- Hibernate
-
-## Frontend
-
+- Spring Data JPA and Hibernate
+- Spring Security
 - Thymeleaf
-- Bootstrap 5
-- HTML5
-- CSS3
-- JavaScript
-
-## Database
-
-- MySQL
-
-## Build & Dependency Management
-
+- Bootstrap
 - Maven
+- PostgreSQL JDBC driver
 
-## Version Control
+## 6. Run the Application Locally
 
-- Git
-- GitHub
+### Prerequisites
 
----
+- JDK 17
+- A compatible PostgreSQL instance
+- Git, if checking out the branch
+- The project's database and application configuration
 
-# Project Structure
+### Start on Windows PowerShell
 
-```text
-src/
-├── main/
-│   ├── java/com/frwss/system/
-│   │   ├── controller/
-│   │   ├── service/
-│   │   ├── repository/
-│   │   ├── model/
-│   │   ├── dto/
-│   │   └── config/
-│   │
-│   └── resources/
-│       ├── templates/
-│       ├── static/
-│       └── application.properties
-│
-└── test/
+From the repository root:
+
+```powershell
+.\mvnw.cmd spring-boot:run
 ```
 
----
+### Run the Maven verification lifecycle
 
-# Package Standard
-
-The project follows the standardized package namespace:
-
-```java
-com.frwss.system
+```powershell
+.\mvnw.cmd clean verify
 ```
 
-All modules and future development should strictly follow this structure.
+On systems where the Maven Wrapper is unavailable, use an installed Maven version:
 
----
+```bash
+mvn spring-boot:run
+mvn clean verify
+```
 
-# Current Integrated Modules
+Configure the database using the application's supported configuration before starting it. Do not commit real credentials or sensitive data.
 
-## Completed
+The commands above describe how to invoke the build and application. They are **not a claim that the build or tests passed**; execute them in the target environment and record the actual result.
 
-- Ingestion frontend
-- Manual entry workflows
-- Backend ingestion services
-- Repository integration
-- Package standardization
-- CSV/XLSX support
-- Validation support
+## 7. Manual Workflow Verification Checklist
+
+Use an appropriately configured local development database and test accounts.
+
+- [ ] Create a workflow and confirm its initial state is `ENTERED`.
+- [ ] Confirm `ENTERED → REVIEWED` is accepted for an authorized reviewer.
+- [ ] Confirm `REVIEWED → VERIFIED` is accepted for an authorized auditor.
+- [ ] Confirm `REVIEWED → REJECTED` is accepted for an authorized auditor.
+- [ ] Confirm unsupported transitions are rejected.
+- [ ] Confirm a missing or blank justification is rejected.
+- [ ] Confirm the workflow creator cannot review or approve their own workflow.
+- [ ] Confirm the same user cannot perform consecutive transitions.
+- [ ] Confirm unauthorized roles cannot submit restricted transitions through the web interface.
+- [ ] Confirm each successful transition creates a history record with actor, states, justification, and timestamp.
+- [ ] Confirm workflow state changes are sent to the audit service.
+- [ ] For `RECONCILIATION` source records, verify that verification/rejection invokes the corresponding reconciliation operation.
+- [ ] Verify missing workflow identifiers produce the expected not-found behavior.
+
+Record the date, environment, test data, actual result, and evidence for each check. Do not mark a check as passed until it has been executed.
+
+## 8. Test Status and Evidence
+
+The supplied ZIP snapshot does not contain a `src/test` test-source tree. Therefore, this README does not claim that automated workflow unit or integration tests are included in this branch snapshot.
+
+The `clean verify` command can be used to run the Maven verification lifecycle, but its actual outcome must be confirmed in the development environment. Add links to test reports, screenshots, or CI runs here once they exist.
+
+## 9. Known Review Points
+
+The following points should be considered during final integration and review:
+
+1. **Exception specificity:** some workflow validation failures currently use generic `RuntimeException` instances. Confirm that the global exception handling maps them to appropriate user-facing responses.
+2. **Input validation:** confirm that incoming DTOs and workflow identifiers are validated at the API boundary.
+3. **Authorization consistency:** review API-level authorization as well as the role checks in `WorkflowViewController`.
+4. **Audit and transaction behavior:** verify the intended transaction boundary when a workflow transition, transition log, audit entry, and reconciliation operation are performed together.
+5. **Data integrity:** verify source-record identifiers and the workflow's relationship to reconciliation records before release.
+
+These are review points, not assertions that a defect has been reproduced.
+
+## 10. Scope and Safety Boundary
+
+The workflow module supports review and approval of reconciliation-related records. It must not be used to execute payments, transfers, or other real financial transactions. Development and demonstration should use synthetic or anonymized data.
 
 
----
-
-
-# Future Enhancements
-
-- Hash-chain audit logging
-- AI-assisted anomaly detection
-- Advanced reconciliation analytics
-- Dashboard visualizations
-- Docker deployment
-
----
-
-# Contributors
-
-- Group A – CSC3213 Project in Computer Science I
-- University of Peradeniya
-
----
-
-# Academic Context
-
-This project is developed as part of the undergraduate Computer Science curriculum using Agile/Prototyping methodology.
-
----
-
-# License
-
-Academic Use Only.  
-Not intended for production financial operations.
