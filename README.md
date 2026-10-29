@@ -1,179 +1,177 @@
-# Financial Reconciliation and Workflow Support System (FRWSS)
+# FRWSS — Testing Branch
 
-A centralized enterprise-style reconciliation and workflow management platform developed as a final-year undergraduate capstone project for CSC3213 – Project in Computer Science I.
+**Project:** Financial Reconciliation and Workflow Support System (FRWSS)  
+**Course:** CSC3213 – Project in Computer Science I  
+**Branch purpose:** Automated testing and quality assurance  
+**Primary test framework:** JUnit 5, Mockito, Spring Boot Test
 
-The system focuses on:
+## 1. Purpose of This Branch
 
-- Financial data ingestion
-- Reconciliation workflows
-- Auditability
-- Workflow approvals
-- Exception tracking
-- Immutable audit support
+This branch consolidates automated tests for the existing FRWSS application. It is a development branch within the same FRWSS repository, **not a separate application**.
 
-> **IMPORTANT**
->
-> This system DOES NOT process real financial transactions or payments.  
-> It is strictly a reconciliation and workflow support platform.
+The test suite is intended to verify implemented business logic, validation, workflow transitions, security decisions, audit-chain behaviour, and interactions with persistence-related dependencies. Integration tests exercise selected service-to-database flows.
 
----
+FRWSS is a reconciliation and workflow support system. Any payment-related tests in this branch exercise a **simulated payment gateway** and payment-reconciliation logic; they do not execute real payments or transfers.
 
-# Project Overview
+## 2. Testing Scope
 
-The Financial Reconciliation and Workflow Support System (FRWSS) is designed to streamline organizational reconciliation operations by integrating multiple financial data sources into a centralized workflow-driven environment.
+The checked-in test source contains **39 Java test classes**:
 
-The platform supports:
+- **36 unit-test classes**
+- **3 integration-test classes**
+- **280 declared test methods/annotations** in total, including two parameterized test methods. The number of executed test cases can be higher because parameterized tests run once per supplied argument set.
 
-- Automated data ingestion
-- Manual financial record entry
-- Validation and duplicate detection
-- Workflow-based review processes
-- Audit-ready traceability
-- Administrative oversight
+The inventory below is based on the source files in this branch. It is not a statement that every test passed in a single final run.
 
----
+### 2.1 Unit-test coverage by area
 
-# Core Features
+| Area | Test classes | Focus |
+|---|---|---|
+| Ingestion | `IngestionServiceTest`, `IngestionControllerTest` | CSV ingestion, preview/save paths, record types, duplicate/invalid inputs, controller responses, session and service-failure paths |
+| Manual entry | `ManualEntryControllerTest` | Search, add and update flows for receipt, payroll, stock-purchase and accounting records; missing keys, duplicate identifiers, unsupported types and not-found cases |
+| Reconciliation | `ReconciliationServiceTest` | Exact, partial and one-to-many matching; orphan records; manual resolution; approval/rejection; workflow hand-off |
+| Workflow | `WorkflowServiceImplTest`, `WorkflowControllerTest`, `WorkflowViewControllerTest`, `WorkflowTransitionValidatorTest` | Workflow creation, state transitions, transition rules, role checks, history, error handling and persistence/audit/reconciliation failure paths |
+| Tax | `TaxConfigurationServiceTest`, `TaxEstimationServiceTest`, `AdminTaxConfigurationControllerTest`, `TaxEstimationControllerTest` | Tax configuration retrieval/update, estimation, monetary boundaries and rounding, inactive/missing configuration and failure paths |
+| Audit | `AuditServiceTest` | Genesis hash, hash chaining, tamper detection, chain verification, chain-break acknowledgement and filtered log retrieval |
+| Security | `SecurityContextAdapterTest`, `GlobalModelAttributesAdviceTest` | Authentication/principal handling, role checks, development/security modes and model attributes |
+| Messaging and notifications | `MessagingServiceTest`, `NotificationServiceTest` | Message sending/replying, inbox/sent/conversation retrieval, read/delete permissions and workflow/reconciliation/system notifications |
+| Simulated payment | `SimulatedPaymentGatewayServiceTest`, `PaymentReconciliationServiceTest` | Simulated success/failure, status/refund validation, reconciliation against accounting records, audit interactions and summary statistics |
+| Domain models and DTOs | `AccountingRecordTest`, `StockPurchaseTest`, `UserTest`, `ManualEntryFormTest`, `TaxConfigurationTest`, `TaxEstimationRequestDtoTest`, `TaxEstimationResponseDtoTest`, `WorkflowRecordTest`, `WorkflowStateTest`, `WorkflowTransitionLogTest`, `WorkflowHistoryResponseDtoTest`, `WorkflowRequestDtoTest`, `WorkflowResponseDtoTest`, `WorkflowStateUpdateRequestDtoTest` | Field assignment, defaults, enum values and data-holder behaviour |
+| Exceptions | `WorkflowNotFoundExceptionTest`, `InvalidWorkflowTransitionExceptionTest`, `GlobalExceptionHandlerTest` | Exception messages and HTTP/error-handler responses |
+| Application advice | `GlobalModelAttributesAdviceTest` | Shared user and role attributes added to MVC models |
 
-## Ingestion Module
+`IngestionControllerTest` is stored under the existing misspelled directory `src/test/java/com/frwss/system/contoller/`. `WorkflowTransitionValidatorTest` is also stored in a non-standard directory and declares a package name that differs from the normal production package hierarchy. These layout issues do not change the test inventory, but are worth correcting in a separate, carefully verified cleanup.
 
-- CSV ingestion
-- XLSX ingestion
-- Automated ingestion pipeline
-- Manual financial record entry
-- Validation workflows
-- Duplicate detection
+### 2.2 Integration tests
 
-## Workflow Management
+The integration tests use `@SpringBootTest`, the `test` profile, and `@Transactional`. They use the Spring application context and real repositories rather than mocking the main persistence path.
 
-- Workflow state transitions
-- Approval/review pipeline
-- Task tracking
-- Exception management
+| Test class | Integrated flow | Main assertions |
+|---|---|---|
+| `IngestionIntegrationTest` | CSV upload → ingestion preview/validation → record save → receipt repository | Valid record count, save count, database count and stored receipt fields |
+| `WorkflowIntegrationTest` | Workflow service → workflow record/transition-log repositories → history retrieval | Workflow creation, state transition, persisted state, transition log and history |
+| `TaxConfigurationIntegrationTest` | Tax configuration repository/service → database | Configuration creation/retrieval, tax-rate update and persisted description |
 
-## Audit & Traceability
+These are focused integration scenarios, not a full end-to-end test of every application screen or module.
 
-- Immutable audit logs
-- Historical tracking
-- Reconciliation tracking
-- Activity monitoring
+## 3. Technology and Test Design
 
-## User Management
+The Maven project specifies Java 17 and Spring Boot 4.0.5. The test-related dependencies include:
 
-- Role-based access control (RBAC)
-- User authentication
-- Access restriction by role
+- **JUnit Jupiter / JUnit 5** — test cases and assertions.
+- **Mockito** — mocks, stubbing, argument capture and interaction verification.
+- **Spring Boot Test** — Spring context and integration tests.
+- **Spring Security Test** — security-related testing support.
+- **H2 Database** — in-memory test database.
+- **MockMultipartFile** — simulated multipart file uploads.
+- **Spring MVC test utilities** — model and web-layer test support.
 
----
+Unit tests isolate the class under test and mock its external dependencies where appropriate. Integration tests deliberately use real Spring-managed services/repositories and the H2 test configuration to check selected persistence flows.
 
-# Technology Stack
+The test configuration is located at `src/test/resources/application-test.properties`:
 
-## Backend
+- JDBC URL: in-memory H2 database (`jdbc:h2:mem:testdb`)
+- Hibernate schema lifecycle: `create-drop`
+- Flyway: disabled for the test profile
+- SQL logging: disabled
 
-- Java 17
-- Spring Boot
-- Spring MVC
-- Spring Data JPA
-- Hibernate
+The test profile is activated explicitly by the three integration-test classes.
 
-## Frontend
+## 4. Running the Tests
 
-- Thymeleaf
-- Bootstrap 5
-- HTML5
-- CSS3
-- JavaScript
+Run commands from the repository root, where `pom.xml` and `mvnw.cmd` are located.
 
-## Database
+### Windows PowerShell
 
-- MySQL
+Run the complete suite:
 
-## Build & Dependency Management
-
-- Maven
-
-## Version Control
-
-- Git
-- GitHub
-
----
-
-# Project Structure
-
-```text
-src/
-├── main/
-│   ├── java/com/frwss/system/
-│   │   ├── controller/
-│   │   ├── service/
-│   │   ├── repository/
-│   │   ├── model/
-│   │   ├── dto/
-│   │   └── config/
-│   │
-│   └── resources/
-│       ├── templates/
-│       ├── static/
-│       └── application.properties
-│
-└── test/
+```powershell
+.\mvnw.cmd test
 ```
 
----
+Run a clean test build:
 
-# Package Standard
-
-The project follows the standardized package namespace:
-
-```java
-com.frwss.system
+```powershell
+.\mvnw.cmd clean test
 ```
 
-All modules and future development should strictly follow this structure.
+Run one unit-test class:
 
----
+```powershell
+.\mvnw.cmd -Dtest=ReconciliationServiceTest test
+```
 
-# Current Integrated Modules
+Run one integration-test class:
 
-## Completed
+```powershell
+.\mvnw.cmd -Dtest=IngestionIntegrationTest test
+```
 
-- Ingestion frontend
-- Manual entry workflows
-- Backend ingestion services
-- Repository integration
-- Package standardization
-- CSV/XLSX support
-- Validation support
+Other useful targeted commands:
 
+```powershell
+.\mvnw.cmd -Dtest=WorkflowServiceImplTest test
+.\mvnw.cmd -Dtest=TaxConfigurationIntegrationTest test
+.\mvnw.cmd -Dtest=WorkflowIntegrationTest test
+```
 
----
+On Linux/macOS, use `./mvnw` instead of `.\mvnw.cmd`.
 
+A successful run should finish with Maven reporting `BUILD SUCCESS`. Record the actual final test count from that run rather than relying on an earlier IDE screenshot or a source-file count.
 
-# Future Enhancements
+## 5. Results and Evidence
 
-- Hash-chain audit logging
-- AI-assisted anomaly detection
-- Advanced reconciliation analytics
-- Dashboard visualizations
-- Docker deployment
+### Source inventory
 
----
+Inspection of the uploaded branch snapshot found:
 
-# Contributors
+- 39 Java test classes.
+- 36 unit-test classes and 3 integration-test classes.
+- 278 `@Test` declarations and 2 `@ParameterizedTest` declarations (280 declared test methods/annotations overall).
 
-- Group A – CSC3213 Project in Computer Science I
-- University of Peradeniya
+These figures describe the checked-in test sources. They are not the same as the number of executed test invocations, because parameterized tests may run multiple times.
 
----
+### Execution evidence available during this review
 
-# Academic Context
+A prior IDE screenshot shared during development showed **200 tests passed** in that particular run. A later screenshot showed `IngestionIntegrationTest` passing after the test database configuration and trimmed CSV-value expectation were corrected. A focused `AdminTaxConfigurationControllerTest` run was also reported passing after the test was updated to supply `BindingResult`.
 
-This project is developed as part of the undergraduate Computer Science curriculum using Agile/Prototyping methodology.
+These are separate results from earlier runs. They do **not** establish that all 280 declared test methods or all three integration tests pass together on the exact snapshot represented by this ZIP.
 
----
+During this review, a fresh Maven run could not be completed because the Maven wrapper was unable to download its Maven distribution from Maven Central in the available environment. Therefore, this README intentionally does not claim a fresh full-suite pass.
 
-# License
+**Before final submission:** run `.\mvnw.cmd clean test` in your development environment and update this section with the actual summary from the final run.
 
-Academic Use Only.  
-Not intended for production financial operations.
+## 6. Known Limitations and Notes
+
+- No JaCoCo coverage percentage is reported; coverage instrumentation is not required for this branch's stated testing approach.
+- A source inventory cannot prove that every business-rule branch is covered. The test suite should be maintained as production logic evolves.
+- Unit tests with mocked repositories verify the unit's behaviour and interactions; they do not independently prove database query or schema correctness.
+- The three integration tests cover selected happy-path lifecycle flows. They do not replace comprehensive integration testing for every module.
+- `SimulatedPaymentGatewayServiceTest` exercises a simulated gateway. It must not be described as testing real payment processing.
+- The test package/directory inconsistencies described in Section 2 are cleanup candidates and should only be changed with a subsequent full test run.
+- Do not commit production credentials or secrets in test configuration.
+
+## 7. Requirements and Project Traceability
+
+Use this test branch together with the project documents already maintained by Group A:
+
+- `CSC3213_21_Group_A_Project_Charter.pdf` — project scope and boundaries.
+- `Group_A_SRS.pdf` — software requirements.
+- `Group_A_RTM_v1.pdf` — requirements traceability matrix.
+- `Group_A_WBS_v1.pdf` — work breakdown and planned activities.
+- `SPRINT_4_TESTING_PLAN.md` — testing sprint goal, approach, standards, and definition of done.
+
+Map requirements to test classes/methods through the RTM. Requirement IDs are intentionally not listed here because they have not been verified against the RTM in this branch snapshot.
+
+## 8. Branch Context and Definition of Done
+
+This branch is the team's testing branch in the same FRWSS repository. It should be integrated using the team's agreed Git workflow; it should not be deployed or treated as a separate product.
+
+Before declaring this testing work complete:
+
+1. Run `.\mvnw.cmd clean test` from the repository root.
+2. Confirm the full suite finishes with `BUILD SUCCESS`.
+3. Record the actual executed test count and any skipped tests.
+4. Review failures and resolve or document them.
+5. Ensure only intended test, test-configuration, and documentation changes are committed.
+6. Retain the final Maven output or IDE test-run screenshot as evidence.
