@@ -1,0 +1,8 @@
+receipt_id,reference_no,payer_name,amount,date,entered_by
+1,REF100,John Doe,5000,2025-01-01,jdoe
+2,,Alice Smith,12000,2025-02-10,asmith
+3,REF102,Bob Lee,-4500,2025-03-15,blee
+4,REF103,,7000,2025-04-20,user1
+5,REF104,Chris Evan,0,2025-05-05,user2
+6,REF105,David Kim,abc,2025-06-01,user3
+7,REF106,Emma Watson,15000,,user4
