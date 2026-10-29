@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/header :: header('Reply to Message')}"></head>
+
+<style>
+  .quote-toggle-icon {
+    transition: transform var(--frwss-transition-fast);
+  }
+  .quote-toggle-icon.rotated {
+    transform: rotate(90deg);
+  }
+  .quoted-content {
+    border-left: 3px solid var(--frwss-border);
+    color: var(--frwss-text-muted);
+  }
+</style>
+
+<body>
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="container py-4 py-lg-5">
+
+  <!-- ===================== Page Header ===================== -->
+  <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+    <div>
+      <h1 class="h3 mb-2"><i class="bi bi-reply me-2"></i>Reply to Message</h1>
+      <p class="frwss-subtitle mb-0">Reply to <span th:text="${originalMessage.subject}">Subject</span></p>
+    </div>
+    <a th:href="@{/messages/view/{id}(id=${originalMessage.id})}" class="btn btn-outline-secondary">
+      <i class="bi bi-arrow-left me-1"></i>Back
+    </a>
+  </div>
+
+  <!-- ===================== Original Message (collapsed quote) ===================== -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-white py-3">
+      <button class="btn btn-link btn-sm text-decoration-none p-0 fw-semibold d-flex align-items-center gap-2"
+              type="button" data-bs-toggle="collapse" data-bs-target="#originalMessageBody"
+              aria-expanded="false" aria-controls="originalMessageBody">
+        <i class="bi bi-chevron-right quote-toggle-icon"></i>
+        Original message from <span th:text="${senderName}">Sender</span>
+      </button>
+    </div>
+    <div class="collapse" id="originalMessageBody">
+      <div class="card-body">
+        <div class="row mb-2">
+          <div class="col-md-6">
+            <span class="fw-semibold">From:</span>
+            <span th:text="${senderName}">Sender</span>
+          </div>
+          <div class="col-md-6">
+            <span class="fw-semibold">To:</span>
+            <span th:text="${recipientName}">Recipient</span>
+          </div>
+        </div>
+        <div class="mb-2">
+          <span class="fw-semibold">Subject:</span>
+          <span th:text="${originalMessage.subject}">Subject</span>
+        </div>
+        <div class="quoted-content border-start pt-2 ps-3">
+          <div style="white-space: pre-wrap;" th:text="${originalMessage.content}">Content</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== Reply Form ===================== -->
+  <div class="card shadow-sm">
+    <div class="card-header bg-white py-3">
+      <strong>Your Reply</strong>
+    </div>
+    <div class="card-body p-4">
+      <form th:action="@{/messages/reply/send}" method="post">
+        <input type="hidden" name="parentMessageId" th:value="${originalMessage.id}">
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">To</label>
+          <input type="text" class="form-control" th:value="${senderName}" readonly>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Subject</label>
+          <input type="text" class="form-control" th:value="'Re: ' + ${originalMessage.subject}" readonly>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Reply <span class="text-danger">*</span></label>
+          <textarea name="content" class="form-control" rows="6" required
+                    placeholder="Type your reply here..."></textarea>
+        </div>
+
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-send me-1"></i>Send Reply
+          </button>
+          <a th:href="@{/messages/view/{id}(id=${originalMessage.id})}" class="btn btn-outline-secondary">
+            <i class="bi bi-x-circle me-1"></i>Cancel
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<div th:replace="~{fragments/footer :: footer}"></div>
+<!-- ========================================== -->
+<!-- INCLUDE SCRIPTS FRAGMENT                   -->
+<!-- ========================================== -->
+<div th:replace="~{fragments/scripts :: badgeStyles}"></div>
+<div th:replace="~{fragments/scripts :: badgeScripts}"></div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var collapseEl = document.getElementById('originalMessageBody');
+    var icon = document.querySelector('.quote-toggle-icon');
+    if (collapseEl && icon) {
+      collapseEl.addEventListener('show.bs.collapse', function () { icon.classList.add('rotated'); });
+      collapseEl.addEventListener('hide.bs.collapse', function () { icon.classList.remove('rotated'); });
+    }
+  });
+</script>
+
+</body>
+</html>

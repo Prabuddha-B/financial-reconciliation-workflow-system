@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/header :: header('Messages')}"></head>
+
+<style>
+  .message-item {
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+  }
+  .message-item:hover {
+    background-color: var(--frwss-surface-3) !important;
+  }
+  .message-item.unread {
+    background-color: rgba(37, 99, 235, .06);
+    border-left: 4px solid var(--frwss-primary);
+  }
+  .message-item.unread:hover {
+    background-color: rgba(37, 99, 235, .1) !important;
+  }
+  .message-item .badge-new {
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.6; }
+    100% { opacity: 1; }
+  }
+  .from-badge {
+    font-size: 0.8rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 1rem;
+  }
+  .avatar-circle {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: .95rem;
+    flex-shrink: 0;
+  }
+  .date-group-header {
+    font-size: .78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--frwss-text-muted);
+    padding: .9rem 1.25rem .4rem;
+    background: var(--frwss-surface-2);
+  }
+</style>
+
+<body>
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="container py-4 py-lg-5">
+
+  <!-- ===================== Page Header ===================== -->
+  <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+    <div>
+      <h1 class="h3 mb-2"><i class="bi bi-envelope me-2"></i>Messages</h1>
+      <p class="frwss-subtitle mb-0">View and manage messages sent to and from your account</p>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <span class="badge rounded-pill bg-primary-subtle text-primary-emphasis border border-primary-subtle px-3 py-2"
+            th:if="${unreadCount != null and unreadCount > 0}">
+        <i class="bi bi-envelope-paper me-1"></i>
+        <span th:text="${unreadCount}">0</span> unread
+      </span>
+      <span class="badge rounded-pill bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle px-3 py-2"
+            th:if="${unreadCount == null or unreadCount == 0}">
+        <i class="bi bi-check-all me-1"></i>All read
+      </span>
+      <a href="/messages/compose" class="btn btn-primary">
+        <i class="bi bi-pencil-square me-1"></i>Compose
+      </a>
+    </div>
+  </div>
+
+  <!-- ===================== Tabs ===================== -->
+  <ul class="nav nav-tabs mb-3">
+    <li class="nav-item">
+      <a class="nav-link" th:classappend="${activeTab == 'inbox'} ? 'active' : ''"
+         th:href="@{/messages/inbox}">
+        <i class="bi bi-inbox me-1"></i>Inbox
+        <span th:if="${unreadCount > 0}" class="badge bg-danger ms-1" th:text="${unreadCount}">0</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" th:classappend="${activeTab == 'sent'} ? 'active' : ''"
+         th:href="@{/messages/sent}">
+        <i class="bi bi-send me-1"></i>Sent
+      </a>
+    </li>
+  </ul>
+
+  <!-- ===================== Success/Error messages ===================== -->
+  <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show shadow-sm d-flex align-items-start gap-3" role="alert">
+    <i class="bi bi-check-circle-fill fs-5 mt-1"></i>
+    <div class="flex-grow-1" th:text="${successMessage}"></div>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+  <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show shadow-sm d-flex align-items-start gap-3" role="alert">
+    <i class="bi bi-exclamation-triangle-fill fs-5 mt-1"></i>
+    <div class="flex-grow-1" th:text="${errorMessage}"></div>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+
+  <!-- ===================== Message List ===================== -->
+  <div class="card shadow-sm">
+    <div class="list-group list-group-flush">
+      <div th:each="message : ${messages}"
+           class="list-group-item list-group-item-action message-item"
+           th:classappend="${activeTab == 'inbox' and !message.isRead} ? 'unread' : ''"
+           th:data-href="@{/messages/view/{id}(id=${message.id})}"
+           th:data-group-label="${message.sentAt.toLocalDate() == #temporals.createToday() ? 'Today' : (message.sentAt.toLocalDate() == #temporals.createToday().minusDays(1) ? 'Yesterday' : #temporals.format(message.sentAt, 'dd MMM yyyy'))}">
+
+        <div class="d-flex align-items-start gap-3">
+
+          <!-- Avatar -->
+          <div class="avatar-circle"
+               th:classappend="${activeTab == 'inbox'} ? 'bg-primary-subtle text-primary' : 'bg-success-subtle text-success'"
+               th:text="${#strings.toUpperCase(#strings.substring((activeTab == 'inbox' ? message.senderName : message.recipientName) ?: '?', 0, 1))}">A</div>
+
+          <div class="flex-grow-1 me-2">
+            <!-- Header: Status + Subject -->
+            <div class="mb-1">
+              <span th:if="${activeTab == 'inbox' and !message.isRead}"
+                    class="badge bg-primary badge-new me-2">New</span>
+              <a th:href="@{/messages/view/{id}(id=${message.id})}" class="text-decoration-none text-dark fw-semibold">
+                <span th:text="${message.subject}">Subject</span>
+              </a>
+            </div>
+
+            <!-- From/To -->
+            <div class="text-muted small">
+              <span th:if="${activeTab == 'inbox'}">
+                <strong>From</strong> <span th:text="${message.senderName}">Sender</span>
+              </span>
+              <span th:if="${activeTab == 'sent'}">
+                <strong>To</strong> <span th:text="${message.recipientName}">Recipient</span>
+              </span>
+            </div>
+
+            <!-- Preview -->
+            <div class="text-muted small mt-1">
+              <span th:text="${#strings.abbreviate(message.content, 120)}">Message preview...</span>
+            </div>
+          </div>
+
+          <!-- Date/Time -->
+          <div class="text-end text-muted small" style="min-width: 70px;">
+            <div th:text="${#temporals.format(message.sentAt, 'HH:mm')}">Time</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div th:if="${#lists.isEmpty(messages)}" class="text-center py-5">
+        <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary-subtle text-primary mb-3"
+             style="width: 3.5rem; height: 3.5rem;">
+          <i class="bi bi-inbox fs-3"></i>
+        </div>
+        <div class="fw-semibold mb-1">No messages in your <span th:text="${pageTitle}">inbox</span></div>
+        <div class="text-muted small mb-3">When you receive messages, they'll appear here.</div>
+        <a href="/messages/compose" class="btn btn-outline-primary">
+          <i class="bi bi-pencil-square me-1"></i>Compose Message
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== Mark All Read Button (Inbox only) ===================== -->
+  <div class="mt-3" th:if="${activeTab == 'inbox' and not #lists.isEmpty(messages) and unreadCount > 0}">
+    <form th:action="@{/messages/mark-all-read}" method="post" class="d-inline">
+      <button type="submit" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-check2-all me-1"></i>Mark all as read
+      </button>
+    </form>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<div th:replace="~{fragments/footer :: footer}"></div>
+<!-- ========================================== -->
+<!-- INCLUDE SCRIPTS FRAGMENT                   -->
+<!-- ========================================== -->
+<div th:replace="~{fragments/scripts :: badgeStyles}"></div>
+<div th:replace="~{fragments/scripts :: badgeScripts}"></div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.message-item[data-href]').forEach(function (row) {
+      row.addEventListener('click', function (event) {
+        if (event.target.closest('a') || event.target.closest('button')) {
+          return;
+        }
+        window.location.href = row.getAttribute('data-href');
+      });
+    });
+
+    // Insert a date-group header before the first row of each group
+    // (Today / Yesterday / dd MMM yyyy), computed server-side per row.
+    var rows = document.querySelectorAll('.message-item[data-group-label]');
+    var lastLabel = null;
+    rows.forEach(function (row) {
+      var label = row.getAttribute('data-group-label');
+      if (label !== lastLabel) {
+        var header = document.createElement('div');
+        header.className = 'date-group-header';
+        header.textContent = label;
+        row.parentNode.insertBefore(header, row);
+        lastLabel = label;
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

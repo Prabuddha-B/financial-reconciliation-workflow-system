@@ -15,8 +15,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class SecurityContextAdapter {
 
-    // Configurable via application.properties: security.enabled=true/false
-    @Value("${security.enabled:false}")
+    @Value("${security.enabled:true}")
     private boolean useRealSecurity;
 
     // Hardcoded fallback values for development

@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/header :: header('Reset PIN')}"></head>
+
+<style>
+    /* ============================================================
+       FRWSS PRO UX/UI DESIGN - Reset PIN
+       ============================================================ */
+
+    .main-container {
+        padding: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        margin-bottom: 2.5rem;
+    }
+
+    .page-header h2 {
+        font-weight: 700;
+        color: #1a2332;
+        font-size: 2rem;
+        letter-spacing: -0.3px;
+        margin-bottom: 0.25rem;
+    }
+
+    .page-header h2 i {
+        color: #0d6efd;
+    }
+
+    .page-header .text-muted {
+        font-size: 1.05rem;
+        color: #6c757d !important;
+    }
+
+    .card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        transition: box-shadow 0.2s ease;
+        background: white;
+    }
+
+    .card:hover {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .card-header {
+        background: white;
+        border-bottom: 1px solid #f0f2f5;
+        padding: 1.25rem 1.5rem;
+        border-radius: 16px 16px 0 0 !important;
+    }
+
+    .card-header h3 {
+        font-weight: 600;
+        color: #1a2332;
+        font-size: 1.1rem;
+        margin: 0;
+    }
+
+    .card-header h3 i {
+        color: #0d6efd;
+        margin-right: 0.5rem;
+    }
+
+    .card-body {
+        padding: 2rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: #1a2332;
+        margin-bottom: 0.4rem;
+    }
+
+    .form-label i {
+        color: #6c757d;
+        width: 1.2rem;
+    }
+
+    .form-label .required {
+        color: #dc3545;
+        margin-left: 0.15rem;
+    }
+
+    .form-control {
+        border-radius: 10px;
+        border: 1.5px solid #e2e8f0;
+        padding: 0.7rem 1rem;
+        font-size: 1rem;
+        transition: all 0.15s;
+        background: white;
+    }
+
+    .form-control:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1);
+    }
+
+    .form-control[readonly] {
+        background: #f8f9fa;
+        cursor: not-allowed;
+        opacity: 0.8;
+    }
+
+    .form-text {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+
+    .btn-warning-custom {
+        padding: 0.7rem 2rem;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 1rem;
+        background: #ffc107;
+        color: #1a2332;
+        border: none;
+        transition: all 0.15s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+    }
+
+    .btn-warning-custom:hover {
+        background: #e0a800;
+        color: #1a2332;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(255, 193, 7, 0.35);
+    }
+
+    .btn-secondary-custom {
+        padding: 0.7rem 2rem;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 1rem;
+        border: 1.5px solid #e2e8f0;
+        transition: all 0.15s;
+        background: white;
+        color: #495057;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-secondary-custom:hover {
+        background: #f8f9fa;
+        border-color: #ced4da;
+        transform: translateY(-2px);
+    }
+
+    .alert {
+        border: none;
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        font-weight: 500;
+        font-size: 0.95rem;
+    }
+
+    .alert-danger {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .alert i {
+        font-size: 1.1rem;
+    }
+
+    .alert-success {
+        background: #d1e7dd;
+        color: #0f5132;
+    }
+
+    .info-box {
+        background: #f8f9fa;
+        border-radius: 16px;
+        padding: 1.75rem;
+        border: 1px solid #e9ecef;
+        height: 100%;
+    }
+
+    .info-box h6 {
+        font-weight: 600;
+        color: #1a2332;
+        font-size: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .info-box .info-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 0.6rem 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .info-box .info-item:last-child {
+        border-bottom: none;
+    }
+
+    .info-box .info-icon {
+        color: #0d6efd;
+        font-size: 1.2rem;
+        margin-top: 0.1rem;
+        min-width: 1.5rem;
+    }
+
+    .info-box .info-text {
+        font-size: 0.95rem;
+        color: #495057;
+    }
+
+    .info-box .info-text strong {
+        color: #1a2332;
+        display: block;
+        margin-bottom: 0.15rem;
+    }
+
+    .warning-box {
+        background: #fff3cd;
+        border: 1px solid #ffe69c;
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .warning-box .warning-icon {
+        color: #856404;
+        font-size: 1.3rem;
+        margin-top: 0.1rem;
+    }
+
+    .warning-box .warning-text {
+        color: #856404;
+        font-size: 0.95rem;
+    }
+
+    .warning-box .warning-text strong {
+        display: block;
+        margin-bottom: 0.15rem;
+        color: #664d03;
+    }
+
+    @media (max-width: 768px) {
+        .main-container {
+            padding: 1rem;
+        }
+        .card-body {
+            padding: 1.25rem;
+        }
+        .page-header h2 {
+            font-size: 1.6rem;
+        }
+        .page-header .text-muted {
+            font-size: 0.95rem;
+        }
+        .btn-warning-custom,
+        .btn-secondary-custom {
+            padding: 0.6rem 1.25rem;
+            font-size: 0.9rem;
+        }
+        .form-label {
+            font-size: 0.9rem;
+        }
+        .form-control {
+            font-size: 0.95rem;
+            padding: 0.6rem 0.85rem;
+        }
+        .info-box {
+            margin-top: 1.5rem;
+        }
+        .warning-box {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .card-header h3 {
+            font-size: 1rem;
+        }
+        .card-body {
+            padding: 1rem;
+        }
+        .btn-warning-custom,
+        .btn-secondary-custom {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+        .form-control {
+            font-size: 0.9rem;
+            padding: 0.5rem 0.75rem;
+        }
+        .form-label {
+            font-size: 0.85rem;
+        }
+        .page-header h2 {
+            font-size: 1.3rem;
+        }
+    }
+
+    /* ==========================================
+   Dark Mode Support
+   ========================================== */
+
+    [data-bs-theme="dark"] .card,
+    [data-bs-theme="dark"] .card-header,
+    [data-bs-theme="dark"] .info-box,
+    [data-bs-theme="dark"] .role-card,
+    [data-bs-theme="dark"] .form-control,
+    [data-bs-theme="dark"] .btn-secondary-custom {
+        background-color: #1f2937 !important;
+        color: #f8f9fa !important;
+    }
+
+    [data-bs-theme="dark"] .card-header {
+        border-bottom: 1px solid #374151 !important;
+    }
+
+    [data-bs-theme="dark"] .info-box {
+        border-color: #374151 !important;
+    }
+
+    [data-bs-theme="dark"] .form-control {
+        border-color: #4b5563 !important;
+    }
+
+    [data-bs-theme="dark"] .form-control::placeholder {
+        color: #9ca3af !important;
+    }
+
+    [data-bs-theme="dark"] .form-label,
+    [data-bs-theme="dark"] .card-header h3
+    [data-bs-theme="dark"] .role-name,
+    [data-bs-theme="dark"] .info-text strong {
+        color: #f8f9fa !important;
+    }
+
+    /* White/Grey border around Reset PIN card */
+    [data-bs-theme="dark"] .card {
+        border: 1px solid #374151 !important;
+    }
+
+    /* Card header divider */
+    [data-bs-theme="dark"] .card-header {
+        border-bottom: 1px solid #374151 !important;
+    }
+
+    [data-bs-theme="dark"] .info-text {
+        color: #d1d5db !important;
+    }
+
+    [data-bs-theme="dark"] .info-item {
+        border-bottom-color: #374151 !important;
+    }
+
+    [data-bs-theme="dark"] .role-card {
+        border-color: #4b5563 !important;
+    }
+
+    [data-bs-theme="dark"] .role-card:hover {
+        background-color: #273449 !important;
+    }
+
+    [data-bs-theme="dark"] .role-card.selected {
+        background-color: #1e3a8a !important;
+        border-color: #3b82f6 !important;
+    }
+
+    [data-bs-theme="dark"] .btn-secondary-custom {
+        border-color: #4b5563 !important;
+    }
+
+
+    /* Page Header */
+    [data-bs-theme="dark"] .page-header h2 {
+        color: #f8f9fa !important;
+    }
+
+    /* Card Header */
+    [data-bs-theme="dark"] .card-header h3 {
+        color: #f8f9fa !important;
+    }
+
+    /* Readonly Inputs */
+    [data-bs-theme="dark"] .form-control[readonly] {
+        background-color: #111827 !important;
+        color: #f8f9fa !important;
+        border-color: #4b5563 !important;
+    }
+
+    /* Form Helper Text */
+    [data-bs-theme="dark"] .form-text {
+        color: #9ca3af !important;
+    }
+
+    /* Headings */
+    [data-bs-theme="dark"] .verification-card h1,
+    [data-bs-theme="dark"] .verification-card h2,
+    [data-bs-theme="dark"] .verification-card h3,
+    [data-bs-theme="dark"] .verification-card h4,
+    [data-bs-theme="dark"] .verification-card h5,
+    [data-bs-theme="dark"] .verification-card h6 {
+        color: #f8f9fa !important;
+    }
+
+    /* Text */
+    [data-bs-theme="dark"] .verification-card p,
+    [data-bs-theme="dark"] .verification-card label,
+    [data-bs-theme="dark"] .verification-card .form-text {
+        color: #d1d5db !important;
+    }
+
+    /* Inputs */
+    [data-bs-theme="dark"] .verification-card .form-control {
+        background-color: #111827 !important;
+        color: #f8f9fa !important;
+        border-color: #4b5563 !important;
+    }
+
+    [data-bs-theme="dark"] .verification-card .form-control::placeholder {
+        color: #9ca3af !important;
+    }
+
+    /* ==========================================
+   Reset PIN - Dark Mode Fixes
+   ========================================== */
+
+    /* Page subtitle */
+    [data-bs-theme="dark"] .page-header .text-muted {
+        color: #9ca3af !important;
+    }
+
+    /* Quick Reference title */
+    [data-bs-theme="dark"] .info-box h6 {
+        color: #f8f9fa !important;
+    }
+
+    /* Info box labels */
+    [data-bs-theme="dark"] .info-box .info-text strong {
+        color: #f8f9fa !important;
+    }
+
+    /* Info box descriptions */
+    [data-bs-theme="dark"] .info-box .info-text,
+    [data-bs-theme="dark"] .info-box .info-text span {
+        color: #d1d5db !important;
+    }
+
+    /* Border above buttons */
+    [data-bs-theme="dark"] .border-top {
+        border-color: #374151 !important;
+    }
+
+    /* Cancel button text */
+    [data-bs-theme="dark"] .btn-secondary-custom {
+        color: #f8f9fa !important;
+    }
+
+    /* Warning box */
+    [data-bs-theme="dark"] .warning-box {
+        background: #3b2f0b !important;
+        border-color: #7c5c00 !important;
+    }
+
+    [data-bs-theme="dark"] .warning-text,
+    [data-bs-theme="dark"] .warning-text strong,
+    [data-bs-theme="dark"] .warning-icon {
+        color: #facc15 !important;
+    }
+</style>
+
+<body class="d-flex flex-column min-vh-100 bg-light">
+
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <main class="flex-grow-1">
+
+        <div class="container-fluid main-container">
+
+            <!-- Error Message -->
+            <div th:if="${errorMessage}"
+                 class="alert alert-danger alert-dismissible fade show"
+                 role="alert">
+
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <span th:text="${errorMessage}"></span>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                </button>
+
+            </div>
+
+            <!-- Success Message -->
+            <div th:if="${successMessage}"
+                 class="alert alert-success alert-dismissible fade show"
+                 role="alert">
+
+                <i class="bi bi-check-circle-fill me-2"></i>
+                <span th:text="${successMessage}"></span>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                </button>
+
+            </div>
+
+
+            <!-- PAGE HEADER -->
+            <div class="page-header">
+
+                <div>
+                    <h2>
+                        <i class="bi bi-keypad-fill me-2"></i>
+                        Reset PIN
+                    </h2>
+                    <p class="text-muted mb-0">
+                        Reset PIN for user account
+                    </p>
+                </div>
+
+            </div>
+
+
+            <!-- RESET PIN FORM -->
+            <div class="row g-4">
+
+                <div class="col-lg-8">
+
+                    <div class="card shadow-sm">
+
+                        <div class="card-header">
+                            <h3 class="mb-0">
+                                <i class="bi bi-keypad-fill me-2"></i>
+                                Reset PIN
+                            </h3>
+                        </div>
+
+                        <div class="card-body">
+
+                            <!-- Warning Box -->
+                            <div class="warning-box">
+                                <div class="warning-icon">
+                                    <i class="bi bi-exclamation-triangle-fill"></i>
+                                </div>
+                                <div class="warning-text">
+                                    <strong>⚠️ Important Security Notice</strong>
+                                    This will immediately change the user's PIN.
+                                    The user will need to use the new PIN for admin actions and account switching.
+                                </div>
+                            </div>
+
+
+                            <form th:action="@{/admin/users/{id}/reset-pin(id=${user.userId})}"
+                                  th:object="${resetPinRequest}"
+                                  method="post">
+
+                                <!-- Hidden User ID -->
+                                <input type="hidden" name="userId" th:value="${user.userId}"/>
+
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <i class="bi bi-person"></i>
+                                        Username
+                                    </label>
+                                    <input type="text"
+                                           class="form-control"
+                                           th:value="${user.username}"
+                                           readonly>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <i class="bi bi-keypad-fill"></i>
+                                        New PIN <span class="required">*</span>
+                                    </label>
+                                    <input type="password"
+                                           class="form-control"
+                                           th:field="*{pin}"
+                                           maxlength="6"
+                                           minlength="4"
+                                           placeholder="Enter 4-6 digit PIN"
+                                           required>
+                                    <div class="form-text">
+                                        Must be 4-6 digits (numbers only)
+                                    </div>
+                                </div>
+
+                                <div class="d-flex gap-3 pt-3 border-top">
+                                    <button type="submit" class="btn-warning-custom">
+                                        <i class="bi bi-keypad-fill"></i>
+                                        Reset PIN
+                                    </button>
+                                    <a th:href="@{/admin/users}"
+                                       class="btn-secondary-custom">
+                                        <i class="bi bi-x-lg"></i>
+                                        Cancel
+                                    </a>
+                                </div>
+
+                            </form>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- Right Column: Info Box -->
+                <div class="col-lg-4">
+
+                    <div class="info-box">
+                        <h6>
+                            <i class="bi bi-info-circle me-2" style="color: #0d6efd;"></i>
+                            Quick Reference
+                        </h6>
+
+                        <div class="info-item">
+                            <div class="info-icon"><i class="bi bi-person"></i></div>
+                            <div class="info-text">
+                                <strong>User</strong>
+                                <span th:text="${user.username}"></span>
+                            </div>
+                        </div>
+
+                        <div class="info-item">
+                            <div class="info-icon"><i class="bi bi-shield-lock"></i></div>
+                            <div class="info-text">
+                                <strong>PIN Required</strong>
+                                You must verify your PIN first
+                            </div>
+                        </div>
+
+                        <div class="info-item">
+                            <div class="info-icon"><i class="bi bi-keypad-fill"></i></div>
+                            <div class="info-text">
+                                <strong>PIN Reset</strong>
+                                User must use new PIN
+                            </div>
+                        </div>
+
+                        <div class="info-item" style="border-bottom: none; padding-bottom: 0;">
+                            <div class="info-icon"><i class="bi bi-clock-history" style="color: #f59e0b;"></i></div>
+                            <div class="info-text">
+                                <strong>Audit Log</strong>
+                                This action will be logged
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+</body>
+
+</html>

@@ -1,0 +1,979 @@
+/* ==========================================================
+   ADMIN MANAGEMENT SHARED STYLES
+   Used By:
+   - User Management
+   - Tax Rate Management
+   - Future Admin Modules
+   ========================================================== */
+
+:root {
+    --admin-primary: #0d6efd;
+    --admin-primary-hover: #0b5ed7;
+
+    --admin-success: #198754;
+    --admin-success-hover: #157347;
+
+    --admin-danger: #dc3545;
+
+    --admin-text: #1a2332;
+    --admin-text-muted: #6c757d;
+
+    --admin-bg: #ffffff;
+    --admin-bg-secondary: #f8f9fa;
+
+    --admin-border: #e9ecef;
+    --admin-border-light: #f1f3f5;
+
+    --admin-card-bg: #ffffff;
+    --admin-card-header-bg: #ffffff;
+    --admin-card-header-border: #f0f2f5;
+    --admin-table-header-bg: #f8f9fa;
+    --admin-table-row-hover: #f8f9ff;
+    --admin-input-bg: #ffffff;
+    --admin-input-text: #495057;
+    --admin-input-border: #dde1e6;
+    --admin-input-focus: #86b7fe;
+    --admin-bulk-bg: #ffffff;
+
+    --admin-border-subtle: #ced4da;
+    --admin-border-control: #dee2e6;
+    --admin-text-label: #495057;
+    --admin-status-success-bg: #d1e7dd;
+    --admin-status-success-text: #0f5132;
+    --admin-status-muted-bg: #e9ecef;
+    --admin-status-muted-text: #495057;
+    --admin-status-muted-dot: #adb5bd;
+    --admin-action-edit-bg: #e7f1ff;
+    --admin-action-edit-border: #cfe2ff;
+    --admin-action-reset-bg: #fff3cd;
+    --admin-action-reset-border: #ffe69c;
+    --admin-action-reset-text: #856404;
+    --admin-action-disable-bg: #f8d7da;
+    --admin-action-disable-border: #f5c2c7;
+    --admin-action-enable-border: #a3cfbb;
+    --admin-alert-danger-text: #721c24;
+    --admin-modal-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    --admin-on-accent: #ffffff;
+    --admin-shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.06);
+    --admin-shadow-md: 0 2px 12px rgba(0, 0, 0, 0.08);
+    --admin-shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.1);
+    --admin-focus-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.1);
+    --admin-primary-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);
+    --admin-success-shadow: 0 2px 8px rgba(25, 135, 84, 0.3);
+}
+
+[data-bs-theme="dark"] {
+    --admin-primary: #6ea8fe;
+    --admin-primary-hover: #9ec5fe;
+    --admin-success: #75b798;
+    --admin-success-hover: #a3cfbb;
+    --admin-danger: #ea868f;
+    --admin-text: #f8f9fa;
+    --admin-text-muted: #adb5bd;
+    --admin-bg: #1e293b;
+    --admin-bg-secondary: #334155;
+    --admin-border: #475569;
+    --admin-border-light: #64748b;
+
+    --admin-card-bg: #1e293b;
+    --admin-card-header-bg: #1e293b;
+    --admin-card-header-border: #475569;
+    --admin-table-header-bg: #334155;
+    --admin-table-row-hover: #3b4a60;
+    --admin-input-bg: #1e293b;
+    --admin-input-text: #f8f9fa;
+    --admin-input-border: #475569;
+    --admin-input-focus: #6ea8fe;
+    --admin-bulk-bg: #1e293b;
+
+    --admin-border-subtle: #64748b;
+    --admin-border-control: #475569;
+    --admin-text-label: #cbd5e1;
+    --admin-status-success-bg: #164e3b;
+    --admin-status-success-text: #a3cfbb;
+    --admin-status-muted-bg: #334155;
+    --admin-status-muted-text: #cbd5e1;
+    --admin-status-muted-dot: #94a3b8;
+    --admin-action-edit-bg: #1e3a5f;
+    --admin-action-edit-border: #315d8f;
+    --admin-action-reset-bg: #4a3410;
+    --admin-action-reset-border: #806020;
+    --admin-action-reset-text: #ffda6a;
+    --admin-action-disable-bg: #4c1d24;
+    --admin-action-disable-border: #7f303b;
+    --admin-action-enable-border: #3d8060;
+    --admin-alert-danger-text: #f1aeb5;
+    --admin-modal-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+    --admin-on-accent: #0f172a;
+    --admin-shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.25);
+    --admin-shadow-md: 0 2px 12px rgba(0, 0, 0, 0.35);
+    --admin-shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.45);
+    --admin-focus-shadow: 0 0 0 0.2rem rgba(110, 168, 254, 0.25);
+    --admin-primary-shadow: 0 2px 8px rgba(110, 168, 254, 0.3);
+    --admin-success-shadow: 0 2px 8px rgba(117, 183, 152, 0.3);
+}
+
+
+/* ==========================================================
+   PAGE LAYOUT
+   ========================================================== */
+
+
+/* Main container */
+.main-container {
+    padding: 2rem;
+}
+
+
+/* ============================================================
+   BULK ACTIONS BAR
+   ============================================================ */
+.bulk-actions-wrapper {
+    margin-bottom: 1rem;
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.3s ease, opacity 0.3s ease, margin 0.3s ease;
+    opacity: 0;
+}
+
+.bulk-actions-wrapper.show {
+    max-height: 80px;
+    opacity: 1;
+    margin-bottom: 1rem;
+}
+
+.bulk-actions-bar {
+    background: var(--admin-bulk-bg);
+    border: 1px solid var(--admin-border);
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.bulk-actions-bar .bulk-info {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 500;
+    font-size: 0.85rem;
+    color: var(--admin-text);
+    padding-right: 1rem;
+    border-right: 1px solid var(--admin-border-control);
+}
+
+.bulk-actions-bar .bulk-info i {
+    color: var(--admin-primary);
+    font-size: 1rem;
+}
+
+.bulk-actions-bar .bulk-info .count {
+    color: var(--admin-primary);
+    font-weight: 700;
+}
+
+.bulk-actions-bar .bulk-buttons {
+    display: flex;
+    gap: 0.3rem;
+    flex-wrap: wrap;
+    flex: 1;
+}
+
+.bulk-actions-bar .bulk-btn {
+    padding: 0.25rem 0.7rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    cursor: pointer;
+    background: var(--admin-bg);
+    color: var(--admin-text-label);
+    border-color: var(--admin-border-control);
+}
+
+.bulk-actions-bar .bulk-btn:hover {
+    transform: translateY(-1px);
+}
+
+.bulk-actions-bar .bulk-btn.btn-enable {
+    background: var(--admin-status-success-bg);
+    color: var(--admin-status-success-text);
+    border-color: var(--admin-action-enable-border);
+}
+
+.bulk-actions-bar .bulk-btn.btn-enable:hover {
+    background: var(--admin-action-enable-border);
+}
+
+.bulk-actions-bar .bulk-btn.btn-disable {
+    background: var(--admin-action-disable-bg);
+    color: var(--admin-alert-danger-text);
+    border-color: var(--admin-action-disable-border);
+}
+
+.bulk-actions-bar .bulk-btn.btn-disable:hover {
+    background: var(--admin-action-disable-border);
+}
+
+.bulk-actions-bar .bulk-btn.btn-reset {
+    background: var(--admin-action-reset-bg);
+    color: var(--admin-action-reset-text);
+    border-color: var(--admin-action-reset-border);
+}
+
+.bulk-actions-bar .bulk-btn.btn-reset:hover {
+    background: var(--admin-action-reset-border);
+}
+
+.bulk-actions-bar .bulk-close {
+    background: none;
+    border: none;
+    color: var(--admin-status-muted-dot);
+    font-size: 0.9rem;
+    padding: 0.1rem 0.3rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border-radius: 4px;
+    line-height: 1;
+}
+
+.bulk-actions-bar .bulk-close:hover {
+    color: var(--admin-danger);
+    background: var(--admin-bg-secondary);
+}
+
+
+/* Responsive */
+@media (max-width: 992px) {
+    .main-container {
+        padding: 1.5rem;
+    }
+    .action-group {
+        gap: 0.25rem;
+    }
+    .action-group .btn-action {
+        padding: 0.15rem 0.4rem;
+        font-size: 0.7rem;
+    }
+    .action-group .btn-action i {
+        font-size: 0.65rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .main-container {
+        padding: 1rem;
+    }
+    .card-body {
+        padding: 1rem;
+    }
+    .page-header h2 {
+        font-size: 1.4rem;
+    }
+    .btn-add-user {
+        padding: 0.4rem 1rem;
+        font-size: 0.8rem;
+    }
+    .table thead th,
+    .table tbody td {
+        padding: 0.4rem 0.5rem;
+        font-size: 0.8rem;
+    }
+    .bulk-actions-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.4rem;
+        padding: 0.5rem;
+    }
+    .bulk-actions-bar .bulk-info {
+        border-right: none;
+        padding-right: 0;
+        border-bottom: 1px solid var(--admin-border-control);
+        padding-bottom: 0.4rem;
+    }
+    .bulk-actions-bar .bulk-buttons {
+        gap: 0.3rem;
+    }
+    .bulk-actions-bar .bulk-btn {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.5rem;
+    }
+    .bulk-actions-wrapper.show {
+        max-height: 120px;
+    }
+}
+
+@media (max-width: 576px) {
+    .main-container {
+        padding: 0.5rem;
+    }
+    .action-group .btn-action .btn-text {
+        display: none;
+    }
+    .action-group .btn-action {
+        padding: 0.15rem 0.3rem;
+        font-size: 0.65rem;
+    }
+    .table thead th,
+    .table tbody td {
+        padding: 0.3rem 0.3rem;
+        font-size: 0.75rem;
+    }
+    .username-text {
+        font-size: 0.8rem;
+    }
+    .role-badge,
+    .status-badge {
+        font-size: 0.65rem;
+        padding: 0.15rem 0.4rem;
+    }
+    .bulk-actions-bar .bulk-btn {
+        font-size: 0.6rem;
+        padding: 0.15rem 0.4rem;
+    }
+    .bulk-actions-bar .bulk-info {
+        font-size: 0.75rem;
+    }
+    .bulk-actions-wrapper.show {
+        max-height: 150px;
+    }
+}
+
+
+/* Page header with breadcrumb style */
+.page-header {
+    margin-bottom: 2rem;
+}
+
+.page-header .breadcrumb-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--admin-text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.page-header .breadcrumb-nav a {
+    color: var(--admin-primary);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.page-header .breadcrumb-nav a:hover {
+    text-decoration: underline;
+}
+
+.page-header .breadcrumb-nav .separator {
+    color: var(--admin-border-subtle);
+}
+
+.page-header .breadcrumb-nav .current {
+    color: var(--admin-text);
+    font-weight: 600;
+}
+
+.page-header h2 {
+    font-weight: 700;
+    color: var(--admin-text);
+    font-size: 1.75rem;
+    letter-spacing: -0.3px;
+    margin-bottom: 0.25rem;
+}
+
+.page-header h2 i {
+    color: var(--admin-primary);
+}
+
+.page-header .text-muted {
+    font-size: 0.95rem;
+    color: var(--admin-text-muted) !important;
+}
+
+
+
+
+
+
+
+
+/* ==========================================================
+   PAGE HEADER
+   ========================================================== */
+
+
+
+/* ==========================================================
+   CARDS
+   ========================================================== */
+
+
+/* Card styles - matching your design */
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: var(--admin-shadow-sm);
+    transition: box-shadow 0.2s ease;
+    background: var(--admin-card-bg);
+}
+
+.card:hover {
+    box-shadow: var(--admin-shadow-md);
+}
+
+.card-header {
+    background: var(--admin-card-header-bg);
+    border-bottom: 1px solid var(--admin-card-header-border);
+    padding: 1rem 1.25rem;
+    border-radius: 12px 12px 0 0 !important;
+}
+
+.card-header h5 {
+    font-weight: 600;
+    color: var(--admin-text);
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+.card-header h5 i {
+    color: var(--admin-primary);
+    margin-right: 0.5rem;
+}
+
+.card-body {
+    padding: 1.25rem;
+}
+
+
+/* ==========================================================
+   FILTER SECTION
+   ========================================================== */
+
+/* Filter section */
+.filter-section .card {
+    margin-bottom: 1.5rem;
+}
+
+.filter-section .form-label {
+    font-weight: 500;
+    font-size: 0.85rem;
+    color: var(--admin-text-label);
+    margin-bottom: 0.3rem;
+}
+
+.filter-section .form-control,
+.filter-section .form-select {
+    border-radius: 6px;
+    border: 1px solid var(--admin-input-border);
+    padding: 0.45rem 0.75rem;
+    font-size: 0.9rem;
+    transition: all 0.15s;
+    background: var(--admin-input-bg);
+}
+
+.filter-section .form-control:focus,
+.filter-section .form-select:focus {
+    border-color: var(--admin-input-focus);
+    box-shadow: var(--admin-focus-shadow);
+}
+
+.filter-section .input-group .input-group-text {
+    background: var(--admin-input-bg);
+    border: 1px solid var(--admin-input-border);
+    border-right: none;
+    border-radius: 6px 0 0 6px;
+    color: var(--admin-text-muted);
+    padding: 0.45rem 0.75rem;
+}
+
+.filter-section .input-group .form-control {
+    border-radius: 0 6px 6px 0;
+    border-left: none;
+}
+
+.btn-filter {
+    border-radius: 6px;
+    padding: 0.45rem 1.5rem;
+    font-weight: 500;
+    font-size: 0.9rem;
+    background: var(--admin-primary);
+    border: none;
+    color: var(--admin-on-accent);
+    transition: all 0.15s;
+}
+
+.btn-filter:hover {
+    background: var(--admin-primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--admin-primary-shadow);
+}
+
+.btn-reset {
+    border-radius: 6px;
+    padding: 0.45rem 1.25rem;
+    font-weight: 500;
+    font-size: 0.9rem;
+    border: 1px solid var(--admin-input-border);
+    transition: all 0.15s;
+    background: var(--admin-input-bg);
+    color: var(--admin-input-text);
+}
+
+.btn-reset:hover {
+    background: var(--admin-bg-secondary);
+    border-color: var(--admin-border-subtle);
+}
+
+
+
+/* ==========================================================
+   TABLES
+   ========================================================== */
+
+/* Created date */
+.created-date {
+    color: var(--admin-text-muted);
+    font-size: 0.85rem;
+}
+
+
+/* Table styles */
+.table-container .card {
+    overflow: hidden;
+}
+
+.table {
+    margin-bottom: 0;
+    font-size: 0.9rem;
+}
+
+.table thead th {
+    background: var(--admin-table-header-bg);
+    border-bottom: 1px solid var(--admin-border);
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    color: var(--admin-text-label);
+    padding: 0.7rem 1rem;
+}
+
+.table tbody td {
+    padding: 0.7rem 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--admin-border-light);
+}
+
+.table tbody tr {
+    transition: background-color 0.15s ease;
+}
+
+.table tbody tr:hover {
+    background-color: var(--admin-table-row-hover);
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+
+/* Checkbox styles */
+.form-check-input {
+    cursor: pointer;
+    border-radius: 3px;
+    border: 1.5px solid var(--admin-border-subtle);
+    width: 1rem;
+    height: 1rem;
+    transition: all 0.15s;
+}
+
+.form-check-input:checked {
+    background-color: var(--admin-primary);
+    border-color: var(--admin-primary);
+}
+
+.form-check-input:focus {
+    box-shadow: var(--admin-focus-shadow);
+}
+
+
+/* ==========================================================
+   STATUS BADGES
+   ========================================================== */
+
+/* Username */
+.username-text {
+    font-weight: 600;
+    color: var(--admin-text);
+}
+
+/* Role badges */
+.role-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    font-weight: 500;
+    font-size: 0.8rem;
+    display: inline-block;
+}
+
+
+
+
+/* Status badges */
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    font-weight: 500;
+    font-size: 0.8rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.status-badge.active {
+    background: var(--admin-status-success-bg);
+    color: var(--admin-status-success-text);
+}
+
+.status-badge.active .status-dot {
+    background: var(--admin-success);
+}
+
+.status-badge.disabled {
+    background: var(--admin-status-muted-bg);
+    color: var(--admin-status-muted-text);
+}
+
+.status-badge.disabled .status-dot {
+    background: var(--admin-status-muted-dot);
+}
+
+.status-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+
+
+/* ==========================================================
+   ACTION BUTTONS
+   ========================================================== */
+
+
+/* Add User button */
+.btn-add-user {
+    padding: 0.5rem 1.25rem;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    background: var(--admin-success);
+    color: var(--admin-on-accent);
+    border: none;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-add-user:hover {
+    background: var(--admin-success-hover);
+    color: var(--admin-on-accent);
+    transform: translateY(-1px);
+    box-shadow: var(--admin-success-shadow);
+}
+
+
+/* Action buttons */
+.action-group {
+    display: flex;
+    gap: 0.3rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.action-group .btn-action {
+    padding: 0.2rem 0.5rem;
+    font-size: 0.75rem;
+    border-radius: 4px;
+    font-weight: 500;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    border: 1px solid transparent;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.action-group .btn-action i {
+    font-size: 0.7rem;
+}
+
+.action-group .btn-action:hover {
+    transform: translateY(-1px);
+}
+
+.action-group .btn-edit {
+    background: var(--admin-action-edit-bg);
+    color: var(--admin-primary);
+    border-color: var(--admin-action-edit-border);
+}
+
+.action-group .btn-edit:hover {
+    background: var(--admin-action-edit-border);
+}
+
+.action-group .btn-reset-password {
+    background: var(--admin-action-reset-bg);
+    color: var(--admin-action-reset-text);
+    border-color: var(--admin-action-reset-border);
+}
+
+.action-group .btn-reset-password:hover {
+    background: var(--admin-action-reset-border);
+}
+
+.action-group .btn-reset-pin {
+    background: var(--admin-border);
+    color: var(--admin-text-label);
+    border-color: var(--admin-border-control);
+}
+
+.action-group .btn-reset-pin:hover {
+    background: var(--admin-border-control);
+}
+
+.action-group .btn-disable {
+    background: var(--admin-action-disable-bg);
+    color: var(--admin-danger);
+    border-color: var(--admin-action-disable-border);
+}
+
+.action-group .btn-disable:hover {
+    background: var(--admin-action-disable-border);
+}
+
+.action-group .btn-enable {
+    background: var(--admin-status-success-bg);
+    color: var(--admin-success);
+    border-color: var(--admin-action-enable-border);
+}
+
+.action-group .btn-enable:hover {
+    background: var(--admin-action-enable-border);
+}
+
+/* ==========================================================
+   ALERTS
+   ========================================================== */
+/* Alert messages */
+.alert {
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.alert-success {
+    background: var(--admin-status-success-bg);
+    color: var(--admin-status-success-text);
+}
+
+.alert-danger {
+    background: var(--admin-action-disable-bg);
+    color: var(--admin-alert-danger-text);
+}
+
+.alert i {
+    font-size: 1rem;
+}
+
+
+
+
+/* ==========================================================
+   MODALS
+   ========================================================== */
+
+
+/* Modal */
+.modal-content {
+    border-radius: 12px;
+    border: none;
+    box-shadow: var(--admin-shadow-lg);
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--admin-border);
+    padding: 1rem 1.25rem;
+}
+
+.modal-body {
+    padding: 1.25rem;
+}
+
+.modal-footer {
+    border-top: 1px solid var(--admin-border);
+    padding: 1rem 1.25rem;
+}
+/* ==========================================================
+   STATISTICS CARDS
+   ========================================================== */
+
+.stats-card {
+    border: none;
+}
+
+.stats-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+}
+
+.stats-icon.primary {
+    background: rgba(13, 110, 253, 0.15);
+    color: var(--admin-primary);
+}
+
+.stats-icon.success {
+    background: rgba(25, 135, 84, 0.15);
+    color: var(--admin-success);
+}
+
+.stats-icon.danger {
+    background: rgba(220, 53, 69, 0.15);
+    color: var(--admin-danger);
+}
+
+.stats-icon.purple {
+    background: rgba(111, 66, 193, 0.15);
+    color: #6f42c1;
+}
+
+.stats-value {
+    font-weight: 700;
+    color: var(--admin-text);
+}
+
+.stats-label {
+    color: var(--admin-text-muted);
+}
+
+.page-title {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: var(--admin-text);
+    margin: 0;
+    line-height: 1.2;
+}
+
+.page-title i {
+    color: var(--admin-primary);
+}
+
+.page-subtitle {
+    color: var(--admin-text-muted);
+    font-size: 1rem;
+    margin-top: 0.25rem;
+}
+
+.page-header {
+    margin-bottom: 2rem;
+}
+
+
+/* ============================================================
+   DARK MODE SUPPORT
+   ============================================================ */
+
+[data-bs-theme="dark"] .page-header h2 {
+    color: #f8f9fa !important;
+}
+
+[data-bs-theme="dark"] .page-header .text-muted {
+    color: #d1d5db !important;
+}
+
+[data-bs-theme="dark"] .card {
+    background: #1f2937 !important;
+    border: 1px solid #374151 !important;
+    box-shadow: none !important;
+}
+
+[data-bs-theme="dark"] .table thead th {
+    background: #111827 !important;
+    color: #f8f9fa !important;
+    border-bottom: 1px solid #374151 !important;
+}
+
+[data-bs-theme="dark"] .table tbody td {
+    color: #f8f9fa !important;
+    border-color: #374151 !important;
+}
+
+[data-bs-theme="dark"] .table tbody tr {
+    background: #1f2937 !important;
+}
+
+[data-bs-theme="dark"] .table tbody tr:hover {
+    background: #273449 !important;
+}
+
+[data-bs-theme="dark"] .module-text {
+    color: #f8f9fa !important;
+}
+
+
+[data-bs-theme="dark"] .category-text {
+    color: #d1d5db !important;
+}
+[data-bs-theme="dark"] .description-text {
+    color: #d1d5db !important;
+}
+
+[data-bs-theme="dark"] .tax-rate-badge {
+    background: #dbeafe !important;
+    color: #2563eb !important;
+}
+
+[data-bs-theme="dark"] .btn-back {
+    background: #1f2937 !important;
+    color: #f8f9fa !important;
+    border-color: #4b5563 !important;
+}
+
+[data-bs-theme="dark"] .btn-back:hover {
+    background: #273449 !important;
+}
+
+
+/* ==========================================================
+   UNIVERSAL TABLE TEXT FIX
+   ========================================================== */
+
+.module-text,
+.category-text,
+.description-text,
+.tax-rate-text {
+    color: var(--admin-text);
+}
+
+.table tbody td {
+    color: var(--admin-text);
+}
+
+
+

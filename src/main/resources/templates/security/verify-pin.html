@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/header :: header('Verify PIN')}"></head>
+
+<style>
+    /* ============================================================
+       FRWSS PRO UX/UI DESIGN - Verify PIN (Centered Portal Style)
+       ============================================================ */
+
+    .main-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: calc(100vh - 200px);
+        padding: 2rem;
+    }
+
+    .verify-card {
+        max-width: 440px;
+        width: 100%;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 8px 40px rgba(0, 0, 0, 0.08);
+        padding: 2.5rem 2.5rem 2rem;
+        border: 1px solid #f0f2f5;
+    }
+
+    /* Lock Icon */
+    .lock-icon-wrapper {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .lock-icon {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        background: #e7f1ff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.2rem;
+        color: #0d6efd;
+    }
+
+    /* Title */
+    .verify-title {
+        text-align: center;
+        font-weight: 700;
+        font-size: 1.5rem;
+        color: #1a2332;
+        margin-bottom: 0.5rem;
+    }
+
+    .verify-subtitle {
+        text-align: center;
+        font-size: 0.95rem;
+        color: #6c757d;
+        margin-bottom: 2rem;
+    }
+
+    /* Form */
+    .form-label {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #1a2332;
+        margin-bottom: 0.4rem;
+    }
+
+    .form-label i {
+        color: #6c757d;
+        margin-right: 0.4rem;
+    }
+
+    .form-control {
+        border-radius: 10px;
+        border: 1.5px solid #e2e8f0;
+        padding: 0.7rem 1rem;
+        font-size: 1rem;
+        transition: all 0.15s;
+        background: white;
+    }
+
+    .form-control:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1);
+    }
+
+    .form-text {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+
+    .btn-verify {
+        width: 100%;
+        padding: 0.75rem;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 1rem;
+        background: #0d6efd;
+        color: white;
+        border: none;
+        transition: all 0.15s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.6rem;
+        margin-top: 0.5rem;
+    }
+
+    .btn-verify:hover {
+        background: #0b5ed7;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(13, 110, 253, 0.35);
+    }
+
+    .btn-cancel {
+        width: 100%;
+        padding: 0.75rem;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 1rem;
+        border: 1.5px solid #e2e8f0;
+        transition: all 0.15s;
+        background: white;
+        color: #495057;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+        text-decoration: none;
+    }
+
+    .btn-cancel:hover {
+        background: #f8f9fa;
+        border-color: #ced4da;
+        transform: translateY(-2px);
+        text-decoration: none;
+        color: #495057;
+    }
+
+    .divider {
+        border: none;
+        border-top: 1px solid #e9ecef;
+        margin: 1.25rem 0;
+    }
+
+    /* Alert messages */
+    .alert {
+        border: none;
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        font-weight: 500;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+
+    .alert-danger {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .alert-success {
+        background: #d1e7dd;
+        color: #0f5132;
+    }
+
+    .alert i {
+        font-size: 1rem;
+        margin-right: 0.5rem;
+    }
+
+    .alert .btn-close {
+        font-size: 0.7rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 576px) {
+        .main-container {
+            padding: 1rem;
+            min-height: calc(100vh - 160px);
+        }
+        .verify-card {
+            padding: 1.75rem 1.25rem 1.5rem;
+        }
+        .lock-icon {
+            width: 60px;
+            height: 60px;
+            font-size: 1.8rem;
+        }
+        .verify-title {
+            font-size: 1.25rem;
+        }
+        .verify-subtitle {
+            font-size: 0.85rem;
+        }
+        .form-control {
+            font-size: 0.9rem;
+            padding: 0.6rem 0.85rem;
+        }
+        .btn-verify,
+        .btn-cancel {
+            font-size: 0.9rem;
+            padding: 0.6rem;
+        }
+    }
+
+    /* ==========================================
+   Dark Mode - Verify PIN Page
+   ========================================== */
+
+    [data-bs-theme="dark"] .verify-card {
+        background-color: #1f2937 !important;
+        border-color: #374151 !important;
+        color: #f8f9fa !important;
+    }
+
+    [data-bs-theme="dark"] .verify-title {
+        color: #f8f9fa !important;
+    }
+
+    [data-bs-theme="dark"] .verify-subtitle,
+    [data-bs-theme="dark"] .form-text {
+        color: #d1d5db !important;
+    }
+
+    [data-bs-theme="dark"] .form-label {
+        color: #f8f9fa !important;
+    }
+
+    [data-bs-theme="dark"] .form-label i {
+        color: #9ca3af !important;
+    }
+
+    [data-bs-theme="dark"] .form-control {
+        background-color: #111827 !important;
+        color: #f8f9fa !important;
+        border-color: #4b5563 !important;
+    }
+
+    [data-bs-theme="dark"] .form-control::placeholder {
+        color: #9ca3af !important;
+    }
+
+    [data-bs-theme="dark"] .btn-cancel {
+        background-color: #1f2937 !important;
+        color: #f8f9fa !important;
+        border-color: #4b5563 !important;
+    }
+
+    [data-bs-theme="dark"] .btn-cancel:hover {
+        background-color: #273449 !important;
+        color: #f8f9fa !important;
+    }
+
+    [data-bs-theme="dark"] .divider {
+        border-top-color: #374151 !important;
+    }
+
+    [data-bs-theme="dark"] .lock-icon {
+        background-color: rgba(13, 110, 253, 0.15) !important;
+    }
+</style>
+
+<body class="d-flex flex-column min-vh-100">
+
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <main class="flex-grow-1">
+
+        <div class="container-fluid main-container">
+
+
+            <!-- VERIFY PIN CARD -->
+            <div class="verify-card">
+
+                <!-- Success Message -->
+                <div th:if="${successMessage}"
+                     class="alert alert-success alert-dismissible fade show"
+                     role="alert">
+
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span th:text="${successMessage}"></span>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="alert">
+                    </button>
+
+                </div>
+
+                <!-- Error Message -->
+                <div th:if="${errorMessage}"
+                     class="alert alert-danger alert-dismissible fade show"
+                     role="alert">
+
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <span th:text="${errorMessage}"></span>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="alert">
+                    </button>
+
+                </div>
+
+                <!-- Lock Icon -->
+                <div class="lock-icon-wrapper">
+                    <div class="lock-icon">
+                        <i class="bi bi-shield-lock"></i>
+                    </div>
+                </div>
+
+                <!-- Title -->
+                <h2 class="verify-title">Verify PIN</h2>
+                <p class="verify-subtitle">Enter your security PIN to continue with the sensitive operation.</p>
+
+                <!-- Form -->
+                <form th:action="@{/security/verify-pin}"
+                      th:object="${pinVerificationRequest}"
+                      method="post">
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="bi bi-keypad-fill"></i>
+                            Security PIN
+                        </label>
+                        <input type="password"
+                               class="form-control"
+                               th:field="*{pin}"
+                               maxlength="6"
+                               minlength="4"
+                               pattern="[0-9]{4,6}"
+                               placeholder="Enter your PIN"
+                               required
+                               autofocus>
+                        <div class="form-text">
+                            Enter your 4-6 digit security PIN
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-verify">
+                        <i class="bi bi-check-circle"></i>
+                        Verify PIN
+                    </button>
+
+                    <hr class="divider">
+
+                    <a th:href="@{/home}" class="btn-cancel">
+                        <i class="bi bi-x-lg"></i>
+                        Cancel
+                    </a>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+</body>
+
+</html>

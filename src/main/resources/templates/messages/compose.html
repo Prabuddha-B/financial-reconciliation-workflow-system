@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/header :: header('Compose Message')}"></head>
+
+<style>
+  .quote-toggle-icon {
+    transition: transform var(--frwss-transition-fast);
+  }
+  .quote-toggle-icon.rotated {
+    transform: rotate(90deg);
+  }
+</style>
+
+<body>
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="container py-4 py-lg-5">
+
+  <!-- ===================== Page Header ===================== -->
+  <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+    <div>
+      <h1 class="h3 mb-2"><i class="bi bi-pencil-square me-2"></i>Compose Message</h1>
+      <p class="frwss-subtitle mb-0">Send a message to another user</p>
+    </div>
+    <a href="/messages/inbox" class="btn btn-outline-secondary">
+      <i class="bi bi-arrow-left me-1"></i>Back to Inbox
+    </a>
+  </div>
+
+  <!-- ===================== Success/Error messages ===================== -->
+  <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show shadow-sm d-flex align-items-start gap-3" role="alert">
+    <i class="bi bi-check-circle-fill fs-5 mt-1"></i>
+    <div class="flex-grow-1" th:text="${successMessage}"></div>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+  <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show shadow-sm d-flex align-items-start gap-3" role="alert">
+    <i class="bi bi-exclamation-triangle-fill fs-5 mt-1"></i>
+    <div class="flex-grow-1" th:text="${errorMessage}"></div>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+
+  <!-- ===================== Compose Form ===================== -->
+  <div class="card shadow-sm">
+    <div class="card-header bg-white py-3">
+      <strong>New Message</strong>
+      <div class="text-muted small">Fields marked with * are required</div>
+    </div>
+
+    <div class="card-body p-4">
+      <form th:action="@{/messages/send}" method="post" th:object="${message}">
+
+        <!-- Recipient + Subject side by side -->
+        <div class="row g-3 mb-3">
+          <div class="col-12 col-md-6">
+            <label class="form-label fw-semibold">To <span class="text-danger">*</span></label>
+            <select th:field="*{recipientId}" class="form-select" required>
+              <option value="">-- Select Recipient --</option>
+              <option th:each="user : ${users}"
+                      th:value="${user.userId}"
+                      th:text="${user.username}">
+                User
+              </option>
+            </select>
+          </div>
+          <div class="col-12 col-md-6">
+            <label class="form-label fw-semibold">Subject <span class="text-danger">*</span></label>
+            <input type="text" th:field="*{subject}" class="form-control" required placeholder="Enter message subject">
+          </div>
+        </div>
+
+        <!-- Content -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Message <span class="text-danger">*</span></label>
+          <textarea th:field="*{content}" class="form-control" rows="8" required
+                    placeholder="Type your message here..."></textarea>
+        </div>
+
+        <!-- Advanced options (optional, collapsed by default) -->
+        <div class="mb-3">
+          <button class="btn btn-link btn-sm text-decoration-none p-0 fw-semibold d-flex align-items-center gap-2"
+                  type="button" data-bs-toggle="collapse" data-bs-target="#advancedOptions"
+                  aria-expanded="false" aria-controls="advancedOptions">
+            <i class="bi bi-chevron-right quote-toggle-icon"></i>
+            Advanced options
+            <span class="text-muted fw-normal">(link to a reconciliation, workflow, tax, or audit record)</span>
+          </button>
+
+          <div class="collapse mt-3" id="advancedOptions">
+            <div class="row g-3">
+              <div class="col-12 col-md-6">
+                <label class="form-label fw-semibold">Reference Type</label>
+                <select th:field="*{referenceType}" class="form-select">
+                  <option value="">None</option>
+                  <option value="RECONCILIATION">Reconciliation</option>
+                  <option value="WORKFLOW">Workflow</option>
+                  <option value="TAX">Tax</option>
+                  <option value="AUDIT">Audit</option>
+                </select>
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label fw-semibold">Reference ID</label>
+                <input type="text" th:field="*{referenceId}" class="form-control" placeholder="e.g., 123">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-send me-1"></i>Send Message
+          </button>
+          <a href="/messages/inbox" class="btn btn-outline-secondary">
+            <i class="bi bi-x-circle me-1"></i>Cancel
+          </a>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<div th:replace="~{fragments/footer :: footer}"></div>
+<!-- ========================================== -->
+<!-- INCLUDE SCRIPTS FRAGMENT                   -->
+<!-- ========================================== -->
+<div th:replace="~{fragments/scripts :: badgeStyles}"></div>
+<div th:replace="~{fragments/scripts :: badgeScripts}"></div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var collapseEl = document.getElementById('advancedOptions');
+    var icon = document.querySelector('.quote-toggle-icon');
+    if (collapseEl && icon) {
+      collapseEl.addEventListener('show.bs.collapse', function () { icon.classList.add('rotated'); });
+      collapseEl.addEventListener('hide.bs.collapse', function () { icon.classList.remove('rotated'); });
+    }
+  });
+</script>
+
+</body>
+</html>

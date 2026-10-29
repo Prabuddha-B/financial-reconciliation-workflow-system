@@ -1,14 +1,64 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-  <title>Bulk Reconciliation Results</title>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-</head>
 
-<body class="bg-light">
+<head th:replace="~{fragments/header :: header('Bulk Reconciliation Results')}"></head>
+
+<style>
+
+  .reconciliation-stat-card {
+    background: var(--frwss-surface-2);
+    border: 1px solid var(--frwss-border);
+    border-radius: var(--frwss-radius-lg);
+    padding: 1.25rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    box-shadow: var(--frwss-shadow-sm);
+    transition: transform var(--frwss-transition-normal), box-shadow var(--frwss-transition-normal);
+  }
+
+  .reconciliation-stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--frwss-shadow-md);
+  }
+
+  .reconciliation-stat-card.success { border-color: rgba(var(--bs-success-rgb), .4); }
+  .reconciliation-stat-card.warning { border-color: rgba(var(--bs-warning-rgb), .4); }
+  .reconciliation-stat-card.danger  { border-color: rgba(var(--bs-danger-rgb), .4); }
+
+  .reconciliation-stat-card .stat-icon {
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: var(--frwss-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 1.15rem;
+  }
+
+  .reconciliation-stat-card .stat-label {
+    font-size: .78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--frwss-text-muted);
+    margin-bottom: .2rem;
+  }
+
+  .reconciliation-stat-card .stat-value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--frwss-text-primary);
+  }
+
+</style>
+
+<body>
+
+<!-- Nav Bar -->
+<div th:replace="~{fragments/navbar :: navbar}"></div>
 
 <div class="container py-4 py-lg-5">
 
@@ -18,12 +68,12 @@
       <h1 class="h3 mb-2">
         <i class="bi bi-diagram-3 me-2"></i>Bulk Reconciliation Results
       </h1>
-      <p class="text-muted mb-0">
+      <p class="frwss-subtitle mb-0">
         One-to-many reconciliation results showing bulk transactions and their matched children
       </p>
     </div>
     <div class="d-flex gap-2">
-      <a href="/reconciliation" class="btn btn-outline-primary">
+      <a href="/reconciliation" class="btn btn-outline-secondary">
         <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
       </a>
       <form th:action="@{/reconciliation/run-one-to-many}" method="post" class="d-inline">
@@ -45,36 +95,48 @@
   <!-- ===================== Statistics Summary ===================== -->
   <div class="row g-3 g-lg-4 mb-4">
     <div class="col-6 col-md-3">
-      <div class="card shadow-sm h-100 border-0">
-        <div class="card-body text-center">
-          <div class="text-muted small text-uppercase fw-semibold">Total Bulk</div>
-          <div class="h3 fw-bold text-primary" th:text="${#lists.size(bulkResults)}">0</div>
+      <div class="reconciliation-stat-card h-100">
+        <div class="stat-icon bg-primary-subtle text-primary">
+          <i class="bi bi-diagram-3"></i>
+        </div>
+        <div>
+          <div class="stat-label">Total Bulk</div>
+          <div class="stat-value" th:text="${#lists.size(bulkResults)}">0</div>
         </div>
       </div>
     </div>
     <div class="col-6 col-md-3">
-      <div class="card shadow-sm h-100 border-success-subtle">
-        <div class="card-body text-center">
-          <div class="text-muted small text-uppercase fw-semibold">Exact Matches</div>
-          <div class="h3 fw-bold text-success"
+      <div class="reconciliation-stat-card success h-100">
+        <div class="stat-icon bg-success-subtle text-success">
+          <i class="bi bi-check-circle"></i>
+        </div>
+        <div>
+          <div class="stat-label">Exact Matches</div>
+          <div class="stat-value text-success"
                th:text="${#lists.size(bulkResults.?[status.name() == 'EXACT'])}">0</div>
         </div>
       </div>
     </div>
     <div class="col-6 col-md-3">
-      <div class="card shadow-sm h-100 border-warning-subtle">
-        <div class="card-body text-center">
-          <div class="text-muted small text-uppercase fw-semibold">Partial Matches</div>
-          <div class="h3 fw-bold text-warning"
+      <div class="reconciliation-stat-card warning h-100">
+        <div class="stat-icon bg-warning-subtle text-warning-emphasis">
+          <i class="bi bi-clock-history"></i>
+        </div>
+        <div>
+          <div class="stat-label">Partial Matches</div>
+          <div class="stat-value text-warning"
                th:text="${#lists.size(bulkResults.?[status.name() == 'PARTIAL'])}">0</div>
         </div>
       </div>
     </div>
     <div class="col-6 col-md-3">
-      <div class="card shadow-sm h-100 border-danger-subtle">
-        <div class="card-body text-center">
-          <div class="text-muted small text-uppercase fw-semibold">Orphans</div>
-          <div class="h3 fw-bold text-danger"
+      <div class="reconciliation-stat-card danger h-100">
+        <div class="stat-icon bg-danger-subtle text-danger">
+          <i class="bi bi-exclamation-triangle"></i>
+        </div>
+        <div>
+          <div class="stat-label">Orphans</div>
+          <div class="stat-value text-danger"
                th:text="${#lists.size(bulkResults.?[status.name() == 'ORPHAN'])}">0</div>
         </div>
       </div>
@@ -90,8 +152,8 @@
           <div class="text-muted small">One-to-many matching results</div>
         </div>
         <span class="text-muted small">
-                    Showing <span th:text="${#lists.size(bulkResults)}">0</span> total bulk records
-                </span>
+          Showing <span th:text="${#lists.size(bulkResults)}">0</span> total bulk records
+        </span>
       </div>
     </div>
 
@@ -123,24 +185,24 @@
             <td class="text-end" th:text="${#numbers.formatDecimal(result.differenceAmount, 1, 2)}">0.00</td>
             <td class="text-center" th:text="${result.childCount}">3</td>
             <td>
-                                <span th:if="${result.status.name() == 'EXACT'}"
-                                      class="badge rounded-pill bg-success-subtle text-success-emphasis border border-success-subtle">
-                                    <i class="bi bi-check-circle me-1"></i>EXACT
-                                </span>
+              <span th:if="${result.status.name() == 'EXACT'}"
+                    class="badge rounded-pill bg-success-subtle text-success-emphasis border border-success-subtle">
+                <i class="bi bi-check-circle me-1"></i>EXACT
+              </span>
               <span th:if="${result.status.name() == 'PARTIAL'}"
                     class="badge rounded-pill bg-warning-subtle text-warning-emphasis border border-warning-subtle">
-                                    <i class="bi bi-clock-history me-1"></i>PARTIAL
-                                </span>
+                <i class="bi bi-clock-history me-1"></i>PARTIAL
+              </span>
               <span th:if="${result.status.name() == 'ORPHAN'}"
                     class="badge rounded-pill bg-danger-subtle text-danger-emphasis border border-danger-subtle">
-                                    <i class="bi bi-exclamation-triangle me-1"></i>ORPHAN
-                                </span>
+                <i class="bi bi-exclamation-triangle me-1"></i>ORPHAN
+              </span>
             </td>
             <td>
               <span th:text="${result.confidenceScore + '%'}">100%</span>
               <span th:if="${result.status.name() == 'EXACT'}" class="text-success">
-                                    <i class="bi bi-star-fill small"></i>
-                                </span>
+                <i class="bi bi-star-fill small"></i>
+              </span>
             </td>
             <td th:text="${result.reconciledBy}">admin</td>
             <td class="pe-3 small text-muted" th:text="${#temporals.format(result.reconciledAt, 'yyyy-MM-dd HH:mm')}">2026-07-03 22:20</td>
@@ -219,6 +281,14 @@
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Footer -->
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<!-- ========================================== -->
+<!-- INCLUDE SCRIPTS FRAGMENT                   -->
+<!-- ========================================== -->
+<div th:replace="~{fragments/scripts :: badgeStyles}"></div>
+<div th:replace="~{fragments/scripts :: badgeScripts}"></div>
+
 </body>
 </html>

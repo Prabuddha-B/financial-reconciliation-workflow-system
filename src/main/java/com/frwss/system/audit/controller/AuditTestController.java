@@ -34,13 +34,25 @@ public class AuditTestController {
     public String verifyAuditChainDetailed(){
         AuditChainResult result = auditService.verifyAuditChainDetailed();
 
-        if(result.isValid()){
+        if (result.isValid()) {
+            if (result.hasAnyBreaks()) {
+                return "Audit chain is valid (" + result.getTotalBreakCount()
+                        + " break(s) found, all acknowledged)";
+            }
             return "Audit chain is valid";
-        } else {
-            return "Audit chain is broken at log ID: "
-                    + result.getBrokenAtId()
-                    + " (" + result.getReason()
-                    + " in field: " + result.getFieldName() + ")";
         }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Audit chain has ").append(result.getUnresolvedCount())
+                .append(" unresolved break(s):\n");
+
+        for (AuditChainResult.ChainBreak brk : result.getUnresolvedBreaks()) {
+            sb.append("- Broken at log ID: ").append(brk.getBrokenAtId())
+                    .append(" (").append(brk.getReason())
+                    .append(" in field: ").append(brk.getFieldName())
+                    .append(")\n");
+        }
+
+        return sb.toString();
     }
 }

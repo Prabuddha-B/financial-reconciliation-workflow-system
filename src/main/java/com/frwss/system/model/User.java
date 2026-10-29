@@ -19,6 +19,9 @@ public class User {
 
     private String password;
 
+    @Column(name = "pin_hash")
+    private String pinHash;
+
     private boolean enabled = true;
 
     @Column(name = "created_at")
@@ -76,5 +79,13 @@ public class User {
     public Set<Role> getRoles() { return roles; }
 
     public void setRoles(Set<Role> roles) { this.roles = roles; }
+
+    public String getPinHash() {
+        return pinHash;
+    }
+
+    public void setPinHash(String pinHash) {
+        this.pinHash = pinHash;
+    }
 
 }

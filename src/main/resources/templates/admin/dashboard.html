@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/header :: header('Administrator Dashboard')}"></head>
+
+<style>
+    /* ============================================================
+       FRWSS ADMIN DASHBOARD - Enterprise Banking Style
+       ============================================================ */
+
+    /* ============================================================
+   DARK MODE DASHBOARD
+   ============================================================ */
+
+    [data-bs-theme="dark"] .stat-card .stat-number {
+        color: #ffffff;
+    }
+
+    [data-bs-theme="dark"] .stat-card .stat-title {
+        color: #cbd5e1;
+    }
+
+    [data-bs-theme="dark"] .stat-card .stat-label {
+        color: #94a3b8;
+    }
+
+    [data-bs-theme="dark"] .section-divider .divider-label {
+        color: #e2e8f0;
+    }
+
+    [data-bs-theme="dark"] .chart-card .chart-title,
+    [data-bs-theme="dark"] .summary-card .summary-title {
+        color: #ffffff;
+    }
+
+    [data-bs-theme="dark"] .summary-card .list-group-item .label {
+        color: #cbd5e1;
+    }
+
+    [data-bs-theme="dark"] .summary-card .list-group-item .value {
+        color: #ffffff;
+    }
+
+
+    .main-container {
+        padding: 2rem;
+        max-width: 1600px;
+        margin: 0 auto;
+    }
+
+    body {
+        background: linear-gradient(135deg, #f8fafc 0%, #eef2f6 100%);
+        min-height: 100vh;
+    }
+
+    /* ============================================================
+       HERO HEADER
+       ============================================================ */
+
+    /* ============================================================
+   HERO HEADER - LIGHT MODE (DEFAULT)
+   ============================================================ */
+    .hero-header {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 2rem 2.5rem;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    }
+
+    /* ============================================================
+   HERO HEADER - DARK MODE
+   ============================================================ */
+    [data-bs-theme="dark"] .hero-header {
+        background: linear-gradient(135deg, #1a2332 0%, #2d3748 100%);
+        border-color: #334155;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+
+
+
+    .hero-header .hero-left {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .hero-header .hero-title {
+        color: white;
+        font-weight: 700;
+        font-size: 2.1rem;
+        letter-spacing: -0.3px;
+        margin-bottom: 0;
+    }
+
+    .hero-header .hero-title i {
+        color: #60a5fa;
+        margin-right: 0.75rem;
+    }
+
+    .hero-header .hero-title .user-name {
+        color: #60a5fa;
+    }
+
+
+
+    .hero-header .hero-right {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .hero-header .last-updated {
+        color: #94a3b8;
+        font-size: 0.85rem;
+        text-align: right;
+    }
+
+    .hero-header .last-updated .label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #64748b;
+    }
+
+    /* Light Mode */
+    .hero-header .hero-title {
+        color: #1e293b;
+    }
+
+    .hero-header .hero-subtitle {
+        color: #64748b;
+    }
+
+    .hero-header .last-updated .label {
+        color: #94a3b8;
+    }
+
+    .hero-header .last-updated .value {
+        color: #334155;
+    }
+
+    /* Dark Mode */
+    [data-bs-theme="dark"] .hero-header .hero-title {
+        color: #ffffff;
+    }
+
+    [data-bs-theme="dark"] .hero-header .hero-subtitle {
+        color: #94a3b8;
+    }
+
+    [data-bs-theme="dark"] .hero-header .last-updated .value {
+        color: #e2e8f0;
+    }
+
+    .hero-header .status-badge {
+        padding: 0.5rem 1.25rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        animation: pulse-badge 2s infinite;
+    }
+
+    .hero-header .status-badge.online {
+        background: #d1e7dd;
+        color: #0f5132;
+    }
+
+    .hero-header .status-badge.offline {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .hero-header .status-badge .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    .hero-header .status-badge.online .dot {
+        background: #198754;
+    }
+
+    .hero-header .status-badge.offline .dot {
+        background: #dc3545;
+    }
+
+    @keyframes pulse-badge {
+        0% { opacity: 1; }
+        50% { opacity: 0.7; }
+        100% { opacity: 1; }
+    }
+
+    /* ============================================================
+       STATISTICS CARDS (CLICKABLE)
+       ============================================================ */
+    .stat-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.25rem 1.5rem;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        height: 100%;
+        border-top: 4px solid #0d6efd;
+        animation: fadeInUp 0.5s ease forwards;
+        opacity: 0;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+        cursor: pointer;
+    }
+
+    .stat-card:nth-child(1) { animation-delay: 0.05s; }
+    .stat-card:nth-child(2) { animation-delay: 0.10s; }
+    .stat-card:nth-child(3) { animation-delay: 0.15s; }
+    .stat-card:nth-child(4) { animation-delay: 0.20s; }
+    .stat-card:nth-child(5) { animation-delay: 0.25s; }
+    .stat-card:nth-child(6) { animation-delay: 0.30s; }
+    .stat-card:nth-child(7) { animation-delay: 0.35s; }
+    .stat-card:nth-child(8) { animation-delay: 0.40s; }
+    .stat-card:nth-child(9) { animation-delay: 0.45s; }
+    .stat-card:nth-child(10) { animation-delay: 0.50s; }
+    .stat-card:nth-child(11) { animation-delay: 0.55s; }
+    .stat-card:nth-child(12) { animation-delay: 0.60s; }
+
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .stat-card .stat-icon {
+        font-size: 1.75rem;
+        margin-bottom: 0.5rem;
+        display: inline-block;
+    }
+
+    .stat-card .stat-icon.blue { color: #0d6efd; }
+    .stat-card .stat-icon.green { color: #198754; }
+    .stat-card .stat-icon.red { color: #dc3545; }
+    .stat-card .stat-icon.purple { color: #6f42c1; }
+    .stat-card .stat-icon.orange { color: #fd7e14; }
+    .stat-card .stat-icon.gray { color: #6c757d; }
+    .stat-card .stat-icon.teal { color: #20c997; }
+    .stat-card .stat-icon.gold { color: #ffc107; }
+
+    .stat-card .stat-title {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-card .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #1a2332;
+        line-height: 1.2;
+    }
+
+    .stat-card .stat-label {
+        font-size: 0.8rem;
+        color: #adb5bd;
+        margin-top: 0.25rem;
+    }
+
+    .stat-card .click-hint {
+        font-size: 0.7rem;
+        color: #adb5bd;
+        margin-top: 0.25rem;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .stat-card:hover .click-hint {
+        opacity: 1;
+    }
+
+    .stat-card.accent-blue { border-top-color: #0d6efd; }
+    .stat-card.accent-green { border-top-color: #198754; }
+    .stat-card.accent-red { border-top-color: #dc3545; }
+    .stat-card.accent-purple { border-top-color: #6f42c1; }
+    .stat-card.accent-orange { border-top-color: #fd7e14; }
+    .stat-card.accent-gray { border-top-color: #6c757d; }
+    .stat-card.accent-teal { border-top-color: #20c997; }
+    .stat-card.accent-gold { border-top-color: #ffc107; }
+
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ============================================================
+       SECTION DIVIDERS
+       ============================================================ */
+    .section-divider {
+        display: flex;
+        align-items: center;
+        margin: 1.5rem 0 1.5rem 0;
+        gap: 1rem;
+    }
+
+    .section-divider .divider-line {
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(to right, transparent, #dee2e6, transparent);
+    }
+
+    .section-divider .divider-label {
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: #1a2332;
+        white-space: nowrap;
+        padding: 0 1rem;
+        letter-spacing: 0.5px;
+    }
+
+    .section-divider .divider-label i {
+        margin-right: 0.5rem;
+    }
+
+    /* ============================================================
+       CHARTS
+       ============================================================ */
+    .chart-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        transition: all 0.3s ease;
+        height: 100%;
+        animation: fadeInUp 0.6s ease forwards;
+        opacity: 0;
+    }
+
+    .chart-card:nth-child(1) { animation-delay: 0.30s; }
+    .chart-card:nth-child(2) { animation-delay: 0.35s; }
+    .chart-card:nth-child(3) { animation-delay: 0.40s; }
+
+    .chart-card:hover {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .chart-card .chart-title {
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: #1a2332;
+        margin-bottom: 0.25rem;
+    }
+
+    .chart-card .chart-subtitle {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-bottom: 1rem;
+    }
+
+    .chart-wrapper {
+        position: relative;
+        height: 250px;
+    }
+
+    .chart-wrapper canvas {
+        max-height: 100%;
+        max-width: 100%;
+    }
+
+    /* ============================================================
+       QUICK ACTIONS
+       ============================================================ */
+    .quick-action-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: #1a2332;
+        display: block;
+        height: 100%;
+        border: 2px solid transparent;
+        animation: fadeInUp 0.5s ease forwards;
+        opacity: 0;
+    }
+
+    .quick-action-card:nth-child(1) { animation-delay: 0.50s; }
+    .quick-action-card:nth-child(2) { animation-delay: 0.55s; }
+    .quick-action-card:nth-child(3) { animation-delay: 0.60s; }
+    .quick-action-card:nth-child(4) { animation-delay: 0.65s; }
+
+    .quick-action-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+        border-color: #0d6efd;
+        text-decoration: none;
+        color: #1a2332;
+    }
+
+    .quick-action-card .qa-icon {
+        font-size: 2.5rem;
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+
+    .quick-action-card .qa-icon.blue { color: #0d6efd; }
+    .quick-action-card .qa-icon.green { color: #198754; }
+    .quick-action-card .qa-icon.purple { color: #6f42c1; }
+    .quick-action-card .qa-icon.orange { color: #fd7e14; }
+
+    .quick-action-card .qa-title {
+        font-weight: 600;
+        font-size: 1rem;
+        margin-bottom: 0.1rem;
+    }
+
+    .quick-action-card .qa-subtitle {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+
+    /* ============================================================
+       SYSTEM SUMMARY
+       ============================================================ */
+    .summary-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        height: 100%;
+        animation: fadeInUp 0.6s ease forwards;
+        opacity: 0;
+        animation-delay: 0.50s;
+    }
+
+    .summary-card .summary-title {
+        font-weight: 600;
+        font-size: 1rem;
+        color: #1a2332;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #f0f2f5;
+    }
+
+    .summary-card .list-group-item {
+        border: none;
+        padding: 0.6rem 0;
+        background: transparent;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #f1f3f5;
+    }
+
+    .summary-card .list-group-item:last-child {
+        border-bottom: none;
+    }
+
+    .summary-card .list-group-item .label {
+        font-size: 0.9rem;
+        color: #495057;
+    }
+
+    .summary-card .list-group-item .value {
+        font-weight: 600;
+        color: #1a2332;
+    }
+
+    /* ============================================================
+       RECENT ACTIVITY
+       ============================================================ */
+    .activity-card {
+        background: var(--frwss-surface);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        height: 100%;
+        animation: fadeInUp 0.6s ease forwards;
+        opacity: 0;
+        animation-delay: 0.55s;
+    }
+
+    .activity-card .activity-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-weight: 600;
+        font-size: 1rem;
+        color: var(--frwss-text, var(--frwss-text-primary));
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--frwss-border);
+    }
+
+    .activity-card .activity-title-label {
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .activity-card .activity-title-icon {
+        color: #0d6efd;
+    }
+
+    .activity-card .activity-timeline {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .activity-card .timeline-item {
+        display: grid;
+        grid-template-columns: 76px 20px minmax(0, 1fr) auto;
+        column-gap: 0.75rem;
+        align-items: start;
+        min-height: 64px;
+        padding: 0 0 1rem;
+    }
+
+    .activity-card .timeline-item:last-child {
+        padding-bottom: 0;
+    }
+
+    .activity-card .timeline-time {
+        padding-top: 0.15rem;
+        color: var(--frwss-text-muted);
+        font-size: 0.75rem;
+        font-weight: 600;
+        line-height: 1.35;
+        text-align: right;
+    }
+
+    .activity-card .timeline-marker {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        height: 100%;
+    }
+
+    .activity-card .timeline-marker::before {
+        position: absolute;
+        top: 10px;
+        bottom: -1rem;
+        width: 2px;
+        background: var(--frwss-border);
+        content: "";
+    }
+
+    .activity-card .timeline-item:last-child .timeline-marker::before {
+        display: none;
+    }
+
+    .activity-card .timeline-dot {
+        position: relative;
+        z-index: 1;
+        width: 10px;
+        height: 10px;
+        margin-top: 0.32rem;
+        border: 2px solid var(--frwss-surface);
+        border-radius: 50%;
+        background: #0d6efd;
+        box-shadow: 0 0 0 2px #cfe2ff;
+    }
+
+    .activity-card .timeline-content {
+        min-width: 0;
+    }
+
+    .activity-card .activity-event-badge {
+        display: inline-flex;
+        align-items: center;
+        margin-bottom: 0.3rem;
+        padding: 0.2rem 0.5rem;
+        border-radius: 999px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        line-height: 1.2;
+    }
+
+    .activity-card .activity-event-badge.badge-workflow {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .activity-card .activity-event-badge.badge-reconciliation,
+    .activity-card .activity-event-badge.badge-default {
+        background: #cfe2ff;
+        color: #0d6efd;
+    }
+
+    .activity-card .activity-event-badge.badge-user-login {
+        background: #d1e7dd;
+        color: #198754;
+    }
+
+    .activity-card .activity-event-badge.badge-audit {
+        background: #e9ecef;
+        color: #6c757d;
+    }
+
+    .activity-card .activity-description {
+        overflow-wrap: anywhere;
+        color: var(--frwss-text, var(--frwss-text-primary));
+        font-size: 0.85rem;
+        line-height: 1.4;
+    }
+
+    .activity-card .activity-user-pill {
+        align-self: start;
+        margin-top: 0.1rem;
+        padding: 0.25rem 0.55rem;
+        border: 1px solid var(--frwss-border);
+        border-radius: 999px;
+        background: var(--frwss-surface-hover, var(--frwss-surface-3));
+        color: var(--frwss-text-muted);
+        font-size: 0.75rem;
+        font-weight: 600;
+        line-height: 1.2;
+        white-space: nowrap;
+    }
+
+    .activity-card .view-all-link {
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: #0d6efd;
+        text-decoration: none;
+    }
+
+    .activity-card .view-all-link:hover {
+        text-decoration: underline;
+    }
+
+    [data-bs-theme="dark"] .activity-card {
+        background: var(--frwss-surface);
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+    }
+
+    [data-bs-theme="dark"] .activity-card .timeline-dot {
+        box-shadow: 0 0 0 2px #1d4ed8;
+    }
+
+    [data-bs-theme="dark"] .activity-card .activity-event-badge.badge-workflow {
+        background: #4a3410;
+        color: #fbbf24;
+    }
+
+    [data-bs-theme="dark"] .activity-card .activity-event-badge.badge-reconciliation,
+    [data-bs-theme="dark"] .activity-card .activity-event-badge.badge-default {
+        background: #1e3a5f;
+        color: #93c5fd;
+    }
+
+    [data-bs-theme="dark"] .activity-card .activity-event-badge.badge-user-login {
+        background: #164e3a;
+        color: #86efac;
+    }
+
+    [data-bs-theme="dark"] .activity-card .activity-event-badge.badge-audit {
+        background: #334155;
+        color: #cbd5e1;
+    }
+
+    @media (max-width: 768px) {
+        .activity-card .timeline-item {
+            grid-template-columns: 64px 18px minmax(0, 1fr);
+            column-gap: 0.6rem;
+        }
+
+        .activity-card .timeline-time {
+            font-size: 0.7rem;
+        }
+
+        .activity-card .activity-user-pill {
+            grid-column: 3;
+            justify-self: start;
+            margin-top: 0.45rem;
+        }
+    }
+
+    /* ============================================================
+       RESPONSIVE
+       ============================================================ */
+    @media (max-width: 992px) {
+        .main-container { padding: 1.5rem; }
+        .hero-header { padding: 1.5rem; }
+        .hero-header .hero-title { font-size: 1.6rem; }
+        .hero-header .hero-right { justify-content: flex-start; width: 100%; }
+    }
+
+    @media (max-width: 768px) {
+        .main-container { padding: 1rem; }
+        .hero-header {
+            flex-direction: column;
+            text-align: left;
+            padding: 1.25rem;
+        }
+        .hero-header .hero-title { font-size: 1.3rem; }
+        .hero-header .hero-subtitle { font-size: 0.9rem; }
+        .hero-header .hero-right {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.75rem;
+            width: 100%;
+        }
+        .hero-header .last-updated { text-align: left; }
+        .stat-card .stat-number { font-size: 1.5rem; }
+        .chart-wrapper { height: 200px; }
+        .quick-action-card { padding: 1rem; }
+        .quick-action-card .qa-icon { font-size: 2rem; }
+        .section-divider .divider-label { font-size: 0.95rem; }
+    }
+
+    @media (max-width: 576px) {
+        .main-container { padding: 0.75rem; }
+        .hero-header { padding: 1rem; }
+        .hero-header .hero-title { font-size: 1.1rem; }
+        .stat-card { padding: 1rem; }
+        .stat-card .stat-number { font-size: 1.25rem; }
+        .chart-wrapper { height: 180px; }
+        .chart-card { padding: 1rem; }
+        .section-divider .divider-label { font-size: 0.85rem; }
+    }
+
+    /* Keep the shared footer visually separate from the final dashboard row. */
+    main + .frwss-footer {
+        margin-top: 2rem;
+    }
+
+    main + .frwss-footer .container-fluid {
+        max-width: 1600px;
+        margin: 0 auto;
+        padding-left: 2rem;
+        padding-right: 2rem;
+    }
+
+    @media (max-width: 768px) {
+        main + .frwss-footer .container-fluid {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+    }
+
+    /* ============================================================
+   DARK MODE - CARDS
+   ============================================================ */
+
+    [data-bs-theme="dark"] .chart-card,
+    [data-bs-theme="dark"] .summary-card,
+    [data-bs-theme="dark"] .quick-action-card,
+    [data-bs-theme="dark"] .stat-card {
+        background: #1e293b;
+        border-color: #334155;
+        color: #f8fafc;
+    }
+
+    [data-bs-theme="dark"] .quick-action-card:hover,
+    [data-bs-theme="dark"] .stat-card:hover,
+    [data-bs-theme="dark"] .chart-card:hover {
+        background: #243447;
+    }
+
+    /* subtitles */
+    [data-bs-theme="dark"] .chart-subtitle,
+    [data-bs-theme="dark"] .qa-subtitle,
+    [data-bs-theme="dark"] .stat-label,
+    [data-bs-theme="dark"] .click-hint {
+        color: #94a3b8;
+    }
+
+    /* titles */
+    [data-bs-theme="dark"] .qa-title,
+    [data-bs-theme="dark"] .chart-title,
+    [data-bs-theme="dark"] .summary-title,
+    [data-bs-theme="dark"] .stat-title {
+        color: #f8fafc;
+    }
+
+    /* summary list */
+    [data-bs-theme="dark"] .summary-card .list-group-item {
+        border-bottom: 1px solid #334155;
+    }
+
+    [data-bs-theme="dark"] .summary-card .list-group-item .label {
+        color: #cbd5e1;
+    }
+
+    [data-bs-theme="dark"] body {
+        background: linear-gradient(
+                135deg,
+                #0f172a 0%,
+                #111827 100%
+        );
+    }
+
+    [data-bs-theme="dark"] .summary-card .list-group-item .value {
+        color: #ffffff;
+    }
+
+</style>
+
+<body class="d-flex flex-column min-vh-100">
+
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <main class="flex-grow-1">
+
+        <div class="container-fluid main-container">
+
+            <!-- === HERO HEADER === -->
+            <div class="hero-header">
+                <div class="hero-left">
+                    <h1 class="hero-title">
+                        <i class="bi bi-speedometer2"></i>
+                        Welcome back, <span class="user-name" th:text="${currentUser}">admin</span>
+                    </h1>
+                    <p class="hero-subtitle">
+                        <i class="bi bi-bar-chart-line me-1"></i>
+                        System overview with user and reconciliation analytics
+                    </p>
+                </div>
+                <div class="hero-right">
+                    <div class="last-updated">
+                        <div class="label">Last Updated</div>
+                        <div class="value">
+                            <span th:text="${#temporals.format(#temporals.createNow(), 'dd MMM yyyy')}"></span>
+                            <span th:text="${#temporals.format(#temporals.createNow(), 'HH:mm')}"></span>
+                        </div>
+                    </div>
+                    <span class="status-badge"
+                          th:classappend="${dashboard.systemStatus == 'ONLINE' ? 'online' : 'offline'}">
+                            <span class="dot"></span>
+                            <span th:text="${dashboard.systemStatus}">ONLINE</span>
+                        </span>
+                </div>
+            </div>
+
+            <!-- === USER STATISTICS SECTION === -->
+            <div class="section-divider">
+                <span class="divider-line"></span>
+                <span class="divider-label">
+                        <i class="bi bi-people-fill" style="color: #0d6efd;"></i>
+                        User Statistics
+                    </span>
+                <span class="divider-line"></span>
+            </div>
+
+            <div class="row g-3 mb-4">
+
+                <!-- Total Users -->
+                <div class="col-xl-3 col-lg-4 col-md-6">
+                    <a th:href="@{/admin/users}" class="stat-card accent-blue">
+                        <div class="stat-icon blue"><i class="bi bi-people-fill"></i></div>
+                        <div class="stat-title">Total Users</div>
+                        <div class="stat-number" th:text="${dashboard.totalUsers}">0</div>
+                        <div class="stat-label">Registered users in system</div>
+                        <div class="click-hint"><i class="bi bi-arrow-right"></i> Click to manage</div>
+                    </a>
+                </div>
+
+                <!-- Active Users -->
+                <div class="col-xl-3 col-lg-4 col-md-6">
+                    <div class="stat-card accent-green">
+                        <div class="stat-icon green"><i class="bi bi-person-check-fill"></i></div>
+                        <div class="stat-title">Active Users</div>
+                        <div class="stat-number" th:text="${dashboard.activeUsers}">0</div>
+                        <div class="stat-label">Currently active accounts</div>
+                    </div>
+                </div>
+
+                <!-- Disabled Users -->
+                <div class="col-xl-3 col-lg-4 col-md-6">
+                    <div class="stat-card accent-red">
+                        <div class="stat-icon red"><i class="bi bi-person-x-fill"></i></div>
+                        <div class="stat-title">Disabled Users</div>
+                        <div class="stat-number" th:text="${dashboard.disabledUsers}">0</div>
+                        <div class="stat-label">Inactive / suspended accounts</div>
+                    </div>
+                </div>
+
+                <!-- Role Distribution -->
+                <div class="col-xl-3 col-lg-4 col-md-6">
+                    <div class="stat-card accent-purple">
+                        <div class="stat-icon purple"><i class="bi bi-person-badge"></i></div>
+                        <div class="stat-title">Role Distribution</div>
+                        <div class="stat-number"
+                             th:text="${dashboard.administratorCount + dashboard.approverCount + dashboard.auditorCount + dashboard.entryStaffCount}">
+                            0
+                        </div>
+                        <div class="stat-label">
+                            <span class="badge bg-primary me-1" th:text="${dashboard.administratorCount}">0</span>A
+                            <span class="badge bg-warning ms-1 me-1" th:text="${dashboard.approverCount}">0</span>Ap
+                            <span class="badge bg-info ms-1 me-1" th:text="${dashboard.auditorCount}">0</span>Au
+                            <span class="badge bg-secondary ms-1" th:text="${dashboard.entryStaffCount}">0</span>E
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- === RECONCILIATION STATISTICS SECTION === -->
+            <div class="section-divider">
+                <span class="divider-line"></span>
+                <span class="divider-label">
+                        <i class="bi bi-list-check" style="color: #0d6efd;"></i>
+                        Reconciliation Statistics
+                    </span>
+                <span class="divider-line"></span>
+            </div>
+
+            <div class="row g-3 mb-4">
+
+                <!-- Total Reconciliation Results -->
+                <div class="col-xl-3 col-lg-4 col-md-6">
+                    <a th:href="@{/reconciliation}" class="stat-card accent-blue">
+                        <div class="stat-icon blue"><i class="bi bi-list-check"></i></div>
+                        <div class="stat-title">Total Results</div>
+                        <div class="stat-number" th:text="${dashboard.totalReconciliationResults}">0</div>
+                        <div class="stat-label">All reconciliation records</div>
+                        <div class="click-hint"><i class="bi bi-arrow-right"></i> Click to view</div>
+                    </a>
+                </div>
+
+                <!-- Exact Matches -->
+                <div class="col-xl-3 col-lg-4 col-md-6">
+                    <a th:href="@{/reconciliation?status=EXACT}" class="stat-card accent-green">
+                        <div class="stat-icon green"><i class="bi bi-check-circle-fill"></i></div>
+                        <div class="stat-title">Exact Matches</div>
+                        <div class="stat-number" th:text="${dashboard.exactMatches}">0</div>
+                        <div class="stat-label">Perfect matches found</div>
+                        <div class="click-hint"><i class="bi bi-arrow-right"></i> Click to view</div>
+                    </a>
+                </div>
+
+                <!-- Partial Matches -->
+                <div class="col-xl-3 col-lg-4 col-md-6">
+                    <a th:href="@{/reconciliation?status=PARTIAL}" class="stat-card accent-orange">
+                        <div class="stat-icon orange"><i class="bi bi-clock-history"></i></div>
+                        <div class="stat-title">Partial Matches</div>
+                        <div class="stat-number" th:text="${dashboard.partialMatches}">0</div>
+                        <div class="stat-label">Matched with date tolerance</div>
+                        <div class="click-hint"><i class="bi bi-arrow-right"></i> Click to view</div>
+                    </a>
+                </div>
+
+                <!-- Orphan Records -->
+                <div class="col-xl-3 col-lg-4 col-md-6">
+                    <a th:href="@{/reconciliation/orphans}" class="stat-card accent-red">
+                        <div class="stat-icon red"><i class="bi bi-exclamation-triangle-fill"></i></div>
+                        <div class="stat-title">Orphan Records</div>
+                        <div class="stat-number" th:text="${dashboard.orphanRecords}">0</div>
+                        <div class="stat-label">Need manual attention</div>
+                        <div class="click-hint"><i class="bi bi-arrow-right"></i> Click to view</div>
+                    </a>
+                </div>
+
+                <!-- Manually Resolved -->
+                <div class="col-xl-3 col-lg-4 col-md-6">
+                    <a th:href="@{/reconciliation/manual-review}" class="stat-card accent-purple">
+                        <div class="stat-icon purple"><i class="bi bi-pencil-square"></i></div>
+                        <div class="stat-title">Manually Resolved</div>
+                        <div class="stat-number" th:text="${dashboard.manuallyResolved}">0</div>
+                        <div class="stat-label">Awaiting supervisor review</div>
+                        <div class="click-hint"><i class="bi bi-arrow-right"></i> Click to view</div>
+                    </a>
+                </div>
+
+                <!-- Pending Approval -->
+                <div class="col-xl-3 col-lg-4 col-md-6">
+                    <a th:href="@{/workflow/approvals}" class="stat-card accent-gold">
+                        <div class="stat-icon gold"><i class="bi bi-clock"></i></div>
+                        <div class="stat-title">Pending Approval</div>
+                        <div class="stat-number" th:text="${dashboard.pendingApproval}">0</div>
+                        <div class="stat-label">In workflow review</div>
+                        <div class="click-hint"><i class="bi bi-arrow-right"></i> Click to view</div>
+                    </a>
+                </div>
+
+                <!-- Approved -->
+                <div class="col-xl-3 col-lg-4 col-md-6">
+                    <a th:href="@{/reconciliation?status=APPROVED}" class="stat-card accent-green">
+                        <div class="stat-icon green"><i class="bi bi-check2-circle"></i></div>
+                        <div class="stat-title">Approved</div>
+                        <div class="stat-number" th:text="${dashboard.approved}">0</div>
+                        <div class="stat-label">Verified and accepted</div>
+                        <div class="click-hint"><i class="bi bi-arrow-right"></i> Click to view</div>
+                    </a>
+                </div>
+
+                <!-- Rejected -->
+                <div class="col-xl-3 col-lg-4 col-md-6">
+                    <a th:href="@{/reconciliation?status=REJECTED}" class="stat-card accent-red">
+                        <div class="stat-icon red"><i class="bi bi-x-circle"></i></div>
+                        <div class="stat-title">Rejected</div>
+                        <div class="stat-number" th:text="${dashboard.rejected}">0</div>
+                        <div class="stat-label">Reviewed and rejected</div>
+                        <div class="click-hint"><i class="bi bi-arrow-right"></i> Click to view</div>
+                    </a>
+                </div>
+
+            </div>
+
+            <!-- === CHARTS SECTION === -->
+            <div class="section-divider">
+                <span class="divider-line"></span>
+                <span class="divider-label">
+                        <i class="bi bi-graph-up-arrow" style="color: #0d6efd;"></i>
+                        Analytics
+                    </span>
+                <span class="divider-line"></span>
+            </div>
+
+            <div class="row g-3 mb-4">
+
+                <!-- Chart 1: User Status Doughnut -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="chart-card">
+                        <div class="chart-title">User Status</div>
+                        <div class="chart-subtitle">Active vs Disabled users</div>
+                        <div class="chart-wrapper">
+                            <canvas id="userStatusChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart 2: Reconciliation Status Distribution -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="chart-card">
+                        <div class="chart-title">Reconciliation Status</div>
+                        <div class="chart-subtitle">Breakdown of all results</div>
+                        <div class="chart-wrapper">
+                            <canvas id="reconciliationStatusChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart 3: Role Distribution -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="chart-card">
+                        <div class="chart-title">Role Distribution</div>
+                        <div class="chart-subtitle">Users by role</div>
+                        <div class="chart-wrapper">
+                            <canvas id="roleDistributionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- === QUICK ACTIONS === -->
+            <div class="section-divider">
+                <span class="divider-line"></span>
+                <span class="divider-label">
+                        <i class="bi bi-lightning-fill" style="color: #ffc107;"></i>
+                        Quick Actions
+                    </span>
+                <span class="divider-line"></span>
+            </div>
+
+            <div class="row g-3 mb-4">
+
+                <div class="col-lg-3 col-md-6">
+                    <a th:href="@{/admin/users}" class="quick-action-card">
+                        <span class="qa-icon blue"><i class="bi bi-people-fill"></i></span>
+                        <div class="qa-title">User Management</div>
+                        <div class="qa-subtitle">Manage system users</div>
+                    </a>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <a th:href="@{/reconciliation}" class="quick-action-card">
+                        <span class="qa-icon green"><i class="bi bi-list-check"></i></span>
+                        <div class="qa-title">Reconciliation</div>
+                        <div class="qa-subtitle">View all results</div>
+                    </a>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <a th:href="@{/reconciliation/orphans}" class="quick-action-card">
+                        <span class="qa-icon orange"><i class="bi bi-search"></i></span>
+                        <div class="qa-title">View Orphans</div>
+                        <div class="qa-subtitle">Resolve unmatched records</div>
+                    </a>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <a th:href="@{/audit/logs}" class="quick-action-card">
+                        <span class="qa-icon purple"><i class="bi bi-clipboard-check"></i></span>
+                        <div class="qa-title">Audit Logs</div>
+                        <div class="qa-subtitle">View audit trail</div>
+                    </a>
+                </div>
+
+            </div>
+
+            <!-- === SYSTEM SUMMARY + RECENT ACTIVITY === -->
+            <div class="row g-3">
+
+                <!-- System Summary -->
+                <div class="col-lg-6">
+                    <div class="summary-card">
+                        <div class="summary-title">
+                            <i class="bi bi-list-ul me-2" style="color: #0d6efd;"></i>
+                            System Summary
+                        </div>
+                        <div class="list-group">
+                            <div class="list-group-item">
+                                <span class="label"><i class="bi bi-people me-2" style="color: #6c757d;"></i>Total Users</span>
+                                <span class="value" th:text="${dashboard.totalUsers}">0</span>
+                            </div>
+                            <div class="list-group-item">
+                                <span class="label"><i class="bi bi-person-check me-2" style="color: #198754;"></i>Active Users</span>
+                                <span class="value" th:text="${dashboard.activeUsers}">0</span>
+                            </div>
+                            <div class="list-group-item">
+                                <span class="label"><i class="bi bi-person-x me-2" style="color: #dc3545;"></i>Disabled Users</span>
+                                <span class="value" th:text="${dashboard.disabledUsers}">0</span>
+                            </div>
+                            <div class="list-group-item">
+                                <span class="label"><i class="bi bi-list-check me-2" style="color: #0d6efd;"></i>Total Results</span>
+                                <span class="value" th:text="${dashboard.totalReconciliationResults}">0</span>
+                            </div>
+                            <div class="list-group-item">
+                                <span class="label"><i class="bi bi-check-circle me-2" style="color: #198754;"></i>Exact Matches</span>
+                                <span class="value" th:text="${dashboard.exactMatches}">0</span>
+                            </div>
+                            <div class="list-group-item">
+                                <span class="label"><i class="bi bi-exclamation-triangle me-2" style="color: #dc3545;"></i>Orphan Records</span>
+                                <span class="value" th:text="${dashboard.orphanRecords}">0</span>
+                            </div>
+                            <div class="list-group-item" style="border-bottom: none;">
+                                <span class="label"><i class="bi bi-clock me-2" style="color: #ffc107;"></i>Pending Approval</span>
+                                <span class="value" th:text="${dashboard.pendingApproval}">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="col-lg-6">
+                    <div class="activity-card">
+                        <div class="activity-title">
+                            <span class="activity-title-label">
+                                <i class="bi bi-clock-history me-2 activity-title-icon"></i>
+                                Recent Activity
+                            </span>
+                            <a th:href="@{/audit/logs}" class="view-all-link">
+                                View All <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+
+                        <div th:if="${#lists.isEmpty(recentActivities)}" class="text-center text-muted py-3">
+                            <i class="bi bi-inbox" style="font-size: 2rem; display: block; margin-bottom: 0.5rem;"></i>
+                            No recent activity
+                        </div>
+
+                        <div class="activity-timeline" th:unless="${#lists.isEmpty(recentActivities)}">
+                            <div th:each="activity : ${recentActivities}" class="timeline-item">
+                                <time class="timeline-time"
+                                      th:datetime="${#temporals.format(activity.timestamp, 'yyyy-MM-dd''T''HH:mm:ss')}"
+                                      th:text="${#temporals.format(activity.timestamp, 'dd MMM HH:mm')}"></time>
+                                <div class="timeline-marker" aria-hidden="true">
+                                    <span class="timeline-dot"></span>
+                                </div>
+                                <div class="timeline-content">
+                                    <span class="activity-event-badge"
+                                          th:classappend="${#strings.contains(activity.actionType.name(), 'WORKFLOW') ? 'badge-workflow' :
+                                                           #strings.contains(activity.actionType.name(), 'RECONCILIATION') ? 'badge-reconciliation' :
+                                                           #strings.contains(activity.actionType.name(), 'LOGIN') ? 'badge-user-login' :
+                                                           #strings.contains(activity.actionType.name(), 'AUDIT') ? 'badge-audit' :
+                                                           'badge-default'}"
+                                          th:text="${activity.actionType}"></span>
+                                    <div class="activity-description" th:text="${activity.details}"></div>
+                                </div>
+                                <span class="activity-user-pill" th:text="${activity.performedBy}"></span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // ============================================================
+            // Read data from Thymeleaf
+            // ============================================================
+            const activeUsers = [[${dashboard.activeUsers}]];
+            const disabledUsers = [[${dashboard.disabledUsers}]];
+            const adminCount = [[${dashboard.administratorCount}]];
+            const approverCount = [[${dashboard.approverCount}]];
+            const auditorCount = [[${dashboard.auditorCount}]];
+            const entryStaffCount = [[${dashboard.entryStaffCount}]];
+            const exactMatches = [[${dashboard.exactMatches}]];
+            const partialMatches = [[${dashboard.partialMatches}]];
+            const orphanRecords = [[${dashboard.orphanRecords}]];
+            const manuallyResolved = [[${dashboard.manuallyResolved}]];
+            const pendingApproval = [[${dashboard.pendingApproval}]];
+            const approved = [[${dashboard.approved}]];
+            const rejected = [[${dashboard.rejected}]];
+
+            // ============================================================
+            // Chart 1: User Status Doughnut
+            // ============================================================
+            const ctx1 = document.getElementById('userStatusChart').getContext('2d');
+            new Chart(ctx1, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Active Users', 'Disabled Users'],
+                    datasets: [{
+                        data: [activeUsers, disabledUsers],
+                        backgroundColor: ['#198754', '#dc3545'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 10,
+                                usePointStyle: true,
+                                pointStyle: 'circle'
+                            }
+                        }
+                    },
+                    cutout: '70%'
+                }
+            });
+
+            // ============================================================
+            // Chart 2: Reconciliation Status Doughnut
+            // ============================================================
+            const ctx2 = document.getElementById('reconciliationStatusChart').getContext('2d');
+            new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Exact', 'Partial', 'Orphan', 'Manually Resolved', 'Pending Approval', 'Approved', 'Rejected'],
+                    datasets: [{
+                        data: [exactMatches, partialMatches, orphanRecords, manuallyResolved, pendingApproval, approved, rejected],
+                        backgroundColor: ['#198754', '#fd7e14', '#dc3545', '#6f42c1', '#ffc107', '#0d6efd', '#6c757d'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 10,
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                font: { size: 11 }
+                            }
+                        }
+                    },
+                    cutout: '65%'
+                }
+            });
+
+            // ============================================================
+            // Chart 3: Role Distribution Bar
+            // ============================================================
+            const ctx3 = document.getElementById('roleDistributionChart').getContext('2d');
+            new Chart(ctx3, {
+                type: 'bar',
+                data: {
+                    labels: ['Administrator', 'Approver', 'Auditor', 'Entry Staff'],
+                    datasets: [{
+                        label: 'Users',
+                        data: [adminCount, approverCount, auditorCount, entryStaffCount],
+                        backgroundColor: ['#0d6efd', '#ffc107', '#6f42c1', '#20c997'],
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+
+        });
+    </script>
+
+</body>
+</html>

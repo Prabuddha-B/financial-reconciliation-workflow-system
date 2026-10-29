@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!-- ========================================== -->
+<!-- BADGE SCRIPTS FRAGMENT                      -->
+<!-- ========================================== -->
+<div th:fragment="badgeScripts">
+  <script>
+    console.log('🔔 Badge scripts loaded from fragment!');
+
+    /**
+     * Updates the message and notification badges
+     * Fetches unread counts from the API and updates the UI
+     */
+    function updateBadges() {
+      // Get badge elements
+      var msgBadge = document.getElementById('messageBadge');
+      var notifBadge = document.getElementById('notificationBadge');
+
+      // Check if elements exist
+      if (!msgBadge || !notifBadge) {
+        console.log('⚠️ Badge elements not found - retrying...');
+        return;
+      }
+
+      // ==========================================
+      // Update Message Badge
+      // ==========================================
+      fetch('/messages/api/unread-count')
+              .then(function(response) {
+                if (!response.ok) throw new Error('Network error: ' + response.status);
+                return response.text();
+              })
+              .then(function(count) {
+                var numCount = parseInt(count);
+                if (numCount > 0) {
+                  msgBadge.textContent = numCount > 99 ? '99+' : numCount;
+                  msgBadge.style.display = 'inline';
+                  msgBadge.style.backgroundColor = '#dc3545';
+                  msgBadge.style.color = 'white';
+                  msgBadge.style.borderRadius = '50%';
+                  msgBadge.style.padding = '0.25rem 0.5rem';
+                  msgBadge.style.fontSize = '0.65rem';
+                  console.log('✅ Message badge updated: ' + numCount);
+                } else {
+                  msgBadge.style.display = 'none';
+                  console.log('✅ Message badge hidden (0 unread)');
+                }
+              })
+              .catch(function(error) {
+                console.error('❌ Error fetching message count:', error);
+                msgBadge.style.display = 'none';
+              });
+
+      // ==========================================
+      // Update Notification Badge
+      // ==========================================
+      fetch('/notifications/api/unread-count')
+              .then(function(response) {
+                if (!response.ok) throw new Error('Network error: ' + response.status);
+                return response.text();
+              })
+              .then(function(count) {
+                var numCount = parseInt(count);
+                if (numCount > 0) {
+                  notifBadge.textContent = numCount > 99 ? '99+' : numCount;
+                  notifBadge.style.display = 'inline';
+                  notifBadge.style.backgroundColor = '#dc3545';
+                  notifBadge.style.color = 'white';
+                  notifBadge.style.borderRadius = '50%';
+                  notifBadge.style.padding = '0.25rem 0.5rem';
+                  notifBadge.style.fontSize = '0.65rem';
+                  console.log('✅ Notification badge updated: ' + numCount);
+                } else {
+                  notifBadge.style.display = 'none';
+                  console.log('✅ Notification badge hidden (0 unread)');
+                }
+              })
+              .catch(function(error) {
+                console.error('❌ Error fetching notification count:', error);
+                notifBadge.style.display = 'none';
+              });
+    }
+
+    // ==========================================
+    // Initialize Badge System
+    // ==========================================
+
+    // Run when DOM is ready
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('📌 DOM loaded - initializing badge system');
+      // Small delay to ensure all elements are rendered
+      setTimeout(updateBadges, 500);
+    });
+
+    // Also run immediately if DOM is already loaded
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      console.log('📌 DOM already loaded - updating badges immediately');
+      setTimeout(updateBadges, 100);
+    }
+
+    // Run every 15 seconds to keep badges up to date
+    setInterval(updateBadges, 15000);
+
+    // Run when page becomes visible again (user switches tabs)
+    document.addEventListener('visibilitychange', function() {
+      if (!document.hidden) {
+        console.log('👁️ Page became visible - updating badges');
+        updateBadges();
+      }
+    });
+
+    // Run after marking messages as read
+    document.addEventListener('click', function(e) {
+      var target = e.target.closest('form[action*="mark-all-read"], form[action*="mark-read"]');
+      if (target) {
+        console.log('📌 Mark as read clicked - updating badges in 500ms');
+        setTimeout(updateBadges, 500);
+      }
+    });
+
+    console.log('✅ Badge system fully initialized!');
+  </script>
+</div>
+
+<!-- ========================================== -->
+<!-- STYLES FRAGMENT (Optional)                 -->
+<!-- ========================================== -->
+<div th:fragment="badgeStyles">
+  <style>
+    /* Badge animation */
+    @keyframes badgePulse {
+      0% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.7; transform: scale(1.1); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    #messageBadge, #notificationBadge {
+      animation: badgePulse 2s infinite;
+    }
+    #messageBadge[style*="display: none"],
+    #notificationBadge[style*="display: none"] {
+      animation: none;
+    }
+  </style>
+</div>
+</body>
+</html>

@@ -44,6 +44,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class IngestionService {
@@ -976,5 +977,119 @@ public class IngestionService {
                 dto.setErrorMessage("Invalid date");
             }
         }
+    }
+
+    /**
+     * Optimized batch processing for large CSV files
+     * Process 10,000+ records in seconds instead of minutes
+     */
+    public IngestionResult processLargeAccountingFile(MultipartFile file) throws IOException {
+        long startTime = System.currentTimeMillis();
+        log.info("Starting optimized batch ingestion for file: {}", file.getOriginalFilename());
+
+        List<AccountingRecord> entitiesToSave = new ArrayList<>();
+        Set<String> seenReferences = new HashSet<>();
+        int invalidCount = 0;
+        int duplicateCount = 0;
+        int totalRecords = 0;
+        int batchSize = 1000; // Process 1000 records at a time
+
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
+             CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.builder()
+                     .setHeader()
+                     .setSkipHeaderRecord(true)
+                     .setIgnoreHeaderCase(true)
+                     .setTrim(true)
+                     .build())) {
+
+            // First pass: Read all records (fast, no DB calls)
+            List<CSVRecord> allRecords = csvParser.getRecords();
+            totalRecords = allRecords.size();
+            log.info("Read {} records from CSV", totalRecords);
+
+            // Collect all reference numbers for batch duplicate check
+            List<String> referenceNos = new ArrayList<>();
+            Map<String, CSVRecord> recordMap = new HashMap<>();
+
+            for (CSVRecord record : allRecords) {
+                try {
+                    String refNo = record.get("reference_no");
+                    if (!seenReferences.contains(refNo)) {
+                        seenReferences.add(refNo);
+                        referenceNos.add(refNo);
+                        recordMap.put(refNo, record);
+                    } else {
+                        duplicateCount++;
+                    }
+                } catch (Exception e) {
+                    invalidCount++;
+                }
+            }
+
+            // Batch check for existing records in database (ONE query instead of many)
+            Set<String> existingReferences = new HashSet<>();
+            if (!referenceNos.isEmpty()) {
+                existingReferences = accountingRecordRepository.findExistingReferenceNos(referenceNos);
+                log.info("Found {} existing records in database", existingReferences.size());
+            }
+
+            // Build entities to save
+            for (String refNo : referenceNos) {
+                if (existingReferences.contains(refNo)) {
+                    duplicateCount++;
+                    continue;
+                }
+
+                CSVRecord record = recordMap.get(refNo);
+                try {
+                    AccountingRecord entity = new AccountingRecord();
+                    entity.setRecordId(record.get("record_id"));
+                    entity.setReferenceNo(refNo);
+                    entity.setModule(record.get("module"));
+                    entity.setAmount(new BigDecimal(record.get("amount")));
+                    entity.setRecordDate(LocalDate.parse(record.get("record_date")));
+                    entity.setEnteredBy(record.get("entered_by"));
+                    entity.setCreatedAt(LocalDateTime.now());
+                    entitiesToSave.add(entity);
+                } catch (Exception e) {
+                    invalidCount++;
+                    log.warn("Failed to parse record: {}", e.getMessage());
+                }
+            }
+        }
+
+        // Batch save in chunks
+        if (!entitiesToSave.isEmpty()) {
+            log.info("Saving {} records in batches of {}", entitiesToSave.size(), batchSize);
+            int totalSaved = 0;
+            for (int i = 0; i < entitiesToSave.size(); i += batchSize) {
+                int end = Math.min(i + batchSize, entitiesToSave.size());
+                List<AccountingRecord> batch = entitiesToSave.subList(i, end);
+                accountingRecordRepository.saveAll(batch);
+                totalSaved += batch.size();
+                log.info("Saved batch {} of {}", (i / batchSize) + 1,
+                        (entitiesToSave.size() + batchSize - 1) / batchSize);
+            }
+            log.info("Successfully saved {} records", totalSaved);
+        }
+
+        long endTime = System.currentTimeMillis();
+        log.info("Optimized ingestion completed in {} ms. Total: {}, Valid: {}, Invalid: {}, Duplicates: {}",
+                (endTime - startTime), totalRecords, entitiesToSave.size(), invalidCount, duplicateCount);
+
+        // Return result
+        List<AccountingRecordDto> dtos = entitiesToSave.stream()
+                .map(e -> new AccountingRecordDto(
+                        e.getRecordId(),
+                        e.getReferenceNo(),
+                        e.getModule(),
+                        e.getAmount().doubleValue(),
+                        e.getRecordDate().toString(),
+                        e.getEnteredBy()
+                ))
+                .collect(Collectors.toList());
+
+        return new IngestionResult(dtos, totalRecords, entitiesToSave.size(), invalidCount);
     }
 }

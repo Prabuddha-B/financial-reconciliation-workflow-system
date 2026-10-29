@@ -1,0 +1,60 @@
+[data-bs-theme="dark"] {
+    --frwss-bg: #0f172a;
+    --frwss-surface: #1e293b;
+    --frwss-border: #334155;
+    --frwss-shadow:
+            0 2px 6px rgba(0, 0, 0, .35),
+            0 12px 30px rgba(0, 0, 0, .25);
+    color-scheme: dark;
+
+    /* ---- Semantic design system tokens (dark) ---- */
+    --frwss-surface-1: #0f172a;
+    --frwss-surface-2: #1e293b;
+    --frwss-surface-3: #334155;
+    --frwss-text-primary: #e2e8f0;
+    --frwss-text-secondary: #cbd5e1;
+    --frwss-text-muted: #94a3b8;
+}
+
+[data-bs-theme="dark"] body { background: var(--frwss-bg); }
+
+[data-bs-theme="dark"] .frwss-card {
+    background-color: var(--frwss-surface);
+    color: var(--frwss-text-primary);
+}
+[data-bs-theme="dark"] .frwss-subtitle { color: var(--frwss-text-muted) !important; }
+
+[data-bs-theme="dark"] .bg-light {
+    background-color: var(--frwss-surface) !important;
+    color: var(--frwss-text-primary);
+}
+[data-bs-theme="dark"] .bg-white {
+    background-color: var(--frwss-surface) !important;
+    color: var(--frwss-text-primary);
+}
+[data-bs-theme="dark"] .text-dark { color: var(--frwss-text-primary) !important; }
+[data-bs-theme="dark"] .text-muted { color: var(--frwss-text-muted) !important; }
+
+[data-bs-theme="dark"] .border,
+[data-bs-theme="dark"] .border-bottom,
+[data-bs-theme="dark"] .border-top {
+    border-color: var(--frwss-border) !important;
+}
+
+[data-bs-theme="dark"] .table-light {
+    --bs-table-bg: var(--frwss-surface);
+    --bs-table-color: var(--frwss-text-primary);
+}
+
+[data-bs-theme="dark"] .stat-card { background-color: var(--frwss-surface); }
+
+[data-bs-theme="dark"] ::-webkit-scrollbar-track { background: var(--frwss-bg); }
+[data-bs-theme="dark"] ::-webkit-scrollbar-thumb {
+    background: var(--frwss-border);
+    border-radius: var(--frwss-radius-sm);
+}
+
+/* Toggle button icon swap (moon in light mode, sun in dark mode) */
+[data-bs-theme="dark"] .theme-toggle-btn .bi-moon-stars-fill { display: none; }
+[data-bs-theme="dark"] .theme-toggle-btn .bi-sun-fill { display: inline-block; }
+.theme-toggle-btn .bi-sun-fill { display: none; }

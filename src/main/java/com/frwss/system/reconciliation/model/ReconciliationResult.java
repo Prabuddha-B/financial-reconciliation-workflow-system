@@ -48,6 +48,39 @@ public class ReconciliationResult {
     @Column(name = "submitted_by")
     private String submittedBy;
 
+    @Column(name = "reference_match_status")
+    private String referenceMatchStatus; // "MATCH", "PARTIAL", "MISMATCH"
+
+    @Column(name = "amount_match_status")
+    private String amountMatchStatus; // "MATCH", "PARTIAL", "MISMATCH"
+
+    public String getReferenceMatchStatus() {
+        return referenceMatchStatus;
+    }
+
+    public void setReferenceMatchStatus(String referenceMatchStatus) {
+        this.referenceMatchStatus = referenceMatchStatus;
+    }
+
+    public String getAmountMatchStatus() {
+        return amountMatchStatus;
+    }
+
+    public void setAmountMatchStatus(String amountMatchStatus) {
+        this.amountMatchStatus = amountMatchStatus;
+    }
+
+    public String getDateMatchStatus() {
+        return dateMatchStatus;
+    }
+
+    public void setDateMatchStatus(String dateMatchStatus) {
+        this.dateMatchStatus = dateMatchStatus;
+    }
+
+    @Column(name = "date_match_status")
+    private String dateMatchStatus; // "MATCH", "PARTIAL", "MISMATCH"
+
     public Long getId() {
         return id;
     }

@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Notifications</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+    <style>
+
+        /* =========================
+           Page Header
+        ========================== */
+
+        .notification-header {
+            margin-bottom: 2rem;
+        }
+
+        .notification-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: .25rem;
+        }
+
+        .notification-subtitle {
+            color: var(--bs-secondary-color);
+            font-size: 1rem;
+        }
+
+        .notification-status-badge {
+            border-radius: 50px;
+            padding: .75rem 1.25rem;
+            font-weight: 600;
+        }
+
+        /* =========================
+           Notification Container
+        ========================== */
+
+        .notification-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        /* =========================
+           Notification Card
+        ========================== */
+
+        .notification-card {
+            background: var(--bs-body-bg);
+            border: 1px solid var(--bs-border-color);
+            border-radius: 18px;
+            padding:1.25rem 1.5rem;
+            transition: all .25s ease;
+            box-shadow: var(--bs-box-shadow-sm);
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .page-content {
+            flex: 1;
+        }
+
+        .notification-view-btn{
+            border-radius:10px;
+            font-weight:600;
+        }
+
+        .notification-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--bs-box-shadow);
+        }
+
+        .notification-card.unread {
+            border-left: 4px solid var(--bs-primary);
+            background: rgba(var(--bs-primary-rgb), 0.03);
+        }
+
+        /* =========================
+           Icon
+        ========================== */
+
+        .notification-icon-box {
+            width: 58px;
+            height: 58px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 1.4rem;
+        }
+
+        .icon-message {
+            background: rgba(var(--bs-primary-rgb), .12);
+            color: var(--bs-primary);
+        }
+
+        .icon-success {
+            background: rgba(var(--bs-success-rgb), .12);
+            color: var(--bs-success);
+        }
+
+        .icon-warning {
+            background: rgba(var(--bs-warning-rgb), .15);
+            color: var(--bs-warning);
+        }
+
+        .icon-danger {
+            background: rgba(var(--bs-danger-rgb), .12);
+            color: var(--bs-danger);
+        }
+
+        .icon-secondary {
+            background: rgba(var(--bs-secondary-rgb), .12);
+            color: var(--bs-secondary);
+        }
+
+        /* =========================
+           Content
+        ========================== */
+
+        .notification-card-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--bs-body-color);
+        }
+
+        .notification-card-message {
+            color: var(--bs-secondary-color);
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .notification-date {
+            font-size: .9rem;
+            color: var(--bs-secondary-color);
+        }
+
+        /* =========================
+           Type Badge
+        ========================== */
+
+        .notification-type {
+            font-size: .75rem;
+            font-weight: 600;
+            border-radius: 50px;
+            padding: .35rem .75rem;
+        }
+
+        .notification-new {
+            border-radius: 50px;
+            padding: .35rem .75rem;
+            font-size: .75rem;
+            font-weight: 600;
+        }
+
+        /* =========================
+           Empty State
+        ========================== */
+
+        .notification-empty {
+            background: var(--bs-body-bg);
+            border: 1px dashed var(--bs-border-color);
+            border-radius: 18px;
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .badge-message{
+            background:#0d6efd;
+        }
+
+        .badge-approval{
+            background:#ffc107;
+            color:#000;
+        }
+
+        .badge-workflow{
+            background:#fd7e14;
+        }
+
+        .badge-reconciliation{
+            background:#198754;
+        }
+
+
+    </style>
+</head>
+
+<body>
+
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <div class="page-content">
+        <div class="container py-4">
+
+        <!-- Header -->
+        <div class="notification-header d-flex justify-content-between align-items-center">
+
+            <div>
+                <h1 class="notification-title">
+                    <i class="bi bi-bell me-2"></i>
+                    Notifications
+                </h1>
+
+                <p class="notification-subtitle mb-0">
+                    View all your system notifications
+                </p>
+            </div>
+
+            <div>
+
+        <span
+                th:if="${unreadCount != null and unreadCount > 0}"
+                class="badge bg-primary notification-status-badge">
+
+            <i class="bi bi-bell-fill me-1"></i>
+
+            <span th:text="${unreadCount}">0</span>
+
+            Unread
+        </span>
+
+                <span
+                        th:if="${unreadCount == null or unreadCount == 0}"
+                        class="badge bg-success notification-status-badge">
+
+            <i class="bi bi-check2-all me-1"></i>
+
+            All Read
+        </span>
+
+            </div>
+
+        </div>
+
+
+      <!-- Error Message -->
+      <div th:if="${error}" class="alert alert-danger">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        <span th:text="${error}"></span>
+      </div>
+
+      <!-- Success Message -->
+      <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle me-2"></i><span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+
+
+
+        <!-- ===================== Notification List ===================== -->
+        <div class="notification-list">
+
+            <!-- Notification Card -->
+            <div th:each="notification : ${notifications}"
+                 class="notification-card"
+                 th:classappend="${!notification.isRead} ? ' unread' : ''">
+
+                <div class="d-flex align-items-start gap-3">
+
+                    <!-- Icon -->
+                    <div>
+
+                        <div th:if="${notification.type == 'MESSAGE'}"
+                             class="notification-icon-box icon-message">
+                            <i class="bi bi-envelope"></i>
+                        </div>
+
+                        <div th:if="${notification.type == 'APPROVAL'}"
+                             class="notification-icon-box icon-warning">
+                            <i class="bi bi-exclamation-circle"></i>
+                        </div>
+
+                        <div th:if="${notification.type == 'REMINDER'}"
+                             class="notification-icon-box icon-message">
+                            <i class="bi bi-bell"></i>
+                        </div>
+
+                        <div th:if="${notification.type == 'SYSTEM'}"
+                             class="notification-icon-box icon-secondary">
+                            <i class="bi bi-gear"></i>
+                        </div>
+
+                        <div th:if="${notification.type == 'TASK'}"
+                             class="notification-icon-box icon-message">
+                            <i class="bi bi-list-task"></i>
+                        </div>
+
+                        <div th:if="${notification.type == 'RECONCILIATION'}"
+                             class="notification-icon-box icon-success">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+
+                        <div th:if="${notification.type == 'WORKFLOW'}"
+                             class="notification-icon-box icon-warning">
+                            <i class="bi bi-arrow-repeat"></i>
+                        </div>
+
+                        <div th:if="${notification.type == 'APPROVED'}"
+                             class="notification-icon-box icon-success">
+                            <i class="bi bi-check2-circle"></i>
+                        </div>
+
+                        <div th:if="${notification.type == 'REJECTED'}"
+                             class="notification-icon-box icon-danger">
+                            <i class="bi bi-x-circle"></i>
+                        </div>
+
+                        <div th:if="${notification.type == 'UPLOAD'}"
+                             class="notification-icon-box icon-message">
+                            <i class="bi bi-cloud-upload"></i>
+                        </div>
+
+                        <div th:if="${notification.type == null}"
+                             class="notification-icon-box icon-secondary">
+                            <i class="bi bi-pin"></i>
+                        </div>
+
+                    </div>
+
+                    <!-- Content -->
+                    <div class="flex-grow-1">
+
+                        <!-- Header -->
+                        <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+
+                    <span th:if="${!notification.isRead}"
+                          class="badge bg-primary notification-new">
+                        NEW
+                    </span>
+
+                            <span class="badge notification-type bg-secondary"
+                                  th:text="${notification.type}">
+                        MESSAGE
+                    </span>
+
+                            <div class="notification-card-title"
+                                 th:text="${notification.title}">
+                                Notification Title
+                            </div>
+
+                        </div>
+
+                        <!-- Message -->
+                        <div class="notification-card-message"
+                             th:text="${notification.message}">
+                            Notification Message
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+
+                            <div>
+
+                                <a th:if="${notification.link}"
+                                   th:href="${notification.link}"
+                                   class="btn btn-sm btn-outline-primary">
+
+                                    <i class="bi bi-eye me-1"></i>
+                                    View Details
+
+                                </a>
+
+                                <span th:if="${notification.link == null}"
+                                      class="text-muted small">
+                            No action required
+                        </span>
+
+                            </div>
+
+                            <div class="notification-date">
+
+                                <i class="bi bi-clock me-1"></i>
+
+                                <span th:text="${#temporals.format(notification.createdAt, 'dd MMM yyyy HH:mm')}">
+                            25 Jul 2026 10:22
+                        </span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="d-flex flex-column gap-2">
+
+                        <form th:if="${!notification.isRead}"
+                              th:action="@{/notifications/mark-read/{id}(id=${notification.id})}"
+                              method="post">
+
+                            <button type="submit"
+                                    class="btn btn-sm btn-outline-success"
+                                    title="Mark as Read">
+
+                                <i class="bi bi-check2"></i>
+
+                            </button>
+
+                        </form>
+
+                        <form th:action="@{/notifications/delete/{id}(id=${notification.id})}"
+                              method="post">
+
+                            <button type="submit"
+                                    class="btn btn-sm btn-outline-danger"
+                                    onclick="return confirm('Delete this notification?');"
+                                    title="Delete">
+
+                                <i class="bi bi-trash"></i>
+
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Empty State -->
+
+            <div th:if="${#lists.isEmpty(notifications)}"
+                 class="notification-empty">
+
+                <i class="bi bi-bell-slash fs-1 d-block mb-3"></i>
+
+                <h4>No Notifications</h4>
+
+                <p class="text-muted mb-0">
+                    When you receive notifications, they will appear here.
+                </p>
+
+            </div>
+
+        </div>
+
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+    <div th:replace="~{fragments/scripts :: badgeStyles}"></div>
+    <div th:replace="~{fragments/scripts :: badgeScripts}"></div>
+
+
+
+</body>
+</html>

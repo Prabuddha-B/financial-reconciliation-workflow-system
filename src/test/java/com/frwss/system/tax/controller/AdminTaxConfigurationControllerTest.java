@@ -9,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.validation.BindingResult;
 import org.springframework.ui.ConcurrentModel;
 import org.springframework.ui.Model;
 
@@ -132,6 +133,9 @@ class AdminTaxConfigurationControllerTest {
         configuration.setTaxRate(new BigDecimal("18"));
         configuration.setDescription("Updated tax rate");
 
+        BindingResult bindingResult = mock(BindingResult.class);
+        when(bindingResult.hasErrors()).thenReturn(false);
+
         // ---------------------------------------------------------------------
         // Act
         // ---------------------------------------------------------------------
@@ -139,7 +143,8 @@ class AdminTaxConfigurationControllerTest {
         String view =
                 adminTaxConfigurationController.updateConfiguration(
                         id,
-                        configuration);
+                        configuration,
+                        bindingResult);
 
         // ---------------------------------------------------------------------
         // Assert
@@ -172,6 +177,9 @@ class AdminTaxConfigurationControllerTest {
         configuration.setTaxRate(new BigDecimal("15"));
         configuration.setDescription("Annual revision");
 
+        BindingResult bindingResult = mock(BindingResult.class);
+        when(bindingResult.hasErrors()).thenReturn(false);
+
         // ---------------------------------------------------------------------
         // Act
         // ---------------------------------------------------------------------
@@ -179,7 +187,8 @@ class AdminTaxConfigurationControllerTest {
         String view =
                 adminTaxConfigurationController.updateConfiguration(
                         id,
-                        configuration);
+                        configuration,
+                        bindingResult);
 
         // ---------------------------------------------------------------------
         // Assert

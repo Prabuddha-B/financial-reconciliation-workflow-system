@@ -1,61 +1,632 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
+<style>
+
+
+    /* ---------- 1. Navbar spacing – reduce visual heaviness ---------- */
+    .navbar {
+        --bs-navbar-padding-y: 0.35rem;          /* slightly thinner than default */
+        padding-top: var(--bs-navbar-padding-y);
+        padding-bottom: var(--bs-navbar-padding-y);
+        min-height: 3.6rem;
+        transition: box-shadow 0.2s ease;
+    }
+
+    /* ---------- 2. Navigation links – stronger hover contrast ---------- */
+    .navbar-nav .nav-link {
+        padding: 0.5rem 0.85rem;
+        border-radius: 0.375rem;
+        font-weight: 500;
+        transition: background-color 0.18s ease, color 0.18s ease;
+    }
+
+    .navbar-nav .nav-link:hover,
+    .navbar-nav .nav-link:focus {
+        background-color: rgba(var(--bs-primary-rgb), 0.10);
+        color: var(--bs-primary);
+    }
+
+    /* dropdown toggles inherit same hover treatment */
+    .navbar-nav .nav-link.dropdown-toggle:hover,
+    .navbar-nav .nav-link.dropdown-toggle:focus {
+        background-color: rgba(var(--bs-primary-rgb), 0.10);
+        color: var(--bs-primary);
+    }
+
+    /* ---------- 3. Utility icon consistency (using existing .nav-link) ---------- */
+    .navbar-nav .nav-link .bi,
+    .navbar-nav .nav-link i[class*="bi-"],
+    .navbar-nav .nav-link i[class*="fa-"] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.35rem;        /* fixed width */
+        height: 1.35rem;       /* fixed height */
+        font-size: 1.2rem;
+        line-height: 1;
+        transition: transform 0.15s ease;
+    }
+
+    /* identical hover for all utility icons */
+    .navbar-nav .nav-link:hover .bi,
+    .navbar-nav .nav-link:hover i[class*="bi-"],
+    .navbar-nav .nav-link:hover i[class*="fa-"] {
+        transform: translateY(-1px);
+    }
+
+    /* ensure badge alignment stays intact */
+    .navbar-nav .nav-link .badge {
+        margin-left: -0.2rem;
+        margin-top: -0.45rem;
+        font-size: 0.65rem;
+        padding: 0.2rem 0.45rem;
+    }
+
+    /* ---------- 4. Theme toggle button – match utility icons ---------- */
+    .theme-toggle-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 0.375rem;
+        border: none;
+        background: transparent;
+        transition: background-color 0.18s ease, transform 0.15s ease;
+    }
+
+    .theme-toggle-btn:hover,
+    .theme-toggle-btn:focus {
+        background-color: rgba(var(--bs-secondary-rgb), 0.10);
+        transform: translateY(-1px);
+    }
+
+    .theme-toggle-btn .bi,
+    .theme-toggle-btn i[class*="bi-"] {
+        width: 1.35rem;
+        height: 1.35rem;
+        font-size: 1.2rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* ---------- 5. Profile section – spacing & readability ---------- */
+    /* avatar border – now scoped to profile dropdown */
+    .nav-item.dropdown .rounded-circle {
+        border: 2px solid rgba(var(--bs-primary-rgb), 0.15);
+        transition: border-color 0.2s ease;
+    }
+
+    .nav-item.dropdown .rounded-circle:hover {
+        border-color: rgba(var(--bs-primary-rgb), 0.40);
+    }
+
+    /* username – improve readability */
+    .nav-item.dropdown .fw-semibold.text-white {
+        font-weight: 600 !important;
+        font-size: 0.95rem;
+        letter-spacing: 0.01em;
+        line-height: 1.3;
+    }
+
+    /* role label – improve contrast */
+    .nav-item.dropdown .text-white-50 {
+        font-size: 0.7rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        opacity: 0.8;
+        transition: opacity 0.2s ease, color 0.2s ease;
+    }
+
+    /* increase spacing between avatar and text inside the profile dropdown */
+    .nav-item.dropdown .dropdown-toggle {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+    }
+
+    /* better vertical alignment for username/role block */
+    .nav-item.dropdown .dropdown-toggle > div:last-child {
+        line-height: 1.15;
+    }
+
+    /* hover effect on role label */
+    .nav-item.dropdown .dropdown-toggle:hover .text-white-50 {
+        color: var(--bs-primary) !important;
+        opacity: 1;
+    }
+
+    /* ---------- 6. Dropdown menus – visual hierarchy & cleaner shadow ---------- */
+    .dropdown-menu {
+        padding: 0.5rem 0;
+        border: none !important;           /* remove border completely */
+        border-radius: 0.75rem;
+        box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.10),
+        0 0.125rem 0.5rem rgba(0, 0, 0, 0.04);
+        background-color: var(--bs-body-bg);
+        min-width: 12rem;                  /* narrower than before */
+        margin-top: 0.15rem;               /* closer to navbar */
+        animation: dropdownFade 0.15s ease;
+    }
+
+    @keyframes dropdownFade {
+        0% { opacity: 0; transform: translateY(-6px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+
+    /* dropdown items – better separation, adjusted padding */
+    .dropdown-item {
+        padding: 0.65rem 1rem;             /* tighter padding */
+        font-weight: 450;
+        transition: background-color 0.15s ease, color 0.15s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+    }
+
+    .dropdown-item:hover,
+    .dropdown-item:focus {
+        background-color: rgba(var(--bs-primary-rgb), 0.06);
+        color: var(--bs-primary);
+    }
+
+    .dropdown-item:active {
+        background-color: rgba(var(--bs-primary-rgb), 0.12);
+        color: var(--bs-primary);
+    }
+
+    /* dropdown dividers – cleaner spacing */
+    .dropdown-divider {
+        margin: 0.35rem 0.75rem;
+        opacity: 0.5;
+        border-color: rgba(var(--bs-secondary-rgb), 0.12);
+    }
+
+    /* icons inside dropdown items – consistent width */
+    .dropdown-item .bi,
+    .dropdown-item i[class*="bi-"],
+    .dropdown-item i[class*="fa-"] {
+        width: 1.2rem;
+        text-align: center;
+        font-size: 1rem;
+        opacity: 0.7;
+    }
+
+    .dropdown-item:hover .bi,
+    .dropdown-item:hover i {
+        opacity: 1;
+    }
+
+    /* ---------- 7. Navbar brand – more compact ---------- */
+    .navbar-brand span {
+        font-size: 1.55rem !important;
+    }
+
+    /* ---------- 8. Mobile experience – improved spacing & touch targets ---------- */
+    @media (max-width: 991.98px) {
+        .navbar-collapse {
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+        }
+
+        .navbar-nav .nav-item {
+            margin: 0.1rem 0;
+        }
+
+        .navbar-nav .nav-link {
+            padding: 0.65rem 0.85rem;       /* larger touch area */
+            border-radius: 0.5rem;
+        }
+
+        /* utility icons on mobile – full width, larger tap area */
+        .navbar-nav .nav-link .bi,
+        .navbar-nav .nav-link i[class*="bi-"],
+        .navbar-nav .nav-link i[class*="fa-"] {
+            width: 1.5rem;
+            height: 1.5rem;
+            font-size: 1.3rem;
+        }
+
+        /* profile section on mobile – better spacing */
+        .nav-item.dropdown .dropdown-toggle {
+            gap: 0.75rem;
+        }
+
+        .nav-item.dropdown .rounded-circle {
+            width: 2.6rem;
+            height: 2.6rem;
+        }
+
+        .nav-item.dropdown .fw-semibold.text-white {
+            font-size: 1rem;
+        }
+
+        /* dropdown menus on mobile – full width, subtle background */
+        .dropdown-menu {
+            border-radius: 0.5rem;
+            box-shadow: none;
+            background-color: rgba(var(--bs-secondary-rgb), 0.03);
+            margin: 0.25rem 0 0.5rem 0;
+            padding: 0.25rem 0;
+            animation: none;
+            border: 1px solid rgba(var(--bs-secondary-rgb), 0.08);
+        }
+
+        .dropdown-item {
+            padding: 0.6rem 1.2rem;          /* larger touch target */
+        }
+    }
+
+    /* ---------- Extra small devices ---------- */
+    @media (max-width: 575.98px) {
+        .navbar {
+            --bs-navbar-padding-y: 0.2rem;
+            min-height: 3.25rem;
+        }
+
+        .navbar-brand {
+            font-size: 1.1rem;
+        }
+
+        .nav-item.dropdown .fw-semibold.text-white {
+            font-size: 0.9rem;
+        }
+
+        .nav-item.dropdown .text-white-50 {
+            font-size: 0.65rem;
+        }
+
+        .navbar-nav .nav-link .badge {
+            font-size: 0.6rem;
+            padding: 0.15rem 0.35rem;
+            margin-left: -0.1rem;
+            margin-top: -0.3rem;
+        }
+    }
+
+    /* ---------- Dark mode adaptations (automatic via Bootstrap) ---------- */
+    [data-bs-theme="dark"] .dropdown-menu {
+        box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.35),
+        0 0.125rem 0.5rem rgba(0, 0, 0, 0.15);
+    }
+
+    [data-bs-theme="dark"] .dropdown-item:hover,
+    [data-bs-theme="dark"] .dropdown-item:focus {
+        background-color: rgba(var(--bs-primary-rgb), 0.15);
+    }
+
+    [data-bs-theme="dark"] .navbar-nav .nav-link:hover,
+    [data-bs-theme="dark"] .navbar-nav .nav-link:focus {
+        background-color: rgba(var(--bs-primary-rgb), 0.15);
+    }
+
+    [data-bs-theme="dark"] .theme-toggle-btn:hover,
+    [data-bs-theme="dark"] .theme-toggle-btn:focus {
+        background-color: rgba(var(--bs-secondary-rgb), 0.15);
+    }
+
+    [data-bs-theme="dark"] .dropdown-divider {
+        border-color: rgba(255, 255, 255, 0.08);
+    }
+</style>
+
 <body>
 
-    <nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm border-bottom">
+<th:block th:fragment="navbar">
 
-            <div class="container-xl">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm border-bottom">
 
-                <!-- Brand -->
-                <a class="navbar-brand fw-bold d-flex align-items-center" href="/">
-                    <i class="bi bi-bank2 fs-4 me-2"></i>
-                    <span class="fs-3">FRWSS</span>
-                </a>
+        <div class="container-xl">
 
+            <!-- ========================= -->
+            <!-- Brand -->
+            <!-- ========================= -->
+            <a class="navbar-brand fw-bold d-flex align-items-center"
+               th:href="@{/}">
+
+                <i class="bi bi-bank2 fs-4 me-2"></i>
+                <span class="fs-3">FRWSS</span>
+
+            </a>
+
+            <!-- Mobile Toggle -->
+            <button class="navbar-toggler"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#navbarContent"
+                    aria-controls="navbarContent"
+                    aria-expanded="false"
+                    aria-label="Toggle navigation">
+
+                <span class="navbar-toggler-icon"></span>
+
+            </button>
+
+            <!-- ========================= -->
+            <!-- Navbar Content -->
+            <!-- ========================= -->
+            <div class="collapse navbar-collapse"
+                 id="navbarContent">
+
+                <!-- Left Navigation -->
+                <ul class="navbar-nav ms-4">
+
+                    <!-- Dashboard -->
+                    <li class="nav-item">
+
+                        <a class="nav-link fw-semibold"
+                           th:href="@{/}">
+
+                            <i class="bi bi-speedometer2 me-1"></i>
+                            Dashboard
+
+                        </a>
+
+                    </li>
+
+                    <!-- Audit Logs -->
+                    <li class="nav-item"
+                        th:if="${userRole == 'ADMIN' or userRole == 'AUDITOR'}">
+
+                        <a class="nav-link fw-semibold"
+                           th:href="@{/audit/logs}">
+
+                            <i class="bi bi-journal-text me-1"></i>
+                            Audit Logs
+
+                        </a>
+
+                    </li>
+
+                    <!-- Administrator Dropdown -->
+                    <li class="nav-item dropdown"
+                        th:if="${userRole == 'ADMIN'}">
+
+                        <a class="nav-link dropdown-toggle fw-semibold"
+                           href="#"
+                           role="button"
+                           data-bs-toggle="dropdown"
+                           aria-expanded="false">
+
+                            <i class="bi bi-gear-fill me-1"></i>
+                            Administrator
+
+                        </a>
+
+                        <ul class="dropdown-menu shadow">
+
+                            <!-- Admin Dashboard -->
+                            <li>
+                                <a class="dropdown-item"
+                                   th:href="@{/admin/dashboard}">
+                                    <i class="bi bi-bar-chart-line-fill me-2"></i>
+                                    Admin Dashboard
+                                </a>
+                            </li>
+
+                            <li><hr class="dropdown-divider"></li>
+
+                            <!-- User Management -->
+                            <li>
+                                <a class="dropdown-item"
+                                   th:href="@{/admin/users}">
+                                    <i class="bi bi-people-fill me-2"></i>
+                                    User Management
+                                </a>
+                            </li>
+
+                            <!-- Tax Configurations -->
+                            <li>
+                                <a class="dropdown-item"
+                                   th:href="@{/admin/tax-configurations}">
+                                    <i class="bi bi-percent me-2"></i>
+                                    Tax Configurations
+                                </a>
+                            </li>
+
+                        </ul>
+
+                    </li>
+
+                </ul>
+
+                <!-- ========================= -->
                 <!-- Right Side -->
-                <div class="d-flex align-items-center">
+                <!-- ========================= -->
+                <ul class="navbar-nav ms-auto">
 
-                    <!-- User Information -->
-                    <div class="d-flex align-items-center border rounded-pill px-2 py-1">
+                    <!-- ========================================== -->
+                    <!-- MESSAGES BUTTON WITH BADGE -->
+                    <!-- ========================================== -->
+                    <li class="nav-item position-relative me-2">
+                        <a class="nav-link" href="/messages/inbox" title="Messages">
+                            <i class="bi bi-envelope fs-5"></i>
+                            <span id="messageBadge"
+                                  class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                  style="font-size: 0.6rem; min-width: 1.2rem; padding: 0.15rem 0.4rem; border: 1px solid white; display: none;">
+                            0
+                        </span>
+                        </a>
+                    </li>
 
-                        <!-- Avatar -->
-                        <div class="rounded-circle bg-primary d-flex justify-content-center align-items-center me-3"
-                             style="width:40px;height:40px;">
-                            <i class="bi bi-person-fill text-white fs-5"></i>
-                        </div>
+                    <!-- ========================================== -->
+                    <!-- NOTIFICATIONS BUTTON WITH BADGE -->
+                    <!-- ========================================== -->
+                    <li class="nav-item position-relative me-2">
+                        <a class="nav-link" href="/notifications" title="Notifications">
+                            <i class="bi bi-bell fs-5"></i>
+                            <span id="notificationBadge"
+                                  class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                  style="font-size: 0.6rem; min-width: 1.2rem; padding: 0.15rem 0.4rem; border: 1px solid white; display: none;">
+                            0
+                        </span>
+                        </a>
+                    </li>
 
-                        <!-- Username -->
-                        <div class="me-3 text-end">
+                    <!-- ========================================== -->
+                    <!-- COMPOSE MESSAGE BUTTON -->
+                    <!-- ========================================== -->
+                    <li class="nav-item me-2">
+                        <a class="nav-link" href="/messages/compose" title="Compose Message">
+                            <i class="bi bi-pencil-square fs-5"></i>
+                        </a>
+                    </li>
 
-                            <div class="fw-semibold text-white" th:text="${currentUser}">
-                                admin
+                    <!-- ========================================== -->
+                    <!-- DARK MODE TOGGLE -->
+                    <!-- ========================================== -->
+                    <li class="nav-item me-2">
+                        <button type="button"
+                                class="nav-link border-0 bg-transparent theme-toggle-btn"
+                                onclick="toggleFrwssTheme()"
+                                title="Toggle dark mode">
+                            <i class="bi bi-moon-stars-fill fs-5"></i>
+                            <i class="bi bi-sun-fill fs-5"></i>
+                        </button>
+                    </li>
+
+                    <!-- ========================================== -->
+                    <!-- PROFILE DROPDOWN -->
+                    <!-- ========================================== -->
+                    <li class="nav-item dropdown">
+
+                        <a class="nav-link dropdown-toggle d-flex align-items-center"
+                           href="#"
+                           role="button"
+                           data-bs-toggle="dropdown"
+                           aria-expanded="false">
+
+                            <div class="rounded-circle bg-primary
+                                    d-flex justify-content-center
+                                    align-items-center me-2"
+                                 style="width:40px;height:40px;">
+
+                                <i class="bi bi-person-fill text-white"></i>
+
                             </div>
 
-                            <small class="text-white-50" th:text="${userRole}">
-                                Administrator
-                            </small>
+                            <div>
 
-                        </div>
+                                <div class="fw-semibold text-white"
+                                     th:text="${currentUser}">
+                                    admin
+                                </div>
 
-                        <!-- Divider -->
-                        <div class="vr text-secondary me-3"></div>
+                                <small class="text-white-50"
+                                       th:text="${userRole}">
+                                    ADMIN
+                                </small>
 
-                        <!-- Logout -->
-                        <form th:action="@{/logout}" method="post" class="mb-0">
+                            </div>
 
-                            <button type="submit" class="btn btn-outline-light btn-sm rounded-pill px-3">
-                                <i class="bi bi-box-arrow-right me-1"></i>
-                                Logout
-                            </button>
+                        </a>
 
-                        </form>
+                        <ul class="dropdown-menu dropdown-menu-end shadow"
+                            style="min-width:260px;">
 
-                    </div>
+                            <li class="px-3 pt-2">
 
-                </div>
+                                <div class="fw-bold"
+                                     th:text="${currentUser}">
+                                    admin
+                                </div>
+
+                                <small class="text-muted">
+
+                                    Current Role:
+                                    <span th:text="${userRole}">
+                                    ADMIN
+                                </span>
+
+                                </small>
+
+                            </li>
+
+                            <li><hr class="dropdown-divider"></li>
+
+                            <!-- Messages Quick Link -->
+                            <li>
+                                <a class="dropdown-item" href="/messages/inbox">
+                                    <i class="bi bi-envelope me-2"></i>
+                                    Messages
+                                    <span id="dropdownMessageBadge"
+                                          class="badge bg-danger rounded-pill ms-2"
+                                          style="display: none;">0</span>
+                                </a>
+                            </li>
+
+                            <!-- Notifications Quick Link -->
+                            <li>
+                                <a class="dropdown-item" href="/notifications">
+                                    <i class="bi bi-bell me-2"></i>
+                                    Notifications
+                                    <span id="dropdownNotificationBadge"
+                                          class="badge bg-danger rounded-pill ms-2"
+                                          style="display: none;">0</span>
+                                </a>
+                            </li>
+
+                            <li><hr class="dropdown-divider"></li>
+
+                            <!-- Switch Account -->
+                            <li>
+                                <a class="dropdown-item"
+                                   th:href="@{/security/switch-account}">
+                                    <i class="bi bi-arrow-left-right me-2"></i>
+                                    Switch Account
+                                </a>
+                            </li>
+
+                            <li><hr class="dropdown-divider"></li>
+
+                            <!-- Logout -->
+                            <li>
+                                <form th:action="@{/logout}"
+                                      method="post"
+                                      class="mb-0">
+
+                                    <button type="submit"
+                                            class="dropdown-item text-danger">
+
+                                        <i class="bi bi-box-arrow-right me-2"></i>
+                                        Logout
+
+                                    </button>
+
+                                </form>
+                            </li>
+
+                        </ul>
+
+                    </li>
+
+                </ul>
 
             </div>
+
+        </div>
+
     </nav>
+
+    <!-- ========================================== -->
+    <!-- DARK MODE (CSS + toggle script) -->
+    <!-- ========================================== -->
+    <link rel="stylesheet" th:href="@{/css/theme-dark.css}">
+    <script th:src="@{/js/theme-toggle.js}"></script>
+
+    <!-- ========================================== -->
+    <!-- BOOTSTRAP JS (Required for dropdowns) -->
+    <!-- ========================================== -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+    </script>
+
+    <!-- Instead of inline scripts, include the fragment -->
+    <div th:replace="~{fragments/scripts :: badgeStyles}"></div>
+    <div th:replace="~{fragments/scripts :: badgeScripts}"></div>
+
+</th:block>
 </body>
 </html>

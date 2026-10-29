@@ -4,6 +4,12 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 @Entity
 @Table(name = "tax_configurations")
 public class TaxConfiguration {
@@ -12,15 +18,23 @@ public class TaxConfiguration {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Category is required.")
+    @Size(max = 100, message = "Category cannot exceed 100 characters.")
     @Column(name = "category", nullable = false)
     private String category;
 
+    @NotBlank(message = "Module is required.")
+    @Size(max = 100, message = "Module cannot exceed 100 characters.")
     @Column(name = "module", nullable = false)
     private String module;
 
+    @NotNull(message = "Tax rate is required.")
+    @DecimalMin(value = "0.00", inclusive = true, message = "Tax rate cannot be negative.")
+    @DecimalMax(value = "100.00", inclusive = true, message = "Tax rate cannot exceed 100%.")
     @Column(name = "tax_rate", nullable = false, precision = 5, scale = 2)
     private BigDecimal taxRate;
 
+    @Size(max = 500, message = "Description cannot exceed 500 characters.")
     @Column(name = "description")
     private String description;
 
