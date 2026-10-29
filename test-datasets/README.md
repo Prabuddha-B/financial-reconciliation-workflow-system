@@ -8,13 +8,13 @@ All datasets should contain synthetic or anonymized data. Do not use real financ
 
 ## Dataset Inventory
 
-| File | Data Type | Intended Use |
-|---|---|---|
-| `payroll.csv` | Payroll | Test payroll ingestion and reconciliation |
-| `receipts.csv` | Receipts | Test receipt ingestion and matching |
-| `stock_purchases.csv` | Stock purchases | Test stock-purchase ingestion and matching |
-| `accounting_records.csv` | Accounting records | Test accounting ingestion and reconciliation |
-| `accounting_invalid_and_duplicates.csv` | Accounting records | Test invalid rows and duplicate detection |
+| File | Data Type | Records | Intended Use |
+|---|---|---:|---|
+| `Payroll Dataset.csv` | Payroll | 1,000 | Test payroll data ingestion and validation. |
+| `Accounting Dataset.csv` | Accounting records | 1,000 | Test accounting data ingestion and reconciliation. |
+| `Stock_purchases Dataset.csv` | Stock purchases | 1,000 | Test stock-purchase ingestion and reconciliation. |
+| `Receipts_Valid Dataset.csv` | Receipts | 1,000 | Test ingestion and validation of receipt records with valid-format data. |
+| `Receipts_Invalid Dataset.csv` | Receipts | 7 | Test validation of missing reference numbers and negative amounts, along with other invalid receipt records. |
 
 ## Recommended Testing Sequence
 
