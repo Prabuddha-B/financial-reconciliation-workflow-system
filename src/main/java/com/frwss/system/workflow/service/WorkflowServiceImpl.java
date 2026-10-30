@@ -54,6 +54,8 @@ public class WorkflowServiceImpl implements WorkflowService {
         workflowRecord.setCurrentState(WorkflowState.ENTERED);
         workflowRecord.setCreatedAt(LocalDateTime.now());
         workflowRecord.setUpdatedAt(LocalDateTime.now());
+        workflowRecord.setComments(request.getComments());
+        workflowRecord.setDetails(request.getDetails());
 
         // Saving to DB
         WorkflowRecord savedRecord = workflowRecordRepository.save(workflowRecord);
@@ -65,6 +67,8 @@ public class WorkflowServiceImpl implements WorkflowService {
         response.setSourceType(savedRecord.getSourceType());
         response.setSourceRecordId(savedRecord.getSourceRecordId());
         response.setCurrentState(savedRecord.getCurrentState());
+        response.setComments(savedRecord.getComments());
+        response.setDetails(savedRecord.getDetails());
         response.setMessage("Workflow Created Successfully");
 
         return response;
@@ -178,6 +182,8 @@ public class WorkflowServiceImpl implements WorkflowService {
         response.setSourceRecordId(workflowRecord.getSourceRecordId());
         response.setCurrentState(workflowRecord.getCurrentState());
         response.setCreatedBy(workflowRecord.getCreatedBy());
+        response.setComments(workflowRecord.getComments());
+        response.setDetails(workflowRecord.getDetails());
 
         return response;
     }

@@ -34,6 +34,14 @@ public class WorkflowRecord {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    // Free-text comments entered by the submitter when the workflow was created
+    @Column(name = "comments", length = 2000)
+    private String comments;
+
+    // Summary supplied by the source module (e.g. matched record and justification)
+    @Column(name = "details", length = 2000)
+    private String details;
+
 //    Getters and Setters
 
     public Long getWorkflowId() {
@@ -90,5 +98,21 @@ public class WorkflowRecord {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getComments() {
+        return comments;
+    }
+
+    public void setComments(String comments) {
+        this.comments = comments;
+    }
+
+    public String getDetails() {
+        return details;
+    }
+
+    public void setDetails(String details) {
+        this.details = details;
     }
 }
