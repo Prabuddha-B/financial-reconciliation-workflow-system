@@ -19,6 +19,10 @@ public class WorkflowResponseDto {
 
     private String createdBy;
 
+    private String comments;
+
+    private String details;
+
 //    Getters and Setters
 
     public Long getWorkflowId() {
@@ -67,5 +71,21 @@ public class WorkflowResponseDto {
 
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
+    }
+
+    public String getComments() {
+        return comments;
+    }
+
+    public void setComments(String comments) {
+        this.comments = comments;
+    }
+
+    public String getDetails() {
+        return details;
+    }
+
+    public void setDetails(String details) {
+        this.details = details;
     }
 }

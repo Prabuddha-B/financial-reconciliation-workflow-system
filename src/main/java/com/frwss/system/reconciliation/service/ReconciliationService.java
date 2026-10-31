@@ -1008,7 +1008,9 @@ public class ReconciliationService {
         ReconciliationResult result = reconciliationResultRepository.findById(reconciliationResultId)
                 .orElseThrow(() -> new RuntimeException("Reconciliation result not found"));
 
-        if(result.getStatus() != ReconciliationStatus.MANUALLY_RESOLVED){
+        // A record sent to workflow review is PENDING_APPROVAL, so both states are valid here
+        if(result.getStatus() != ReconciliationStatus.MANUALLY_RESOLVED
+                && result.getStatus() != ReconciliationStatus.PENDING_APPROVAL){
             throw new RuntimeException("Only manually resolved records can be approved");
         }
 
@@ -1041,7 +1043,9 @@ public class ReconciliationService {
         ReconciliationResult result = reconciliationResultRepository.findById(reconciliationResultId)
                 .orElseThrow(() -> new RuntimeException("Reconciliation result not found"));
 
-        if(result.getStatus() != ReconciliationStatus.MANUALLY_RESOLVED){
+        // A record sent to workflow review is PENDING_APPROVAL, so both states are valid here
+        if(result.getStatus() != ReconciliationStatus.MANUALLY_RESOLVED
+                && result.getStatus() != ReconciliationStatus.PENDING_APPROVAL){
             throw new RuntimeException("Only manually resolved records can be rejected");
         }
 
@@ -1088,6 +1092,7 @@ public class ReconciliationService {
         workflowRequest.setSourceRecordId(reconciliationResultId.toString());
         workflowRequest.setCreatedBy(performedBy);
         workflowRequest.setComments(comments);
+        workflowRequest.setDetails(buildWorkflowDetails(result));
 
         // Call workflow service
         WorkflowResponseDto workflowResponse =workflowService.createWorkflow(workflowRequest);
@@ -1111,5 +1116,23 @@ public class ReconciliationService {
         );
 
         return result;
+    }
+
+    // Builds the summary the workflow approver sees: which record was matched,
+    // how confident the match is, and the justification given by the resolver
+    private String buildWorkflowDetails(ReconciliationResult result){
+        String details = "Accounting record: " + result.getAccountingRecordId()
+                + " | Matched " + result.getMatchedSourceType()
+                + " record: " + result.getMatchedRecordId()
+                + " | Confidence: " + result.getConfidenceScore() + "%"
+                + " | Resolved by: " + result.getReconciledBy()
+                + " | " + result.getRemarks();
+
+        // the workflow details column holds at most 2000 characters
+        if(details.length() > 1900){
+            details = details.substring(0, 1900) + "...";
+        }
+
+        return details;
     }
 }

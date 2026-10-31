@@ -134,8 +134,7 @@ public class ReconciliationController {
 
     @PostMapping("/run-exact")
     public String runExactReconciliation(RedirectAttributes redirectAttributes){
-        // temporary user until Spring Security is fully integrated
-        reconciliationService.runExactReconciliation("admin");
+        reconciliationService.runExactReconciliation(securityContextAdapter.getCurrentUsername());
 
         redirectAttributes.addFlashAttribute(
                 "successMessage",
@@ -147,7 +146,7 @@ public class ReconciliationController {
 
     @PostMapping("/run-partial")
     public String runPartialReconciliation(RedirectAttributes redirectAttributes){
-        reconciliationService.runPartialReconciliation("admin", 3);
+        reconciliationService.runPartialReconciliation(securityContextAdapter.getCurrentUsername(), 3);
 
         redirectAttributes.addFlashAttribute(
                 "successMessage",
@@ -172,7 +171,7 @@ public class ReconciliationController {
                 matchedRecordId,
                 confidenceScore,
                 justification,
-                "admin"
+                securityContextAdapter.getCurrentUsername()
         );
 
         redirectAttributes.addFlashAttribute(
@@ -188,7 +187,7 @@ public class ReconciliationController {
             @PathVariable Long resultId,
             RedirectAttributes redirectAttributes
     ){
-        reconciliationService.approveManualResolution(resultId, "admin");
+        reconciliationService.approveManualResolution(resultId, securityContextAdapter.getCurrentUsername());
 
         redirectAttributes.addFlashAttribute(
                 "successMessage",
@@ -207,7 +206,7 @@ public class ReconciliationController {
         reconciliationService.rejectManualResolution(
                 resultId,
                 rejectionReason,
-                "admin"
+                securityContextAdapter.getCurrentUsername()
         );
 
         redirectAttributes.addFlashAttribute(

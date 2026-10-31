@@ -360,13 +360,10 @@
               <td th:text="${txn.gateway}">SIMULATED</td>
               <td>
                                   <span class="transaction-status"
-                                        th:classappend="${txn.status == 'SUCCESS'} ? 'success' :
-                                                        ${txn.status == 'FAILED'} ? 'failed' :
-                                                        ${txn.status == 'PENDING'} ? 'pending' :
-                                                        ${txn.status == 'REFUNDED'} ? 'refunded' : ''"
+                                        th:classappend="${txn.status == 'SUCCESS' ? 'success' : (txn.status == 'FAILED' ? 'failed' : (txn.status == 'PENDING' ? 'pending' : (txn.status == 'REFUNDED' ? 'refunded' : '')))}"
                                         th:text="${txn.status}">
-                                      PENDING
-                                  </span>
+    PENDING
+</span>
               </td>
               <td th:text="${txn.customerName}">John Doe</td>
               <td th:text="${#temporals.format(txn.createdAt, 'dd MMM HH:mm')}">Date</td>

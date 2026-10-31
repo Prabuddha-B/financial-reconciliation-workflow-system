@@ -414,6 +414,30 @@
 
     </div>
 
+    <!-- ===================== Submission Details (supplied by the source module) ===================== -->
+    <div th:if="${not #strings.isEmpty(workflow.details) or not #strings.isEmpty(workflow.comments)}"
+         class="card shadow-sm mb-4">
+      <div class="card-header bg-white py-3">
+        <strong>Submission Details</strong>
+        <div class="text-muted small mt-1">
+          Information provided when this record was sent for review, including the justification for the match.
+        </div>
+      </div>
+      <div class="card-body">
+        <div th:if="${not #strings.isEmpty(workflow.details)}" class="mb-3">
+          <div class="text-muted small fw-semibold mb-1">Match details and justification</div>
+          <div class="text-break" th:text="${workflow.details}"></div>
+        </div>
+        <div th:if="${not #strings.isEmpty(workflow.comments)}" class="mb-3">
+          <div class="text-muted small fw-semibold mb-1">Submitter comments</div>
+          <div class="text-break" th:text="${workflow.comments}"></div>
+        </div>
+        <div class="text-muted small">
+          Submitted by <span class="fw-semibold" th:text="${workflow.createdBy}"></span>
+        </div>
+      </div>
+    </div>
+
     <!-- ===================== Workflow Completion Notifications ===================== -->
     <div th:if="${workflow.currentState.name() == 'VERIFIED'}" class="alert alert-success shadow-sm d-flex align-items-start gap-3 mb-4">
       <i class="bi bi-check-circle-fill fs-5 mt-1"></i>
