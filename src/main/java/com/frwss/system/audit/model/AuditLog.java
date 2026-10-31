@@ -37,6 +37,12 @@ public class AuditLog {
     @Column(name = "current_hash", nullable = false, length =  64)
     private String currentHash;
 
+    // Short per-field fingerprints (comma separated, one per hashed field).
+    // Used only to tell WHICH field changed when verification finds a break.
+    // Entries written before this column existed have null here.
+    @Column(name = "field_hashes", length = 255)
+    private String fieldHashes;
+
     public Long getId(){
         return id;
     }
@@ -107,5 +113,13 @@ public class AuditLog {
 
     public void setCurrentHash(String currentHash) {
         this.currentHash = currentHash;
+    }
+
+    public String getFieldHashes() {
+        return fieldHashes;
+    }
+
+    public void setFieldHashes(String fieldHashes) {
+        this.fieldHashes = fieldHashes;
     }
 }

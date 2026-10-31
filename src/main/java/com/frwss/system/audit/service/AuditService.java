@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Objects;
@@ -24,10 +25,21 @@ import java.util.Objects;
 public class AuditService {
     private static final String GENESIS_HASH = "GENESIS";
 
-    private final AuditLogRepository auditLogRepository;
+    // Names of the fields covered by the hash, in the order they are hashed
+    private static final String[] FIELD_NAMES = {
+            "actionType", "entityType", "entityId",
+            "performedBy", "timestamp", "details", "previousHash"
+    };
 
-    public AuditService(AuditLogRepository auditLogRepository){
+    // How many hex characters of each field's SHA-256 are kept as its fingerprint
+    private static final int FINGERPRINT_LENGTH = 16;
+
+    private final AuditLogRepository auditLogRepository;
+    private final AuditChainLock auditChainLock;
+
+    public AuditService(AuditLogRepository auditLogRepository, AuditChainLock auditChainLock){
         this.auditLogRepository = auditLogRepository;
+        this.auditChainLock = auditChainLock;
     }
 
     /**
@@ -48,6 +60,12 @@ public class AuditService {
             String performedBy,
             String details
     ) {
+        // Serialise audit writes: without this, two requests running at the same
+        // moment both read the same "latest" entry and chain to it, which shows
+        // up later as a false chain break. The lock is held until the surrounding
+        // transaction commits, so the next writer always sees this entry.
+        auditChainLock.acquire();
+
         // get the latest log to link the hash chain
         AuditLog latestLog = auditLogRepository.findTopByOrderByIdDesc().orElse(null);
 
@@ -85,6 +103,8 @@ public class AuditService {
         auditLog.setDetails(details);
         auditLog.setPreviousHash(previousHash);
         auditLog.setCurrentHash(currentHash);
+        auditLog.setFieldHashes(buildFieldHashes(
+                actionType, entityType, entityId, performedBy, timestamp, details, previousHash));
 
         return auditLogRepository.save(auditLog);
     }
@@ -137,11 +157,31 @@ public class AuditService {
                 );
 
                 if (!Objects.equals(log.getCurrentHash(), recalculatedHash)) {
-                    String mismatchField = findMismatchField(log);
+                    List<String> changedFields = findMismatchedFields(log);
+
+                    String fieldName;
+                    String reason;
+
+                    if (changedFields == null) {
+                        // Older entry with no field fingerprints: we know it was
+                        // altered but cannot say which field.
+                        fieldName = "content";
+                        reason = "Entry content does not match its hash (the exact field cannot be "
+                                + "identified because this entry has no field-level fingerprint)";
+                    } else if (changedFields.isEmpty()) {
+                        // Every field still matches its fingerprint, so the stored
+                        // hash itself is what was changed.
+                        fieldName = "currentHash";
+                        reason = "Stored hash was altered: all field values still match their fingerprints";
+                    } else {
+                        fieldName = String.join(", ", changedFields);
+                        reason = "Mismatch in field(s): " + fieldName;
+                    }
+
                     result.addBreak(new AuditChainResult.ChainBreak(
                             log.getId(),
-                            "Mismatch in field: " + mismatchField,
-                            mismatchField
+                            reason,
+                            fieldName
                     ));
                 }
             }
@@ -220,46 +260,93 @@ public class AuditService {
     }
 
     /**
-     * Identifies which field caused a hash mismatch.
-     * Builds the hash incrementally to pinpoint the exact field.
+     * Identifies which field(s) of an entry were changed after it was written.
      *
-     * @param log The audit log entry with the mismatch
-     * @return The name of the field that caused the mismatch
+     * The entry's hash covers all fields at once, so a hash alone cannot say
+     * which one changed. Each entry therefore also stores a short fingerprint
+     * of every field; here each field is re-fingerprinted and compared with
+     * the stored one. The fingerprints are only a diagnostic aid - whether an
+     * entry is broken is always decided by the full hash, never by them.
+     *
+     * @param log The audit log entry whose hash does not match
+     * @return the names of the changed fields (empty if every field still
+     *         matches, meaning the stored hash itself was altered), or null
+     *         if the entry has no usable fingerprints (older entries)
      */
-    private String findMismatchField(AuditLog log){
-        // Define field values and their names in order
-        Object[] fieldValues = {
-                log.getActionType() != null ? log.getActionType().name() : "",
-                log.getEntityType() != null ? log.getEntityType() : "",
-                log.getEntityId() != null ? log.getEntityId() : "",
-                log.getPerformedBy() != null ? log.getPerformedBy() : "",
-                log.getTimestamp() != null ? log.getTimestamp().toString() : "",
-                log.getDetails() != null ? log.getDetails() : "",
-                log.getPreviousHash() != null ? log.getPreviousHash() : ""
-        };
-
-        String[] fieldNames = {
-                "actionType", "entityType", "entityId",
-                "performedBy", "timestamp", "details", "previousHash"
-        };
-
-        // Build up the concatenated string incrementally to find where it breaks
-        StringBuilder sb = new StringBuilder();
-        for(int i = 0; i < fieldValues.length; i++){
-            if(i > 0) sb.append("|");
-            sb.append(fieldValues[i]);
-
-            // Generate has of the current state
-            String partialHash = generateHashFromString(sb.toString());
-
-            // If the partial hash doesn't match the stored hash, this field is causing the issue
-
-            if(!partialHash.equals(log.getCurrentHash())){
-                return fieldNames[i];
-            }
-
+    private List<String> findMismatchedFields(AuditLog log){
+        String stored = log.getFieldHashes();
+        if (stored == null || stored.isBlank()) {
+            return null;
         }
-        return "unknown";
+
+        String[] storedParts = stored.split(",", -1);
+        if (storedParts.length != FIELD_NAMES.length) {
+            return null;
+        }
+
+        String[] currentParts = fingerprintParts(
+                log.getActionType(),
+                log.getEntityType(),
+                log.getEntityId(),
+                log.getPerformedBy(),
+                log.getTimestamp(),
+                log.getDetails(),
+                log.getPreviousHash()
+        );
+
+        List<String> changed = new ArrayList<>();
+        for (int i = 0; i < FIELD_NAMES.length; i++) {
+            if (!currentParts[i].equals(storedParts[i])) {
+                changed.add(FIELD_NAMES[i]);
+            }
+        }
+        return changed;
+    }
+
+    /**
+     * Builds the comma-separated per-field fingerprints stored with an entry.
+     */
+    private String buildFieldHashes(
+            AuditActionType actionType,
+            String entityType,
+            String entityId,
+            String performedBy,
+            LocalDateTime timestamp,
+            String details,
+            String previousHash
+    ){
+        return String.join(",", fingerprintParts(
+                actionType, entityType, entityId, performedBy, timestamp, details, previousHash));
+    }
+
+    /**
+     * Fingerprint (shortened SHA-256) of each hashed field, in FIELD_NAMES order.
+     * Values are normalised exactly as in generateHash so both stay consistent.
+     */
+    private String[] fingerprintParts(
+            AuditActionType actionType,
+            String entityType,
+            String entityId,
+            String performedBy,
+            LocalDateTime timestamp,
+            String details,
+            String previousHash
+    ){
+        String[] values = {
+                Objects.toString(actionType, ""),
+                Objects.toString(entityType, ""),
+                Objects.toString(entityId, ""),
+                Objects.toString(performedBy, ""),
+                Objects.toString(timestamp, ""),
+                Objects.toString(details, ""),
+                Objects.toString(previousHash, "")
+        };
+
+        String[] parts = new String[values.length];
+        for (int i = 0; i < values.length; i++) {
+            parts[i] = generateHashFromString(values[i]).substring(0, FINGERPRINT_LENGTH);
+        }
+        return parts;
     }
 
     /**

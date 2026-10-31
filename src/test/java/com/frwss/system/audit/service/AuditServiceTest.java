@@ -7,7 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -25,6 +26,9 @@ class AuditServiceTest {
 
     @Mock
     private AuditLogRepository auditLogRepository;
+
+    @Mock
+    private AuditChainLock auditChainLock;
 
     @InjectMocks
     private AuditService auditService;
@@ -132,6 +136,61 @@ class AuditServiceTest {
         assertNotEquals(savedLogs.get(0).getCurrentHash(), savedLogs.get(1).getCurrentHash());
     }
 
+    @Test
+    @DisplayName("Should take the chain lock before reading the latest entry, so concurrent writes cannot fork the chain")
+    void log_acquiresChainLockBeforeReadingLatestEntry() {
+
+        // ---------------------------------------------------------------------
+        // Arrange
+        // ---------------------------------------------------------------------
+
+        when(auditLogRepository.findTopByOrderByIdDesc()).thenReturn(Optional.empty());
+        when(auditLogRepository.save(any(AuditLog.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        // ---------------------------------------------------------------------
+        // Act
+        // ---------------------------------------------------------------------
+
+        auditService.log(AuditActionType.EXACT_MATCH_FOUND, "ReconciliationResult", "ACC-001", "admin", "details");
+
+        // ---------------------------------------------------------------------
+        // Assert: the lock must come first, otherwise the read could be stale
+        // ---------------------------------------------------------------------
+
+        InOrder inOrder = inOrder(auditChainLock, auditLogRepository);
+        inOrder.verify(auditChainLock).acquire();
+        inOrder.verify(auditLogRepository).findTopByOrderByIdDesc();
+        inOrder.verify(auditLogRepository).save(any(AuditLog.class));
+    }
+
+    @Test
+    @DisplayName("Should store one short fingerprint per hashed field with every entry")
+    void log_storesFieldFingerprints() {
+
+        // ---------------------------------------------------------------------
+        // Arrange
+        // ---------------------------------------------------------------------
+
+        when(auditLogRepository.findTopByOrderByIdDesc()).thenReturn(Optional.empty());
+        when(auditLogRepository.save(any(AuditLog.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        // ---------------------------------------------------------------------
+        // Act
+        // ---------------------------------------------------------------------
+
+        AuditLog saved = auditService.log(
+                AuditActionType.EXACT_MATCH_FOUND, "ReconciliationResult", "ACC-001", "admin", "details");
+
+        // ---------------------------------------------------------------------
+        // Assert: 7 hashed fields -> 7 comma separated fingerprints
+        // ---------------------------------------------------------------------
+
+        assertNotNull(saved.getFieldHashes());
+        assertEquals(7, saved.getFieldHashes().split(",", -1).length);
+    }
+
     // =========================================================================
     // verifyAuditChainDetailed()
     // =========================================================================
@@ -231,8 +290,8 @@ class AuditServiceTest {
     }
 
     @Test
-    @DisplayName("Should still detect content tampering as a break, even though the reported field name is unreliable")
-    void verifyAuditChainDetailed_contentTampered_reportsBreak() {
+    @DisplayName("Should name the exact field that was tampered with (details)")
+    void verifyAuditChainDetailed_detailsTampered_reportsDetailsField() {
 
         // ---------------------------------------------------------------------
         // Arrange
@@ -244,7 +303,7 @@ class AuditServiceTest {
         auditService.log(AuditActionType.EXACT_MATCH_FOUND, "ReconciliationResult", "ACC-001", "admin", "original details");
 
         // Simulate tampering: the details field changes after the hash was
-        // computed and stored, so currentHash no longer matches the content.
+        // computed and stored.
         savedLogs.get(0).setDetails("TAMPERED details");
 
         when(auditLogRepository.findAllByOrderByIdAsc()).thenReturn(savedLogs);
@@ -256,23 +315,93 @@ class AuditServiceTest {
         AuditChainResult result = auditService.verifyAuditChainDetailed();
 
         // ---------------------------------------------------------------------
-        // Assert
+        // Assert: previously this always reported "actionType"
         // ---------------------------------------------------------------------
 
         assertFalse(result.isValid());
         assertEquals(1, result.getTotalBreakCount());
+        assertEquals("details", result.getBreaks().get(0).getFieldName());
+        assertTrue(result.getBreaks().get(0).getReason().contains("details"));
+    }
 
-        // NOTE / KNOWN ISSUE: AuditService#findMismatchField compares an
-        // incremental partial-string hash against the full 7-field stored
-        // hash. Those can only coincidentally match, so in practice this
-        // method always reports the FIRST field ("actionType") regardless
-        // of which field actually changed - confirmed by tampering
-        // "details" here and getting "actionType" back. The *detection*
-        // that the entry was tampered with is still correct and reliable;
-        // only this diagnostic field name is misleading. This test pins
-        // down the current behavior so a future fix to findMismatchField
-        // is a deliberate, visible change rather than a silent one.
-        assertEquals("actionType", result.getBreaks().get(0).getFieldName());
+    @Test
+    @DisplayName("Should name a different field when a different field is tampered with (performedBy)")
+    void verifyAuditChainDetailed_performedByTampered_reportsPerformedByField() {
+
+        List<AuditLog> savedLogs = new ArrayList<>();
+        stubChainedPersistence(savedLogs);
+
+        auditService.log(AuditActionType.EXACT_MATCH_FOUND, "ReconciliationResult", "ACC-001", "admin", "details");
+
+        savedLogs.get(0).setPerformedBy("someone-else");
+
+        when(auditLogRepository.findAllByOrderByIdAsc()).thenReturn(savedLogs);
+
+        AuditChainResult result = auditService.verifyAuditChainDetailed();
+
+        assertEquals(1, result.getTotalBreakCount());
+        assertEquals("performedBy", result.getBreaks().get(0).getFieldName());
+    }
+
+    @Test
+    @DisplayName("Should list every field that was tampered with when more than one changed")
+    void verifyAuditChainDetailed_severalFieldsTampered_reportsAllOfThem() {
+
+        List<AuditLog> savedLogs = new ArrayList<>();
+        stubChainedPersistence(savedLogs);
+
+        auditService.log(AuditActionType.EXACT_MATCH_FOUND, "ReconciliationResult", "ACC-001", "admin", "details");
+
+        savedLogs.get(0).setEntityId("ACC-999");
+        savedLogs.get(0).setDetails("TAMPERED details");
+
+        when(auditLogRepository.findAllByOrderByIdAsc()).thenReturn(savedLogs);
+
+        AuditChainResult result = auditService.verifyAuditChainDetailed();
+
+        assertEquals(1, result.getTotalBreakCount());
+        assertEquals("entityId, details", result.getBreaks().get(0).getFieldName());
+    }
+
+    @Test
+    @DisplayName("Should report that the stored hash was altered when every field still matches its fingerprint")
+    void verifyAuditChainDetailed_currentHashTampered_reportsCurrentHash() {
+
+        List<AuditLog> savedLogs = new ArrayList<>();
+        stubChainedPersistence(savedLogs);
+
+        auditService.log(AuditActionType.EXACT_MATCH_FOUND, "ReconciliationResult", "ACC-001", "admin", "details");
+
+        savedLogs.get(0).setCurrentHash("0".repeat(64));
+
+        when(auditLogRepository.findAllByOrderByIdAsc()).thenReturn(savedLogs);
+
+        AuditChainResult result = auditService.verifyAuditChainDetailed();
+
+        assertEquals(1, result.getTotalBreakCount());
+        assertEquals("currentHash", result.getBreaks().get(0).getFieldName());
+    }
+
+    @Test
+    @DisplayName("Should still detect tampering on an older entry that has no field fingerprints, without naming a field")
+    void verifyAuditChainDetailed_entryWithoutFingerprints_reportsGenericContentBreak() {
+
+        List<AuditLog> savedLogs = new ArrayList<>();
+        stubChainedPersistence(savedLogs);
+
+        auditService.log(AuditActionType.EXACT_MATCH_FOUND, "ReconciliationResult", "ACC-001", "admin", "original details");
+
+        // Simulate an entry written before fingerprints existed, then tampered with
+        savedLogs.get(0).setFieldHashes(null);
+        savedLogs.get(0).setDetails("TAMPERED details");
+
+        when(auditLogRepository.findAllByOrderByIdAsc()).thenReturn(savedLogs);
+
+        AuditChainResult result = auditService.verifyAuditChainDetailed();
+
+        assertFalse(result.isValid());
+        assertEquals(1, result.getTotalBreakCount());
+        assertEquals("content", result.getBreaks().get(0).getFieldName());
     }
 
     // =========================================================================
