@@ -128,6 +128,23 @@ class PaymentControllerTest {
         verifyNoInteractions(auditService);
     }
 
+    @Test
+    @DisplayName("Should reject a second payment for a record that is already paid")
+    void processPayment_recordAlreadyPaid_returnsBadRequest() {
+
+        when(securityContextAdapter.getCurrentUsername()).thenReturn("cashier1");
+        when(accountingRecordRepository.existsById("ACC-0008")).thenReturn(true);
+        when(paymentTransactionRepository.existsByAccountingRecordIdAndStatus("ACC-0008", "SUCCESS"))
+                .thenReturn(true);
+
+        ResponseEntity<?> response = paymentController.processPayment(request("ACC-0008", "114893.74"));
+
+        assertEquals(400, response.getStatusCode().value());
+        assertEquals("A successful payment already exists for record ACC-0008", errorOf(response));
+        verifyNoInteractions(paymentGatewayService);
+        verifyNoInteractions(auditService);
+    }
+
     // =========================================================================
     // processPayment() - valid request
     // =========================================================================

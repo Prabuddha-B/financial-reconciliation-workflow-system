@@ -1,5 +1,6 @@
 package com.frwss.system.config;
 
+import org.springframework.http.HttpMethod;
 import com.frwss.system.security.service.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,6 +29,10 @@ public class SecurityConfig {
                         .requestMatchers("/login", "/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers("/ingestion/upload", "/ingestion/preview", "/ingestion/save",
                                 "/ingestion/manual/**", "/ingestion/bulk-upload", "/upload-csv")
+                        .hasAnyRole("ENTRY_STAFF", "ADMIN")
+                        // Actions that change money or reconciliation data: entry staff and admin only.
+                        // Reading (GET) stays open to every logged-in user so auditors can still view.
+                        .requestMatchers(HttpMethod.POST, "/payment/**", "/reconciliation/**")
                         .hasAnyRole("ENTRY_STAFF", "ADMIN")
                         .requestMatchers("/audit/**").hasAnyRole("AUDITOR", "ADMIN")
                         .requestMatchers("/workflow/**")

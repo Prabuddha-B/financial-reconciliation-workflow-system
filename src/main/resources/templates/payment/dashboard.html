@@ -332,6 +332,33 @@
 
     </div>
 
+    <!-- Payments that did not match (filled in after Run Reconciliation) -->
+    <div id="mismatchPanel" class="card shadow-sm mb-4 d-none">
+      <div class="card-header bg-white">
+        <strong><i class="bi bi-exclamation-triangle me-2"></i>Payments that did not match</strong>
+        <div class="text-muted small mt-1">
+          Successful payments whose accounting record is missing or has a different amount.
+        </div>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead>
+            <tr>
+              <th>Transaction</th>
+              <th>Record</th>
+              <th class="text-end">Paid</th>
+              <th class="text-end">Expected</th>
+              <th class="text-end">Difference</th>
+              <th>Reason</th>
+            </tr>
+            </thead>
+            <tbody id="mismatchRows"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
     <!-- Transaction Table -->
     <div class="card shadow-sm">
       <div class="card-header bg-white">
@@ -472,6 +499,40 @@
                         `Matched: ${data.matched} | Unmatched: ${data.unmatched} | Errors: ${data.errors}`;
 
                 toast.show();
+
+                /* ----------------------------------
+                   Payments that did not match
+                ----------------------------------- */
+
+                const formatMoney = value =>
+                        (value === null || value === undefined)
+                                ? '-'
+                                : Number(value).toLocaleString(undefined,
+                                        {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+                const mismatchRows = document.getElementById('mismatchRows');
+                const mismatchPanel = document.getElementById('mismatchPanel');
+                const mismatches = data.mismatches || [];
+
+                mismatchRows.innerHTML = '';
+                mismatches.forEach(m => {
+                  const tr = document.createElement('tr');
+                  [
+                    m.transactionId,
+                    m.accountingRecordId || '-',
+                    formatMoney(m.paidAmount),
+                    formatMoney(m.expectedAmount),
+                    formatMoney(m.difference),
+                    m.reason
+                  ].forEach((value, index) => {
+                    const td = document.createElement('td');
+                    td.textContent = value;
+                    if (index >= 2 && index <= 4) td.className = 'text-end';
+                    tr.appendChild(td);
+                  });
+                  mismatchRows.appendChild(tr);
+                });
+                mismatchPanel.classList.toggle('d-none', mismatches.length === 0);
 
                 /* ----------------------------------
                    KPI Card Animation

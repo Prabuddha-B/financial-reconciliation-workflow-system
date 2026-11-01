@@ -220,6 +220,12 @@ public class PaymentController {
             return "Accounting record not found: " + recordId;
         }
 
+        // A record that is already paid must not be paid again (a refunded payment
+        // no longer counts, so it can be paid again after a refund)
+        if (paymentTransactionRepository.existsByAccountingRecordIdAndStatus(recordId, "SUCCESS")) {
+            return "A successful payment already exists for record " + recordId;
+        }
+
         return null;
     }
 }
