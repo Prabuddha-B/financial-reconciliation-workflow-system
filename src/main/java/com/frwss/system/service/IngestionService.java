@@ -59,11 +59,14 @@ public class IngestionService {
 
     private static final DateTimeFormatter[] DATE_FORMATTERS = new DateTimeFormatter[] {
             DateTimeFormatter.ISO_LOCAL_DATE,
+            // Day-first is tried before month-first because that is the local
+            // convention: 05/08/2026 means 5 August. Month-first is only used
+            // when the value cannot be day-first, e.g. 08/15/2026.
+            DateTimeFormatter.ofPattern("d/M/yyyy"),
+            DateTimeFormatter.ofPattern("dd/MM/yyyy"),
             DateTimeFormatter.ofPattern("M/d/yyyy"),
             DateTimeFormatter.ofPattern("M/d/uuuu"),
-            DateTimeFormatter.ofPattern("MM/dd/yyyy"),
-            DateTimeFormatter.ofPattern("dd/MM/yyyy"),
-            DateTimeFormatter.ofPattern("d/M/yyyy")
+            DateTimeFormatter.ofPattern("MM/dd/yyyy")
     };
 
     private static final DateTimeFormatter[] DATE_TIME_FORMATTERS = new DateTimeFormatter[] {

@@ -128,7 +128,8 @@ public class MessageController {
 
         // Get all users except current user for recipient selection
         List<User> users = userRepository.findAll();
-        users.removeIf(u -> u.getUserId().equals(userId));
+        // getUserId() is an Integer and userId a Long, so compare as primitives
+        users.removeIf(u -> u.getUserId() != null && u.getUserId().longValue() == userId);
 
         model.addAttribute("users", users);
         model.addAttribute("message", new MessageDto());
