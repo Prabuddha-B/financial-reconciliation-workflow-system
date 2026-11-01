@@ -3,6 +3,7 @@ package com.frwss.system.security.controller;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
@@ -28,7 +29,9 @@ public class AuthController {
         return "security/login";
     }
 
-    @GetMapping("/access-denied")
+    // Accept every HTTP method: when Spring Security denies a POST it forwards the
+    // request here with the same method, and a GET-only mapping would answer 405.
+    @RequestMapping("/access-denied")
     public String accessDenied() {
         return "security/access-denied";
     }

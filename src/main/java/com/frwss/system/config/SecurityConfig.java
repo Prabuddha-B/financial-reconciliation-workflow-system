@@ -26,7 +26,8 @@ public class SecurityConfig {
         return http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/login", "/css/**", "/js/**", "/images/**").permitAll()
-                        .requestMatchers("/ingestion/upload", "/ingestion/save", "/ingestion/manual/**")
+                        .requestMatchers("/ingestion/upload", "/ingestion/preview", "/ingestion/save",
+                                "/ingestion/manual/**", "/ingestion/bulk-upload", "/upload-csv")
                         .hasAnyRole("ENTRY_STAFF", "ADMIN")
                         .requestMatchers("/audit/**").hasAnyRole("AUDITOR", "ADMIN")
                         .requestMatchers("/workflow/**")

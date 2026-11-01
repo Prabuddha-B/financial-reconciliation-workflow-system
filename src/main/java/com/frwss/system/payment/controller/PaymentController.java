@@ -9,6 +9,7 @@ import com.frwss.system.payment.repository.PaymentTransactionRepository;
 import com.frwss.system.payment.service.PaymentGatewayService;
 import com.frwss.system.payment.service.PaymentReconciliationService;
 import com.frwss.system.payment.service.SimulatedPaymentGatewayService;
+import com.frwss.system.repository.AccountingRecordRepository;
 import com.frwss.system.security.SecurityContextAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -31,18 +33,21 @@ public class PaymentController {
     private final PaymentReconciliationService paymentReconciliationService;
     private final AuditService auditService;
     private final SecurityContextAdapter securityContextAdapter;
+    private final AccountingRecordRepository accountingRecordRepository;
 
     public PaymentController(
             SimulatedPaymentGatewayService paymentGatewayService,
             PaymentTransactionRepository paymentTransactionRepository,
             PaymentReconciliationService paymentReconciliationService,
             AuditService auditService,
-            SecurityContextAdapter securityContextAdapter) {
+            SecurityContextAdapter securityContextAdapter,
+            AccountingRecordRepository accountingRecordRepository) {
         this.paymentGatewayService = paymentGatewayService;
         this.paymentTransactionRepository = paymentTransactionRepository;
         this.paymentReconciliationService = paymentReconciliationService;
         this.auditService = auditService;
         this.securityContextAdapter = securityContextAdapter;
+        this.accountingRecordRepository = accountingRecordRepository;
     }
 
     /**
@@ -76,6 +81,14 @@ public class PaymentController {
     @ResponseBody
     public ResponseEntity<?> processPayment(@RequestBody PaymentRequestDto request) {
         String performedBy = securityContextAdapter.getCurrentUsername();
+
+        // Reject bad input before anything is charged or written
+        String validationError = validatePaymentRequest(request);
+        if (validationError != null) {
+            log.warn("API: Payment request rejected: {}", validationError);
+            return ResponseEntity.badRequest().body(Map.of("error", validationError));
+        }
+
         log.info("API: Processing payment for record: {}", request.getAccountingRecordId());
 
         try {
@@ -181,5 +194,32 @@ public class PaymentController {
                     "error", e.getMessage()
             ));
         }
+    }
+
+    /**
+     * Checks a payment request before it is processed.
+     *
+     * @return an error message, or null when the request is acceptable
+     */
+    private String validatePaymentRequest(PaymentRequestDto request) {
+        if (request == null) {
+            return "Payment request is required";
+        }
+
+        String recordId = request.getAccountingRecordId();
+        if (recordId == null || recordId.isBlank()) {
+            return "Accounting record ID is required";
+        }
+
+        BigDecimal amount = request.getAmount();
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            return "Amount must be greater than zero";
+        }
+
+        if (!accountingRecordRepository.existsById(recordId)) {
+            return "Accounting record not found: " + recordId;
+        }
+
+        return null;
     }
 }
