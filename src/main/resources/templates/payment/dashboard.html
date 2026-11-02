@@ -332,6 +332,92 @@
 
     </div>
 
+    <!-- Payments that did not match (filled in after Run Reconciliation) -->
+    <div id="mismatchPanel" class="card shadow-sm mb-4 d-none">
+      <div class="card-header bg-white d-flex justify-content-between align-items-start">
+        <div>
+          <strong><i class="bi bi-exclamation-triangle me-2"></i>Payments that did not match</strong>
+          <div class="text-muted small mt-1">
+            Result of the last reconciliation run: successful payments whose accounting record
+            is missing or has a different amount.
+          </div>
+        </div>
+        <button type="button" class="btn-close" aria-label="Dismiss"
+                onclick="dismissPaymentMismatches()"></button>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead>
+            <tr>
+              <th>Transaction</th>
+              <th>Record</th>
+              <th class="text-end">Paid</th>
+              <th class="text-end">Expected</th>
+              <th class="text-end">Difference</th>
+              <th>Reason</th>
+            </tr>
+            </thead>
+            <tbody id="mismatchRows"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // The page reloads itself after a reconciliation run, which would erase a table built
+      // in the browser. The result is therefore kept in sessionStorage and redrawn on load.
+      (function () {
+        var STORAGE_KEY = 'lastPaymentMismatches';
+
+        function formatMoney(value) {
+          if (value === null || value === undefined) return '-';
+          return Number(value).toLocaleString(undefined,
+                  {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        }
+
+        window.renderPaymentMismatches = function (mismatches) {
+          var rows = document.getElementById('mismatchRows');
+          var panel = document.getElementById('mismatchPanel');
+          rows.innerHTML = '';
+
+          mismatches.forEach(function (m) {
+            var tr = document.createElement('tr');
+            [
+              m.transactionId,
+              m.accountingRecordId || '-',
+              formatMoney(m.paidAmount),
+              formatMoney(m.expectedAmount),
+              formatMoney(m.difference),
+              m.reason
+            ].forEach(function (value, index) {
+              var td = document.createElement('td');
+              td.textContent = value;
+              if (index >= 2 && index <= 4) td.className = 'text-end';
+              tr.appendChild(td);
+            });
+            rows.appendChild(tr);
+          });
+
+          panel.classList.toggle('d-none', mismatches.length === 0);
+        };
+
+        window.dismissPaymentMismatches = function () {
+          sessionStorage.removeItem(STORAGE_KEY);
+          document.getElementById('mismatchPanel').classList.add('d-none');
+        };
+
+        var saved = sessionStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          try {
+            window.renderPaymentMismatches(JSON.parse(saved));
+          } catch (e) {
+            sessionStorage.removeItem(STORAGE_KEY);
+          }
+        }
+      })();
+    </script>
+
     <!-- Transaction Table -->
     <div class="card shadow-sm">
       <div class="card-header bg-white">
@@ -472,6 +558,15 @@
                         `Matched: ${data.matched} | Unmatched: ${data.unmatched} | Errors: ${data.errors}`;
 
                 toast.show();
+
+                /* ----------------------------------
+                   Payments that did not match
+                   (saved first, because the page reloads below)
+                ----------------------------------- */
+
+                const mismatches = data.mismatches || [];
+                sessionStorage.setItem('lastPaymentMismatches', JSON.stringify(mismatches));
+                window.renderPaymentMismatches(mismatches);
 
                 /* ----------------------------------
                    KPI Card Animation

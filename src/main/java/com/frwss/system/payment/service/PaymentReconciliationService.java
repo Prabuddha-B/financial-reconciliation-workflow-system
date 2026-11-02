@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +55,7 @@ public class PaymentReconciliationService {
         int matched = 0;
         int unmatched = 0;
         int errors = 0;
+        List<Map<String, Object>> mismatches = new ArrayList<>();
 
         List<PaymentTransaction> successfulTransactions = paymentTransactionRepository.findAllSuccessful();
 
@@ -61,6 +64,8 @@ public class PaymentReconciliationService {
                 if (reconcilePaymentTransaction(transaction)) {
                     matched++;
                 } else {
+                    // describe first: if it fails the payment is counted as an error, not twice
+                    mismatches.add(describeMismatch(transaction));
                     unmatched++;
                 }
             } catch (Exception e) {
@@ -73,6 +78,7 @@ public class PaymentReconciliationService {
         results.put("unmatched", unmatched);
         results.put("errors", errors);
         results.put("total", successfulTransactions.size());
+        results.put("mismatches", mismatches);
 
         auditService.log(
                 AuditActionType.PAYMENT_RECONCILIATION,
@@ -85,6 +91,36 @@ public class PaymentReconciliationService {
 
         log.info("Payment reconciliation completed. Matched: {}, Unmatched: {}, Errors: {}", matched, unmatched, errors);
         return results;
+    }
+
+    /**
+     * Explains why a payment did not match: which record it points to, what was
+     * paid, what the record expects, and the difference.
+     */
+    private Map<String, Object> describeMismatch(PaymentTransaction transaction) {
+        Map<String, Object> detail = new LinkedHashMap<>();
+        detail.put("transactionId", transaction.getTransactionId());
+        detail.put("accountingRecordId", transaction.getAccountingRecordId());
+        detail.put("paidAmount", transaction.getAmount());
+
+        if (transaction.getAccountingRecordId() == null) {
+            detail.put("reason", "Payment is not linked to an accounting record");
+            return detail;
+        }
+
+        AccountingRecord record = accountingRecordRepository
+                .findById(transaction.getAccountingRecordId())
+                .orElse(null);
+
+        if (record == null) {
+            detail.put("reason", "Accounting record not found");
+            return detail;
+        }
+
+        detail.put("expectedAmount", record.getAmount());
+        detail.put("difference", transaction.getAmount().subtract(record.getAmount()));
+        detail.put("reason", "Paid amount differs from the accounting record");
+        return detail;
     }
 
     /**
