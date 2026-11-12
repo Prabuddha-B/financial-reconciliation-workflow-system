@@ -246,11 +246,18 @@ public class AuditService {
         );
     }
 
+    /**
+     * Returns at most the first 10 characters of a hash, so messages can show a short readable
+     * part of it.
+     */
     private String safePrefix(String value) {
         if (value == null) return "";
         return value.length() > 10 ? value.substring(0, 10) : value;
     }
 
+    /**
+     * Converts text to a Long, returning null instead of throwing when the text is not a number.
+     */
     private Long parseLongSafely(String value) {
         try {
             return Long.valueOf(value);
@@ -469,6 +476,10 @@ public class AuditService {
     }
 
 
+    /**
+     * Converts the action type filter text to an enum value. Blank, ALL or an unknown name mean no
+     * filter (null).
+     */
     private AuditActionType parseActionType(String actionType) {
         if (actionType == null || actionType.isBlank() || actionType.equals("ALL")) {
             return null;

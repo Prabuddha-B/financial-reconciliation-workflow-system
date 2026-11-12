@@ -326,6 +326,10 @@ public class MessageController {
         }
     }
 
+    /**
+     * GET /messages/api/latest. JSON for the message preview in the navigation bar: the current
+     * user's 5 most recent inbox messages.
+     */
     @GetMapping("/api/latest")
     @ResponseBody
     public List<MessageDto> getLatestMessages() {
