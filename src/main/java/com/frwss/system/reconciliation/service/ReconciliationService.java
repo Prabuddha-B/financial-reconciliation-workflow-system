@@ -38,6 +38,23 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Core of the reconciliation module. It compares accounting records with the source records
+ * (payroll, receipts and stock purchases) in four steps:
+ *
+ * 1. Exact matching: same reference number, amount and date. The record becomes EXACT, or ORPHAN
+ * when nothing matches.
+ *
+ * 2. Partial matching: same reference and amount, but the date may differ by a few days. An ORPHAN
+ * is upgraded to PARTIAL with a confidence score.
+ *
+ * 3. One-to-many matching: one bulk record is compared with the sum of its child records.
+ *
+ * 4. Manual resolution: a reviewer settles an orphan, then the result goes to the workflow module
+ * for approval.
+ *
+ * Every step is written to the audit log.
+ */
 @Service
 public class ReconciliationService {
     private final AccountingRecordRepository accountingRecordRepository;
@@ -70,6 +87,15 @@ public class ReconciliationService {
         this.bulkReconciliationRepository = bulkReconciliationRepository;
     }
 
+    /**
+     * Exact matching run. Takes the 10 most recent accounting records that have no reconciliation
+     * result yet (so each click processes the next batch of 10) and looks for a source record with
+     * the SAME reference number, amount and date. Each record gets a result: EXACT (confidence
+     * 100) or ORPHAN (nothing matched). A start entry, one entry per record and a completion entry
+     * are written to the audit log.
+     *
+     * @param performedBy username stored on every result and audit entry
+     */
     @Transactional
     public void runExactReconciliation(String performedBy){
 
@@ -127,6 +153,16 @@ public class ReconciliationService {
         );
     }
 
+    /**
+     * Partial matching run. Takes the 10 most recent ORPHAN results and tries again, this time
+     * allowing the source record's date to differ by up to toleranceDays (the reference and amount
+     * must still be identical). A hit upgrades the orphan to PARTIAL and sets a confidence score
+     * that falls as the date gap grows (see calculateConfidence). Records that still have no
+     * candidate stay ORPHAN.
+     *
+     * @param performedBy username stored on the results and audit entries
+     * @param toleranceDays how many days earlier or later a source record may be
+     */
     @Transactional
     public void runPartialReconciliation(String performedBy, int toleranceDays){
         auditService.log(
@@ -461,16 +497,27 @@ public class ReconciliationService {
         return bulkReconciliationRepository.findAllOrderByReconciledAtDesc();
     }
 
+    /**
+     * Bulk (one-to-many) results with the given status, for the Bulk Results page.
+     */
     @Transactional(readOnly = true)
     public List<BulkReconciliation> getBulkReconciliationByStatus(ReconciliationStatus status) {
         return bulkReconciliationRepository.findByStatus(status);
     }
 
+    /**
+     * Number of bulk (one-to-many) results stored so far.
+     */
     @Transactional(readOnly = true)
     public long getBulkReconciliationCount() {
         return bulkReconciliationRepository.count();
     }
 
+    /**
+     * Looks for an exact match for one accounting record. Payroll is checked first, then receipts,
+     * then stock purchases, and the search stops at the first hit. Returns an EXACT result when
+     * found, otherwise an ORPHAN result. The result is built here; the caller saves it.
+     */
     private ReconciliationResult reconcileSingleAccountingRecord(
             AccountingRecord accountingRecord,
             String performedBy
@@ -530,6 +577,15 @@ public class ReconciliationService {
         );
     }
 
+    /**
+     * Looks for a partial match for one orphan. Payroll, receipts and stock purchases are searched
+     * in that order for a record with the same reference and amount whose date lies within the
+     * tolerance window; the one closest in date wins. On a hit the existing ORPHAN result is
+     * updated to PARTIAL (no new row is created) and returned. Returns null when no source has a
+     * candidate.
+     *
+     * @param toleranceDays size of the date window on each side of the accounting record's date
+     */
     private ReconciliationResult findPartialMatchForAccountingRecord(
             AccountingRecord accountingRecord,
             ReconciliationResult existingResult,
@@ -622,6 +678,10 @@ public class ReconciliationService {
 
     }
 
+    /**
+     * Creates the result row for an exact match: status EXACT, confidence 100, and the reference,
+     * amount and date all marked MATCH.
+     */
     private ReconciliationResult buildExactResult(
             AccountingRecord accountingRecord,
             String matchedRecordId,
@@ -647,6 +707,10 @@ public class ReconciliationService {
         return result;
     }
 
+    /**
+     * Creates the result row for a record with no match: status ORPHAN, no matched record,
+     * confidence 0, and the reference, amount and date all marked MISMATCH.
+     */
     private ReconciliationResult buildOrphanResult(
             AccountingRecord accountingRecord,
             String performedBy,
@@ -670,6 +734,11 @@ public class ReconciliationService {
         return result;
     }
 
+    /**
+     * Picks the candidate whose date is closest to the accounting record's date. Candidates on the
+     * SAME day (difference 0) are skipped on purpose, because exact matching would already have
+     * found them. Returns null when no usable candidate exists.
+     */
     private Payroll findClosestPayrollMatch(AccountingRecord accountingRecord, List<Payroll> matches){
         Payroll closest =  null;
         long smallestDifference = Long.MAX_VALUE;
@@ -688,6 +757,11 @@ public class ReconciliationService {
         return closest;
     }
 
+    /**
+     * Picks the candidate whose date is closest to the accounting record's date. Candidates on the
+     * SAME day (difference 0) are skipped on purpose, because exact matching would already have
+     * found them. Returns null when no usable candidate exists.
+     */
     private StockPurchase findClosestStockPurchaseMatch(AccountingRecord accountingRecord, List<StockPurchase> matches){
         StockPurchase closest =  null;
         long smallestDifference = Long.MAX_VALUE;
@@ -706,6 +780,11 @@ public class ReconciliationService {
         return closest;
     }
 
+    /**
+     * Picks the candidate whose date is closest to the accounting record's date. Candidates on the
+     * SAME day (difference 0) are skipped on purpose, because exact matching would already have
+     * found them. Returns null when no usable candidate exists.
+     */
     private Receipt findClosestReceiptMatch(AccountingRecord accountingRecord, List<Receipt> matches){
         Receipt closest = null;
         long smallestDifference = Long.MAX_VALUE;
@@ -724,6 +803,11 @@ public class ReconciliationService {
         return closest;
     }
 
+    /**
+     * Turns an existing ORPHAN result into a PARTIAL match: stores the matched record, its type
+     * and the confidence, marks the reference and amount as MATCH and the date as PARTIAL, and
+     * records who did it and when.
+     */
     private void updateToPartialResult(
             ReconciliationResult result,
             String matchedRecordId,
@@ -746,6 +830,11 @@ public class ReconciliationService {
         result.setDateMatchStatus("PARTIAL");    // Date is within tolerance
     }
 
+    /**
+     * Confidence score of a partial match. Same day gives 100. Otherwise 100 minus a penalty of
+     * (30 / toleranceDays) for every day of difference, never lower than 70. Example: with a 3-day
+     * tolerance, a record 2 days off scores 100 - 2 x 10 = 80.
+     */
     private double calculateConfidence(long daysDifference, int toleranceDays){
         if(daysDifference == 0){
             return 100.0;
@@ -757,16 +846,27 @@ public class ReconciliationService {
         return Math.max(confidence, 70.0);
     }
 
+    /**
+     * All reconciliation results, newest first.
+     */
     @Transactional(readOnly = true)
     public List<ReconciliationResult> getAllResults(){
         return reconciliationResultRepository.findAllByOrderByReconciledAtDesc();
     }
 
+    /**
+     * Reconciliation results with the given status (EXACT, PARTIAL, ORPHAN, ...).
+     */
     @Transactional(readOnly = true)
     public List<ReconciliationResult> getResultsByStatus(ReconciliationStatus status){
         return reconciliationResultRepository.findByStatus(status);
     }
 
+    /**
+     * Builds the rows for the Orphans page: every ORPHAN result joined with the reference, amount,
+     * module and date of its accounting record. The records are loaded with one query for the
+     * whole list instead of one query per row.
+     */
     @Transactional(readOnly = true)
     public List<OrphanRecordView> getOrphanRecordViews(){
         List<ReconciliationResult> orphanResults = reconciliationResultRepository.findByStatusOrderByReconciledAtDesc(ReconciliationStatus.ORPHAN);
@@ -821,6 +921,14 @@ public class ReconciliationService {
         );
     }
 
+    /**
+     * Suggests possible matches for a reviewer who is resolving one orphan by hand. Payroll,
+     * receipts and stock purchases are searched for records with the SAME amount whose date is
+     * within 7 days (a wider window than automatic partial matching, and the reference does not
+     * have to match). Each candidate is scored by calculateCandidateConfidence and the list is
+     * returned best first. Returns an empty list when the result does not exist or is no longer an
+     * orphan.
+     */
     @Transactional(readOnly = true)
     public List<CandidateMatchView> getCandidateMatchesForOrphan(Long reconciliationResultId){
         Optional<ReconciliationResult> optionalResult = reconciliationResultRepository.findById(reconciliationResultId);
@@ -925,6 +1033,12 @@ public class ReconciliationService {
         return candidates;
     }
 
+    /**
+     * Score shown next to a manual-review candidate (it is only a hint and is never used for
+     * automatic matching). Base 60 because the amount already matches, plus 20 if the reference
+     * numbers are equal, plus a date bonus (15 same day, 10 within 3 days, 5 within 7 days).
+     * Capped at 95.
+     */
     private double calculateCandidateConfidence(
             String accountingReference,
             String candidateReference,
@@ -951,6 +1065,13 @@ public class ReconciliationService {
 
         return Math.min(confidence, 95.0);
     }
+    /**
+     * A reviewer settles an orphan by choosing the source record it belongs to. Only ORPHAN
+     * results can be resolved. Stores the chosen record, its source type and the confidence, sets
+     * the status to MANUALLY_RESOLVED, keeps the justification in the remarks and writes a
+     * MANUAL_MODIFICATION audit entry. A second person still has to approve the decision through
+     * the workflow.
+     */
     @Transactional
     public void resolveOrphanManually(
             Long reconciliationResultId,
@@ -993,6 +1114,9 @@ public class ReconciliationService {
                         ". Justification: " + justification
         );
     }
+    /**
+     * Results waiting for review (status MANUALLY_RESOLVED), newest first.
+     */
     @Transactional(readOnly = true)
     public List<ReconciliationResult> getManualReviewRecords(){
         return reconciliationResultRepository.findByStatusOrderByReconciledAtDesc(
@@ -1000,6 +1124,12 @@ public class ReconciliationService {
         );
     }
 
+    /**
+     * Marks a reviewed result APPROVED and adds the reviewer's name to the remarks. Accepts
+     * MANUALLY_RESOLVED and also PENDING_APPROVAL, which is the status a result has after Send to
+     * workflow; this is what lets the workflow's final VERIFIED step succeed. Writes an audit
+     * entry. Called by the workflow module, not directly by a page button.
+     */
     @Transactional
     public void approveManualResolution(
             Long reconciliationResultId,
@@ -1034,6 +1164,11 @@ public class ReconciliationService {
         );
     }
 
+    /**
+     * Marks a reviewed result REJECTED and adds the reviewer's name and the rejection reason to
+     * the remarks. Accepts MANUALLY_RESOLVED and PENDING_APPROVAL, like approveManualResolution.
+     * Writes an audit entry.
+     */
     @Transactional
     public void rejectManualResolution(
             Long reconciliationResultId,
@@ -1072,6 +1207,15 @@ public class ReconciliationService {
 
     }
 
+    /**
+     * Submits a manually resolved result to the workflow module as a new workflow item (source
+     * type RECONCILIATION). Only MANUALLY_RESOLVED results can be sent. The matched record,
+     * confidence and justification travel with it (buildWorkflowDetails), together with the
+     * sender's comment, so the approver can see why the match was chosen. The result then becomes
+     * PENDING_APPROVAL and keeps the workflow id.
+     *
+     * @return the updated result
+     */
     @Transactional
     public ReconciliationResult sendToWorkflowReview(
             Long reconciliationResultId,

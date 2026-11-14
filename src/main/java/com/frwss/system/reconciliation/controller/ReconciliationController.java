@@ -16,6 +16,12 @@ import com.frwss.system.workflow.repository.WorkflowRecordRepository;
 
 import java.util.List;
 
+/**
+ * Pages and form actions of the reconciliation module (everything under /reconciliation). Page
+ * methods only show data. POST methods run a reconciliation step or record a reviewer's decision
+ * and then redirect back with a success or error message. Changing data needs ENTRY_STAFF or ADMIN
+ * (see SecurityConfig); reading is open to any logged-in user.
+ */
 @Controller
 @RequestMapping("/reconciliation")
 public class ReconciliationController {
@@ -34,6 +40,10 @@ public class ReconciliationController {
         this.securityContextAdapter = securityContextAdapter;
     }
 
+    /**
+     * GET /reconciliation. Shows the reconciliation results with two optional filters: status
+     * (EXACT, PARTIAL, ORPHAN, ... or ALL) and limit (number of rows or ALL, default 50).
+     */
     @GetMapping
     public String showReconciliationDashboard(
             @RequestParam(required = false) String status,
@@ -76,6 +86,9 @@ public class ReconciliationController {
         return "reconciliation/dashboard";
     }
 
+    /**
+     * Keeps only the first N results for display. A limit of -1 (ALL) returns the list unchanged.
+     */
     private List<ReconciliationResult> applyDisplayLimit(
             List<ReconciliationResult> results,
             String limit
@@ -91,6 +104,10 @@ public class ReconciliationController {
                 .toList();
     }
 
+    /**
+     * Converts the limit request value to a number: blank gives 50, ALL gives -1 (no limit), and
+     * text that is not a number also falls back to 50.
+     */
     private int parseLimit(String limit) {
         if (limit == null || limit.isBlank()) {
             return 50;
@@ -107,12 +124,21 @@ public class ReconciliationController {
         }
     }
 
+    /**
+     * GET /reconciliation/orphans. Lists every orphan result (no match found) so a reviewer can
+     * choose one to resolve.
+     */
     @GetMapping("/orphans")
     public String showOrphanResolutionView(Model model){
         model.addAttribute("orphans", reconciliationService.getOrphanRecordViews());
         return "reconciliation/orphans";
     }
 
+    /**
+     * GET /reconciliation/orphans/{resultId}/candidates. Shows one orphan with the suggested
+     * source records (same amount, date within 7 days, best score first) that the reviewer can
+     * choose from.
+     */
     @GetMapping("/orphans/{resultId}/candidates")
     public String showCandidateMatches(
             @PathVariable Long resultId,
@@ -125,6 +151,10 @@ public class ReconciliationController {
         return "reconciliation/candidates";
     }
 
+    /**
+     * GET /reconciliation/manual-review. Lists the results a reviewer has resolved manually, each
+     * with a button to send it to workflow review.
+     */
     @GetMapping("/manual-review")
     public String showManualReviewPage(Model model){
         model.addAttribute("reviewRecords", reconciliationService.getManualReviewRecords());
@@ -132,6 +162,10 @@ public class ReconciliationController {
         return "reconciliation/manual-review";
     }
 
+    /**
+     * POST /reconciliation/run-exact. Runs one batch of exact matching as the logged-in user, then
+     * returns to the results page with a success message.
+     */
     @PostMapping("/run-exact")
     public String runExactReconciliation(RedirectAttributes redirectAttributes){
         reconciliationService.runExactReconciliation(securityContextAdapter.getCurrentUsername());
@@ -144,6 +178,10 @@ public class ReconciliationController {
         return "redirect:/reconciliation";
     }
 
+    /**
+     * POST /reconciliation/run-partial. Runs one batch of partial matching as the logged-in user,
+     * with a fixed tolerance of 3 days.
+     */
     @PostMapping("/run-partial")
     public String runPartialReconciliation(RedirectAttributes redirectAttributes){
         reconciliationService.runPartialReconciliation(securityContextAdapter.getCurrentUsername(), 3);
@@ -156,6 +194,11 @@ public class ReconciliationController {
         return "redirect:/reconciliation";
     }
 
+    /**
+     * POST /reconciliation/orphans/{resultId}/resolve. Saves the reviewer's choice for an orphan
+     * (source type, matched record id and confidence) together with the required justification,
+     * then redirects with a message.
+     */
     @PostMapping("/orphans/{resultId}/resolve")
     public String resolveOrphanManually(
             @PathVariable Long resultId,
@@ -182,6 +225,11 @@ public class ReconciliationController {
         return "redirect:/reconciliation/orphans";
     }
 
+    /**
+     * POST /reconciliation/manual-review/{resultId}/approve. Approves a manually resolved result
+     * directly. In normal use approval happens through the workflow module (the auditor's VERIFIED
+     * step), so no page button calls this.
+     */
     @PostMapping("/manual-review/{resultId}/approve")
     public String approveManualResolution(
             @PathVariable Long resultId,
@@ -197,6 +245,10 @@ public class ReconciliationController {
         return "redirect:/reconciliation/manual-review";
     }
 
+    /**
+     * POST /reconciliation/manual-review/{resultId}/reject. Rejects a manually resolved result
+     * with a reason. As with approve, the workflow module normally does this.
+     */
     @PostMapping("/manual-review/{resultId}/reject")
     public String rejectManualResolution(
             @PathVariable Long resultId,
@@ -217,6 +269,12 @@ public class ReconciliationController {
         return "redirect:/reconciliation/manual-review";
     }
 
+    /**
+     * POST /reconciliation/manual-review/{resultId}/send-to-workflow. Submits a manually resolved
+     * result to the workflow module. A result can only be submitted once: if a workflow item
+     * already exists for it, an error message is shown. Any failure is reported on the manual
+     * review page instead of being thrown.
+     */
     @PostMapping("/manual-review/{resultId}/send-to-workflow")
     public String sendToWorkflowReview(
             @PathVariable Long resultId,

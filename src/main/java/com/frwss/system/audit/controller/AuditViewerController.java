@@ -11,6 +11,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+/**
+ * Audit log pages: a filterable table of audit entries shown together with the hash chain
+ * verification result, and the action to acknowledge a chain break.
+ */
 @Controller
 public class AuditViewerController {
     private final AuditService auditService;
@@ -22,6 +26,11 @@ public class AuditViewerController {
     }
 
 
+    /**
+     * GET /audit/logs. Shows the audit log with optional filters (action type, entity type, user
+     * and row limit) and runs the full hash chain verification, so every broken entry is listed
+     * next to the log.
+     */
     @GetMapping("/audit/logs")
     public String showAuditLogs(
             @RequestParam(required = false) String actionType,

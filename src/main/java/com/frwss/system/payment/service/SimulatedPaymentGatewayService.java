@@ -42,6 +42,14 @@ public class SimulatedPaymentGatewayService implements PaymentGatewayService{
         this.securityContextAdapter = securityContextAdapter;
     }
 
+    /**
+     * Simulates charging a payment. Builds a PaymentTransaction from the request (currency
+     * defaults to LKR, payment method to CARD) and decides the outcome at random: about 95%
+     * SUCCESS, otherwise FAILED. A successful payment gets a settlement time and a gateway
+     * reference; the response only carries a transaction id on success. The transaction is always
+     * saved and an audit entry (PAYMENT_PROCESSED or PAYMENT_FAILED) is written. No real money
+     * moves.
+     */
     @Override
     @Transactional
     public PaymentResponseDto processPayment(PaymentRequestDto request){
@@ -113,6 +121,10 @@ public class SimulatedPaymentGatewayService implements PaymentGatewayService{
         return response;
     }
 
+    /**
+     * Looks up a transaction by its id and returns its status with a short message such as
+     * 'Payment was successful.' or 'Payment failed.'. Throws when the id does not exist.
+     */
     @Override
     @Transactional(readOnly = true)
     public PaymentResponseDto getPaymentStatus(String transactionId){
@@ -143,6 +155,11 @@ public class SimulatedPaymentGatewayService implements PaymentGatewayService{
         return response;
     }
 
+    /**
+     * Refunds a transaction. Only SUCCESS transactions with an amount above zero can be refunded.
+     * Sets the status to REFUNDED, saves it and writes a PAYMENT_REFUNDED audit entry. Throws for
+     * an unknown id or a transaction that cannot be refunded.
+     */
     @Override
     @Transactional
     public PaymentResponseDto refundPayment(String transactionId){
@@ -187,11 +204,17 @@ public class SimulatedPaymentGatewayService implements PaymentGatewayService{
         return response;
     }
 
+    /**
+     * Always true: the simulated gateway has no outside service that could be down.
+     */
     @Override
     public boolean isAvailable() {
         return true; // Simulated gateway is always available
     }
 
+    /**
+     * Name stored on every transaction made through this gateway (SIMULATED).
+     */
     @Override
     public String getGatewayName() {
         return "SIMULATED";

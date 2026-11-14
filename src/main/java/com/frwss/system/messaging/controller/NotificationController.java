@@ -16,6 +16,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Notification pages and small JSON endpoints (under /notifications). Every action works on the
+ * logged-in user's own notifications only. Unlike the messaging controller, an unknown user does
+ * not cause an exception: the page shows an error and an empty list.
+ */
 @Controller
 @RequestMapping("/notifications")
 public class NotificationController {
@@ -35,6 +40,10 @@ public class NotificationController {
         this.securityContextAdapter = securityContextAdapter;
     }
 
+    /**
+     * Finds the logged-in user's id. Never throws: returns null when nobody is logged in or the
+     * user is not in the database, and callers treat null as 'not authenticated'.
+     */
     private Long getCurrentUserId() {
         try {
             String username = securityContextAdapter.getCurrentUsername();
@@ -55,6 +64,10 @@ public class NotificationController {
         }
     }
 
+    /**
+     * GET /notifications. Shows the current user's notifications and unread count. Shows an error
+     * and an empty list when the user cannot be identified or loading fails.
+     */
     @GetMapping
     public String notifications(Model model) {
         try {
@@ -85,6 +98,10 @@ public class NotificationController {
         return "notifications/notifications";
     }
 
+    /**
+     * POST /notifications/mark-read/{id}. Marks one of the user's notifications as read, then
+     * returns to the list with a message.
+     */
     @PostMapping("/mark-read/{id}")
     public String markAsRead(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
@@ -102,6 +119,9 @@ public class NotificationController {
         return "redirect:/notifications";
     }
 
+    /**
+     * POST /notifications/mark-all-read. Marks all of the user's notifications as read.
+     */
     @PostMapping("/mark-all-read")
     public String markAllAsRead(RedirectAttributes redirectAttributes) {
         try {
@@ -119,6 +139,10 @@ public class NotificationController {
         return "redirect:/notifications";
     }
 
+    /**
+     * POST /notifications/delete/{id}. Soft-deletes one notification: it is hidden from the user
+     * but stays in the database.
+     */
     @PostMapping("/delete/{id}")
     public String deleteNotification(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
@@ -136,6 +160,10 @@ public class NotificationController {
         return "redirect:/notifications";
     }
 
+    /**
+     * GET /notifications/api/unread-count. JSON number for the bell badge in the navigation bar.
+     * Returns 0 when the user is unknown or an error occurs.
+     */
     @GetMapping("/api/unread-count")
     @ResponseBody
     public long getUnreadCount() {
@@ -149,6 +177,10 @@ public class NotificationController {
         }
     }
 
+    /**
+     * GET /notifications/api/latest. JSON list of the user's 5 most recent notifications for the
+     * navigation bar dropdown. Returns an empty list when the user is unknown or an error occurs.
+     */
     @GetMapping("/api/latest")
     @ResponseBody
     public List<NotificationDto> getLatestNotifications() {
