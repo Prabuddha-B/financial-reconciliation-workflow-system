@@ -279,6 +279,7 @@
               <th class="ps-3">Workflow ID</th>
               <th>Source Type</th>
               <th>Source Record ID</th>
+              <th>Summary</th>
               <th>Current State</th>
               <th class="text-md-end pe-3">Actions</th>
             </tr>
@@ -292,6 +293,8 @@
                 <td class="fw-semibold ps-3" th:text="${workflow.workflowId}"></td>
                 <td th:text="${workflow.sourceType}"></td>
                 <td class="text-nowrap" th:text="${workflow.sourceRecordId}"></td>
+                <td class="small text-break"
+                    th:text="${#strings.isEmpty(workflow.detailsSummary()) ? '—' : #strings.abbreviate(workflow.detailsSummary(), 90)}"></td>
                 <td>
 
                   <!-- Workflow State Badges -->
@@ -326,7 +329,7 @@
 
               <!-- Empty State When No Workflow Records Exists -->
               <tr th:if="${#lists.isEmpty(workflows)}">
-                <td colspan="5" class="text-center p-5">
+                <td colspan="6" class="text-center p-5">
                   <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary-subtle text-primary mb-3"
                        style="width: 3.5rem; height: 3.5rem;">
                     <i class="bi bi-inbox fs-3"></i>
