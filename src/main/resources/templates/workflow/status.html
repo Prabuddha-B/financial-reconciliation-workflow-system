@@ -426,7 +426,20 @@
       <div class="card-body">
         <div th:if="${not #strings.isEmpty(workflow.details)}" class="mb-3">
           <div class="text-muted small fw-semibold mb-1">Match details and justification</div>
-          <div class="text-break" th:text="${workflow.details}"></div>
+          <!-- One fact per line: "Label: value". Lines without a short label are shown as plain text. -->
+          <div class="border rounded px-3 py-2">
+            <div th:each="line : ${workflow.detailLines()}"
+                 class="d-flex gap-3 py-1 border-bottom">
+              <th:block th:if="${#strings.contains(line, ': ') and #strings.length(#strings.substringBefore(line, ': ')) lt 25}">
+                <span class="text-muted fw-semibold flex-shrink-0" style="min-width: 10rem;"
+                      th:text="${#strings.substringBefore(line, ': ')}"></span>
+                <span class="text-break" style="white-space: pre-line;"
+                      th:text="${#strings.substringAfter(line, ': ')}"></span>
+              </th:block>
+              <span th:unless="${#strings.contains(line, ': ') and #strings.length(#strings.substringBefore(line, ': ')) lt 25}"
+                    class="text-break" th:text="${line}"></span>
+            </div>
+          </div>
         </div>
         <div th:if="${not #strings.isEmpty(workflow.comments)}" class="mb-3">
           <div class="text-muted small fw-semibold mb-1">Submitter comments</div>

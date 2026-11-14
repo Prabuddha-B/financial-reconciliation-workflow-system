@@ -1,6 +1,8 @@
 package com.frwss.system.reconciliation.service;
 
 import com.frwss.system.audit.service.AuditService;
+import com.frwss.system.model.AccountingRecord;
+import com.frwss.system.model.Receipt;
 import com.frwss.system.reconciliation.model.MatchedSourceType;
 import com.frwss.system.reconciliation.model.ReconciliationResult;
 import com.frwss.system.reconciliation.model.ReconciliationStatus;
@@ -22,6 +24,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -132,6 +136,74 @@ class ReconciliationWorkflowHandoffTest {
 
         assertTrue(captor.getValue().getDetails().length() <= 2000);
         assertTrue(captor.getValue().getDetails().endsWith("..."));
+    }
+
+    @Test
+    @DisplayName("Should show reference, amount and date of both records, one fact per line")
+    void sendToWorkflowReview_recordsFound_buildsStructuredLines() {
+
+        ReconciliationResult result = manuallyResolvedResult(62L);
+
+        AccountingRecord accounting = new AccountingRecord();
+        accounting.setRecordId("ACC-062");
+        accounting.setReferenceNo("RC-2026-FAR1");
+        accounting.setAmount(new BigDecimal("44636.51"));
+        accounting.setRecordDate(LocalDate.of(2026, 9, 21));
+
+        Receipt receipt = new Receipt();
+        receipt.setReceiptId("RCT-062");
+        receipt.setReferenceNo("RC-2026-FAR1");
+        receipt.setAmount(new BigDecimal("44636.51"));
+        receipt.setReceiptDate(LocalDate.of(2026, 9, 27));
+
+        WorkflowResponseDto workflowResponse = new WorkflowResponseDto();
+        workflowResponse.setWorkflowId(902L);
+
+        when(reconciliationResultRepository.findById(62L)).thenReturn(Optional.of(result));
+        when(accountingRecordRepository.findById("ACC-062")).thenReturn(Optional.of(accounting));
+        when(receiptRepository.findById("RCT-062")).thenReturn(Optional.of(receipt));
+        when(workflowService.createWorkflow(any(WorkflowRequestDto.class))).thenReturn(workflowResponse);
+
+        reconciliationService.sendToWorkflowReview(62L, "entry", null);
+
+        ArgumentCaptor<WorkflowRequestDto> captor = ArgumentCaptor.forClass(WorkflowRequestDto.class);
+        verify(workflowService).createWorkflow(captor.capture());
+
+        String details = captor.getValue().getDetails();
+
+        assertEquals(
+                "Accounting record: ACC-062 \u00b7 RC-2026-FAR1 \u00b7 44,636.51 \u00b7 2026-09-21\n"
+                        + "Matched RECEIPT: RCT-062 \u00b7 RC-2026-FAR1 \u00b7 44,636.51 \u00b7 2026-09-27 (6 days apart)\n"
+                        + "Confidence: 90.0%\n"
+                        + "Resolved by: entry\n"
+                        + "Justification: Confirmed against the bank statement",
+                details);
+
+        // the matched record is not repeated inside the remarks any more
+        assertFalse(details.contains("Manually resolved with"));
+    }
+
+    @Test
+    @DisplayName("Should fall back to the plain IDs when the records cannot be found")
+    void sendToWorkflowReview_recordsMissing_fallsBackToIds() {
+
+        ReconciliationResult result = manuallyResolvedResult(63L);
+
+        WorkflowResponseDto workflowResponse = new WorkflowResponseDto();
+        workflowResponse.setWorkflowId(903L);
+
+        when(reconciliationResultRepository.findById(63L)).thenReturn(Optional.of(result));
+        when(workflowService.createWorkflow(any(WorkflowRequestDto.class))).thenReturn(workflowResponse);
+
+        reconciliationService.sendToWorkflowReview(63L, "entry", null);
+
+        ArgumentCaptor<WorkflowRequestDto> captor = ArgumentCaptor.forClass(WorkflowRequestDto.class);
+        verify(workflowService).createWorkflow(captor.capture());
+
+        String details = captor.getValue().getDetails();
+
+        assertTrue(details.startsWith("Accounting record: ACC-063\nMatched RECEIPT: RCT-063\n"));
+        assertTrue(details.contains("\nJustification: Confirmed against the bank statement"));
     }
 
     // =========================================================================

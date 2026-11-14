@@ -1380,21 +1380,118 @@ public class ReconciliationService {
         return result;
     }
 
-    // Builds the summary the workflow approver sees: which record was matched,
-    // how confident the match is, and the justification given by the resolver
+    /**
+     * Builds the summary the workflow approver sees, one fact per line:
+     * <pre>
+     * Accounting record: ACC-0049 · RC-2026-FAR1 · 44,636.51 · 2026-09-21
+     * Matched RECEIPT: RCT-0018 · RC-2026-FAR1 · 44,636.51 · 2026-09-27 (6 days apart)
+     * Confidence: 70.0%
+     * Resolved by: entry
+     * Justification: ...
+     * </pre>
+     * Reference, amount and date are looked up from the records themselves. If a record cannot be
+     * found, that line shows only its ID. The text is cut to fit the workflow details column.
+     */
     private String buildWorkflowDetails(ReconciliationResult result){
-        String details = "Accounting record: " + result.getAccountingRecordId()
-                + " | Matched " + result.getMatchedSourceType()
-                + " record: " + result.getMatchedRecordId()
-                + " | Confidence: " + result.getConfidenceScore() + "%"
-                + " | Resolved by: " + result.getReconciledBy()
-                + " | " + result.getRemarks();
+        Optional<AccountingRecord> accounting = result.getAccountingRecordId() == null
+                ? Optional.empty()
+                : accountingRecordRepository.findById(result.getAccountingRecordId());
 
-        // the workflow details column holds at most 2000 characters
-        if(details.length() > 1900){
-            details = details.substring(0, 1900) + "...";
+        LocalDate accountingDate = accounting.map(AccountingRecord::getRecordDate).orElse(null);
+
+        StringBuilder details = new StringBuilder();
+
+        details.append("Accounting record: ").append(joinParts(
+                result.getAccountingRecordId(),
+                accounting.map(AccountingRecord::getReferenceNo).orElse(null),
+                formatAmount(accounting.map(AccountingRecord::getAmount).orElse(null)),
+                accountingDate == null ? null : accountingDate.toString()
+        ));
+
+        details.append("\nMatched ").append(result.getMatchedSourceType()).append(": ")
+                .append(describeMatchedRecord(result, accountingDate));
+
+        details.append("\nConfidence: ").append(result.getConfidenceScore()).append("%");
+        details.append("\nResolved by: ").append(result.getReconciledBy());
+
+        String remarks = result.getRemarks();
+        if(remarks != null && !remarks.isBlank()){
+            String marker = "Justification: ";
+            int at = remarks.indexOf(marker);
+            if(at >= 0){
+                // the matched record is already shown above, so only keep the justification
+                details.append("\nJustification: ").append(remarks.substring(at + marker.length()));
+            } else {
+                details.append("\nRemarks: ").append(remarks);
+            }
         }
 
-        return details;
+        String text = details.toString();
+
+        // the workflow details column holds at most 2000 characters
+        if(text.length() > 1900){
+            text = text.substring(0, 1900) + "...";
+        }
+
+        return text;
+    }
+
+    /**
+     * "ID · reference · amount · date (N days apart)" for the matched source record. Falls back to
+     * just the ID when the record is not found.
+     */
+    private String describeMatchedRecord(ReconciliationResult result, LocalDate accountingDate){
+        String id = result.getMatchedRecordId();
+        MatchedSourceType type = result.getMatchedSourceType();
+
+        String reference = null;
+        BigDecimal amount = null;
+        LocalDate date = null;
+
+        if(id != null && type != null){
+            if(type == MatchedSourceType.PAYROLL){
+                Optional<Payroll> found = payrollRepository.findById(id);
+                if(found.isPresent()){
+                    reference = found.get().getReferenceNo();
+                    amount = found.get().getSalary();
+                    date = found.get().getPaymentDate();
+                }
+            } else if(type == MatchedSourceType.RECEIPT){
+                Optional<Receipt> found = receiptRepository.findById(id);
+                if(found.isPresent()){
+                    reference = found.get().getReferenceNo();
+                    amount = found.get().getAmount();
+                    date = found.get().getReceiptDate();
+                }
+            } else if(type == MatchedSourceType.STOCK_PURCHASE){
+                Optional<StockPurchase> found = stockPurchaseRepository.findById(id);
+                if(found.isPresent()){
+                    reference = found.get().getInvoiceNo();
+                    amount = found.get().getAmount();
+                    date = found.get().getPurchaseDate();
+                }
+            }
+        }
+
+        String line = joinParts(id, reference, formatAmount(amount), date == null ? null : date.toString());
+
+        if(date != null && accountingDate != null){
+            long days = Math.abs(ChronoUnit.DAYS.between(accountingDate, date));
+            line += days == 0 ? " (same day)" : " (" + days + (days == 1 ? " day" : " days") + " apart)";
+        }
+
+        return line;
+    }
+
+    /** Joins the parts that have a value with " · ", skipping missing ones. */
+    private String joinParts(String... parts){
+        return Arrays.stream(parts)
+                .filter(part -> part != null && !part.isBlank())
+                .collect(Collectors.joining(" · "));
+    }
+
+    /** 44636.5 becomes "44,636.50"; null stays null. */
+    private String formatAmount(BigDecimal amount){
+        return amount == null ? null : String.format(java.util.Locale.US, "%,.2f", amount);
     }
 }
