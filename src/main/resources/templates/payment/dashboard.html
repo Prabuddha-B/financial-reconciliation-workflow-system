@@ -418,6 +418,53 @@
       })();
     </script>
 
+    <!-- Process a Payment (simulated) -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-header bg-white py-3">
+        <strong><i class="bi bi-credit-card me-2"></i>Process a Payment (simulated)</strong>
+        <div class="text-muted small mt-1">
+          Pays an existing accounting record through the simulated gateway. A record that already has a
+          successful payment cannot be paid again.
+        </div>
+      </div>
+      <div class="card-body">
+        <form id="payForm" onsubmit="processPayment(event)">
+          <div class="row g-3">
+            <div class="col-md-3">
+              <label class="form-label small" for="payRecordId">Accounting record ID</label>
+              <input id="payRecordId" class="form-control" maxlength="100" placeholder="e.g. ACC-0008" required>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label small" for="payAmount">Amount (LKR)</label>
+              <input id="payAmount" type="number" step="0.01" min="0.01" class="form-control" placeholder="0.00" required>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small" for="payMethod">Payment method</label>
+              <select id="payMethod" class="form-select">
+                <option value="BANK_TRANSFER">Bank transfer</option>
+                <option value="CARD">Card</option>
+                <option value="CASH">Cash</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label small" for="payCustomer">Customer name (optional)</label>
+              <input id="payCustomer" class="form-control" maxlength="100">
+            </div>
+            <div class="col-md-8">
+              <label class="form-label small" for="payDescription">Description (optional)</label>
+              <input id="payDescription" class="form-control" maxlength="200">
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+              <button id="payButton" type="submit" class="btn btn-payment w-100">
+                <i class="bi bi-send me-2"></i>Process Payment
+              </button>
+            </div>
+          </div>
+        </form>
+        <div id="payResult" class="alert d-none mt-3 mb-0 py-2" role="alert"></div>
+      </div>
+    </div>
+
     <!-- Transaction Table -->
     <div class="card shadow-sm">
       <div class="card-header bg-white">
@@ -506,6 +553,75 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
+
+    /* ----------------------------------
+       Process a payment through the existing
+       POST /payment/api/process endpoint.
+       Messages use textContent, never innerHTML.
+    ----------------------------------- */
+
+    function processPayment(event) {
+
+      event.preventDefault();
+
+      const button = document.getElementById('payButton');
+      const result = document.getElementById('payResult');
+
+      const showResult = (kind, message) => {
+        result.className = 'alert alert-' + kind + ' mt-3 mb-0 py-2';
+        result.textContent = message;
+      };
+
+      const body = {
+        accountingRecordId: document.getElementById('payRecordId').value.trim(),
+        amount: Number(document.getElementById('payAmount').value),
+        paymentMethod: document.getElementById('payMethod').value
+      };
+
+      const customer = document.getElementById('payCustomer').value.trim();
+      const description = document.getElementById('payDescription').value.trim();
+      if (customer) { body.customerName = customer; }
+      if (description) { body.description = description; }
+
+      const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+      const csrfHeaderName = document.querySelector('meta[name="_csrf_header"]').content;
+
+      button.disabled = true;
+      showResult('info', 'Processing payment...');
+
+      fetch('/payment/api/process', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          [csrfHeaderName]: csrfToken
+        },
+        body: JSON.stringify(body)
+      })
+              .then(response =>
+                      response.json().then(data => ({ ok: response.ok, data: data })))
+              .then(({ ok, data }) => {
+
+                if (!ok) {
+                  showResult('danger', data.error || 'Payment could not be processed');
+                  button.disabled = false;
+                  return;
+                }
+
+                if (data.status === 'SUCCESS') {
+                  showResult('success', 'Payment successful (' + data.transactionId + ')');
+                } else {
+                  // the simulated gateway fails some payments on purpose; the record can be retried
+                  showResult('warning', (data.message || 'Payment failed') + ' You can try again.');
+                }
+
+                // reload so the table and statistics show the new transaction
+                setTimeout(() => location.reload(), 1500);
+              })
+              .catch(() => {
+                showResult('danger', 'Server error');
+                button.disabled = false;
+              });
+    }
 
     function runReconciliation(button) {
 
