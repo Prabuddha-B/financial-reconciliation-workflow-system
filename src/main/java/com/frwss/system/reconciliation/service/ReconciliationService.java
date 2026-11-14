@@ -1167,6 +1167,72 @@ public class ReconciliationService {
         );
     }
     /**
+     * Confidence stored for a link a reviewer typed in by hand rather than chose from the suggested
+     * candidates. It is fixed and deliberately low, so a hand-typed link is never mistaken for a
+     * well-supported match.
+     */
+    public static final double MANUAL_ENTRY_CONFIDENCE = 30.0;
+
+    /**
+     * Resolves an orphan with a source record the reviewer typed in, for orphans that have no
+     * suggested candidates. Checks that the justification is filled in, that the orphan is still an
+     * ORPHAN, that the source is PAYROLL, RECEIPT or STOCK_PURCHASE and that the record ID exists in
+     * that source. The confidence is not taken from the caller: it is always
+     * {@link #MANUAL_ENTRY_CONFIDENCE}. After the checks it calls
+     * {@link #resolveOrphanManually}, so the status change and the audit entry are the same as when
+     * a candidate is chosen.
+     *
+     * @throws RuntimeException if any check fails; nothing is saved in that case
+     */
+    @Transactional
+    public void resolveOrphanWithManualEntry(
+            Long reconciliationResultId,
+            String sourceType,
+            String matchedRecordId,
+            String justification,
+            String performedBy
+    ){
+        if(justification == null || justification.isBlank()){
+            throw new RuntimeException("A justification is required");
+        }
+        if(matchedRecordId == null || matchedRecordId.isBlank()){
+            throw new RuntimeException("A matched record ID is required");
+        }
+        String recordId = matchedRecordId.trim();
+
+        ReconciliationResult result = reconciliationResultRepository.findById(reconciliationResultId)
+                .orElseThrow(() -> new RuntimeException("Reconciliation result not found"));
+
+        if(result.getStatus() != ReconciliationStatus.ORPHAN){
+            throw new RuntimeException("Only orphan records can be manually resolved");
+        }
+
+        boolean recordExists;
+        if("PAYROLL".equals(sourceType)){
+            recordExists = payrollRepository.existsById(recordId);
+        } else if("RECEIPT".equals(sourceType)){
+            recordExists = receiptRepository.existsById(recordId);
+        } else if("STOCK_PURCHASE".equals(sourceType)){
+            recordExists = stockPurchaseRepository.existsById(recordId);
+        } else {
+            throw new RuntimeException("Source must be PAYROLL, RECEIPT or STOCK_PURCHASE");
+        }
+
+        if(!recordExists){
+            throw new RuntimeException("No " + sourceType + " record found with ID " + recordId);
+        }
+
+        resolveOrphanManually(
+                reconciliationResultId,
+                sourceType,
+                recordId,
+                MANUAL_ENTRY_CONFIDENCE,
+                justification.trim(),
+                performedBy
+        );
+    }
+
+    /**
      * Results waiting for review (status MANUALLY_RESOLVED), newest first.
      */
     @Transactional(readOnly = true)

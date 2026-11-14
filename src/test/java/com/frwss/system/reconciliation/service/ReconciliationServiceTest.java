@@ -752,6 +752,134 @@ class ReconciliationServiceTest {
     }
 
     // =========================================================================
+    // resolveOrphanWithManualEntry()
+    // =========================================================================
+
+    @Test
+    @DisplayName("Should resolve an orphan with a typed-in ID that exists, using the fixed low confidence")
+    void resolveOrphanWithManualEntry_validId_resolvesWithFixedConfidence() {
+
+        ReconciliationResult orphan = new ReconciliationResult();
+        orphan.setId(30L);
+        orphan.setAccountingRecordId("ACC-030");
+        orphan.setStatus(ReconciliationStatus.ORPHAN);
+
+        when(reconciliationResultRepository.findById(30L)).thenReturn(Optional.of(orphan));
+        when(receiptRepository.existsById("RCT-030")).thenReturn(true);
+
+        reconciliationService.resolveOrphanWithManualEntry(
+                30L, "RECEIPT", "  RCT-030  ", "Matches the signed paper receipt", "auditor1");
+
+        ArgumentCaptor<ReconciliationResult> captor = ArgumentCaptor.forClass(ReconciliationResult.class);
+        verify(reconciliationResultRepository).save(captor.capture());
+
+        ReconciliationResult saved = captor.getValue();
+        assertEquals(ReconciliationStatus.MANUALLY_RESOLVED, saved.getStatus());
+        assertEquals(MatchedSourceType.RECEIPT, saved.getMatchedSourceType());
+        assertEquals("RCT-030", saved.getMatchedRecordId());
+        assertEquals(ReconciliationService.MANUAL_ENTRY_CONFIDENCE, saved.getConfidenceScore());
+        assertTrue(saved.getRemarks().contains("Matches the signed paper receipt"));
+
+        verify(auditService).log(
+                eq(AuditActionType.MANUAL_MODIFICATION),
+                eq("ReconciliationResult"),
+                eq("ACC-030"),
+                eq("auditor1"),
+                anyString()
+        );
+    }
+
+    @Test
+    @DisplayName("Should reject an ID that does not exist in the chosen source")
+    void resolveOrphanWithManualEntry_unknownId_throwsAndSavesNothing() {
+
+        ReconciliationResult orphan = new ReconciliationResult();
+        orphan.setId(31L);
+        orphan.setAccountingRecordId("ACC-031");
+        orphan.setStatus(ReconciliationStatus.ORPHAN);
+
+        when(reconciliationResultRepository.findById(31L)).thenReturn(Optional.of(orphan));
+        when(receiptRepository.existsById("RCT-NOPE")).thenReturn(false);
+
+        assertThrows(RuntimeException.class, () ->
+                reconciliationService.resolveOrphanWithManualEntry(
+                        31L, "RECEIPT", "RCT-NOPE", "n/a", "auditor1"));
+
+        verify(reconciliationResultRepository, never()).save(any());
+        verifyNoInteractions(auditService);
+    }
+
+    @Test
+    @DisplayName("Should reject an ID that exists in a different source than the one chosen")
+    void resolveOrphanWithManualEntry_idInWrongSource_throwsAndSavesNothing() {
+
+        ReconciliationResult orphan = new ReconciliationResult();
+        orphan.setId(32L);
+        orphan.setAccountingRecordId("ACC-032");
+        orphan.setStatus(ReconciliationStatus.ORPHAN);
+
+        when(reconciliationResultRepository.findById(32L)).thenReturn(Optional.of(orphan));
+        // The ID belongs to a receipt, but the reviewer chose PAYROLL
+        when(payrollRepository.existsById("RCT-032")).thenReturn(false);
+
+        assertThrows(RuntimeException.class, () ->
+                reconciliationService.resolveOrphanWithManualEntry(
+                        32L, "PAYROLL", "RCT-032", "n/a", "auditor1"));
+
+        verifyNoInteractions(receiptRepository);
+        verify(reconciliationResultRepository, never()).save(any());
+        verifyNoInteractions(auditService);
+    }
+
+    @Test
+    @DisplayName("Should reject a source that is not PAYROLL, RECEIPT or STOCK_PURCHASE")
+    void resolveOrphanWithManualEntry_invalidSource_throwsAndSavesNothing() {
+
+        ReconciliationResult orphan = new ReconciliationResult();
+        orphan.setId(33L);
+        orphan.setStatus(ReconciliationStatus.ORPHAN);
+
+        when(reconciliationResultRepository.findById(33L)).thenReturn(Optional.of(orphan));
+
+        assertThrows(RuntimeException.class, () ->
+                reconciliationService.resolveOrphanWithManualEntry(
+                        33L, "NONE", "X-1", "n/a", "auditor1"));
+
+        verifyNoInteractions(payrollRepository, receiptRepository, stockPurchaseRepository);
+        verify(reconciliationResultRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Should refuse when the result is no longer an orphan")
+    void resolveOrphanWithManualEntry_notAnOrphan_throwsAndSavesNothing() {
+
+        ReconciliationResult alreadyExact = new ReconciliationResult();
+        alreadyExact.setId(34L);
+        alreadyExact.setStatus(ReconciliationStatus.EXACT);
+
+        when(reconciliationResultRepository.findById(34L)).thenReturn(Optional.of(alreadyExact));
+
+        assertThrows(RuntimeException.class, () ->
+                reconciliationService.resolveOrphanWithManualEntry(
+                        34L, "RECEIPT", "RCT-034", "n/a", "auditor1"));
+
+        verifyNoInteractions(receiptRepository);
+        verify(reconciliationResultRepository, never()).save(any());
+        verifyNoInteractions(auditService);
+    }
+
+    @Test
+    @DisplayName("Should require a justification")
+    void resolveOrphanWithManualEntry_blankJustification_throwsBeforeAnyLookup() {
+
+        assertThrows(RuntimeException.class, () ->
+                reconciliationService.resolveOrphanWithManualEntry(
+                        35L, "RECEIPT", "RCT-035", "   ", "auditor1"));
+
+        verifyNoInteractions(reconciliationResultRepository, receiptRepository, auditService);
+    }
+
+    // =========================================================================
     // approveManualResolution()
     // =========================================================================
 

@@ -195,6 +195,41 @@ public class ReconciliationController {
     }
 
     /**
+     * POST /reconciliation/orphans/{resultId}/resolve-manual-entry. Resolves an orphan with a source
+     * record ID the reviewer typed in (used when there are no suggested candidates). The confidence
+     * is not accepted from the form; the service sets it. If a check fails, the reviewer goes back
+     * to the candidates page with the reason shown.
+     */
+    @PostMapping("/orphans/{resultId}/resolve-manual-entry")
+    public String resolveOrphanWithManualEntry(
+            @PathVariable Long resultId,
+            @RequestParam String sourceType,
+            @RequestParam String matchedRecordId,
+            @RequestParam String justification,
+            RedirectAttributes redirectAttributes
+    ){
+        try {
+            reconciliationService.resolveOrphanWithManualEntry(
+                    resultId,
+                    sourceType,
+                    matchedRecordId,
+                    justification,
+                    securityContextAdapter.getCurrentUsername()
+            );
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/reconciliation/orphans/" + resultId + "/candidates";
+        }
+
+        redirectAttributes.addFlashAttribute(
+                "successMessage",
+                "Orphan record manually resolved successfully"
+        );
+
+        return "redirect:/reconciliation/orphans";
+    }
+
+    /**
      * POST /reconciliation/orphans/{resultId}/resolve. Saves the reviewer's choice for an orphan
      * (source type, matched record id and confidence) together with the required justification,
      * then redirects with a message.

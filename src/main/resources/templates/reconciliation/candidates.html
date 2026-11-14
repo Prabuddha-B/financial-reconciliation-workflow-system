@@ -150,6 +150,12 @@
         </div>
     </div>
 
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show shadow-sm d-flex align-items-start gap-3" role="alert">
+        <i class="bi bi-exclamation-triangle-fill fs-5 mt-1"></i>
+        <div class="flex-grow-1" th:text="${errorMessage}"></div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
     <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show shadow-sm d-flex align-items-start gap-3" role="alert">
         <i class="bi bi-check-circle-fill fs-5 mt-1"></i>
         <div class="flex-grow-1" th:text="${successMessage}"></div>
@@ -263,6 +269,59 @@
                     <i class="bi bi-check2 me-1"></i>Select Candidate
                 </button>
 
+            </form>
+        </div>
+    </div>
+
+    <!-- ===================== Resolve With a Record You Enter ===================== -->
+    <div class="card shadow-sm mt-4">
+        <div class="card-header bg-white py-3">
+            <strong>
+                <i class="bi bi-keyboard me-2 text-primary"></i>
+                Resolve With a Record ID You Enter
+            </strong>
+            <div class="text-muted small mt-1"
+                 th:text="${#lists.isEmpty(candidates)} ? 'No candidates were suggested for this orphan. If you know the source record it belongs to, enter it here.' : 'Not the right candidate? If you know the source record this orphan belongs to, enter it here instead.'">
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="reason-box mb-3">
+                The record ID must exist in the source you choose. Links entered by hand are stored with a
+                fixed low confidence of <strong>30%</strong>, and still need approval in manual review.
+            </div>
+
+            <form th:action="@{/reconciliation/orphans/{id}/resolve-manual-entry(id=${resultId})}" method="post">
+
+                <div class="row g-3 mb-3">
+                    <div class="col-12 col-md-5">
+                        <label class="form-label" for="manualSourceType">Source</label>
+                        <select id="manualSourceType" name="sourceType" class="form-select shadow-sm" required>
+                            <option value="" selected disabled>Choose a source...</option>
+                            <option value="PAYROLL">Payroll</option>
+                            <option value="RECEIPT">Receipt</option>
+                            <option value="STOCK_PURCHASE">Stock purchase</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-7">
+                        <label class="form-label" for="manualRecordId">Matched record ID</label>
+                        <input id="manualRecordId" type="text" name="matchedRecordId"
+                               class="form-control shadow-sm" maxlength="100"
+                               placeholder="e.g. the payroll, receipt or purchase ID" required>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="manualJustification">Justification</label>
+                    <textarea id="manualJustification" name="justification"
+                              class="form-control shadow-sm" rows="3"
+                              placeholder="Explain why this record belongs to this orphan..."
+                              required></textarea>
+                </div>
+
+                <button class="btn btn-outline-success" type="submit">
+                    <i class="bi bi-check2 me-1"></i>Resolve With This Record
+                </button>
             </form>
         </div>
     </div>
