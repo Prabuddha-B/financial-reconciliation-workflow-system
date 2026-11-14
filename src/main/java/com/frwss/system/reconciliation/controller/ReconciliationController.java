@@ -348,7 +348,10 @@ public class ReconciliationController {
     // View Bulk Reconciliation Results
     @GetMapping("/bulk-results")
     public String showBulkResults(Model model) {
-        model.addAttribute("bulkResults", reconciliationService.getAllBulkReconciliationResults());
+        List<BulkReconciliation> bulkResults = reconciliationService.getAllBulkReconciliationResults();
+        model.addAttribute("bulkResults", bulkResults);
+        // Child records for each bulk result, shown in the detail panel when a row is clicked
+        model.addAttribute("bulkChildren", reconciliationService.getChildRecordsForBulkResults(bulkResults));
         return "reconciliation/bulk-results";
     }
 

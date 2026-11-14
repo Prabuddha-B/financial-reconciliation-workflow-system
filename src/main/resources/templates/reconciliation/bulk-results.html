@@ -53,6 +53,37 @@
     color: var(--frwss-text-primary);
   }
 
+
+  /* ============================================================
+     CLICKABLE ROWS + DETAIL SLIDE-OVER PANEL
+     ============================================================ */
+
+  .bulk-row { cursor: pointer; }
+
+  #bulkDetailOffcanvas { width: min(640px, 100%); }
+
+  .detail-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: .75rem;
+    font-weight: 600;
+  }
+  .detail-badge.exact   { background: #d1e7dd; color: #0f5132; }
+  .detail-badge.partial { background: #fff3cd; color: #856404; }
+  .detail-badge.orphan  { background: #f8d7da; color: #721c24; }
+
+  .reason-box {
+    background: var(--frwss-surface-3);
+    border-radius: var(--frwss-radius-sm);
+    padding: 12px 16px;
+    font-size: .875rem;
+    color: var(--frwss-text-secondary);
+    border-left: 4px solid var(--frwss-primary);
+  }
+  .reason-box.partial { border-left-color: #ffc107; }
+  .reason-box.orphan  { border-left-color: #dc3545; }
+  .reason-box.exact   { border-left-color: #198754; }
+
 </style>
 
 <body>
@@ -152,6 +183,7 @@
           <div class="text-muted small">One-to-many matching results</div>
         </div>
         <span class="text-muted small">
+          <i class="bi bi-hand-index-thumb me-1"></i>Click a row to see its children &middot;
           Showing <span th:text="${#lists.size(bulkResults)}">0</span> total bulk records
         </span>
       </div>
@@ -176,7 +208,7 @@
           </tr>
           </thead>
           <tbody>
-          <tr th:each="result, iter : ${bulkResults}">
+          <tr th:each="result, iter : ${bulkResults}" class="bulk-row" th:data-result-id="${result.id}">
             <td class="ps-3 text-muted" th:text="${iter.index + 1}">1</td>
             <td class="fw-semibold" th:text="${result.bulkRecordId}">BULK-001</td>
             <td th:text="${result.bulkReferenceNo}">REF-001</td>
@@ -281,6 +313,131 @@
 
 </div>
 
+<!-- Hidden per-row detail content, cloned into the slide-over panel on row click.
+     Kept in <template> tags so nothing here is rendered inline or affects layout. -->
+<div id="bulkDetailTemplates" hidden>
+  <template th:each="result : ${bulkResults}" th:id="'bulk-detail-tpl-' + ${result.id}">
+    <th:block th:with="children=${bulkChildren != null ? bulkChildren.get(result.id) : null}">
+
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="text-muted small">Bulk Record</div>
+        <span class="detail-badge"
+              th:classappend="${result.status.name() == 'EXACT' ? 'exact' : (result.status.name() == 'PARTIAL' ? 'partial' : 'orphan')}"
+              th:text="${result.status}"></span>
+      </div>
+      <h5 class="fw-bold mb-1" th:text="${result.bulkRecordId}">BULK-001</h5>
+      <div class="text-muted mb-3" th:text="${result.bulkReferenceNo}">PO-2026-A01-BULK</div>
+
+      <h6 class="fw-bold mb-2">
+        <i class="bi bi-diagram-2 me-2 text-primary"></i>Match Details
+      </h6>
+      <div class="reason-box mb-3"
+           th:classappend="${result.status.name() == 'EXACT' ? 'exact' : (result.status.name() == 'PARTIAL' ? 'partial' : 'orphan')}">
+        <span th:text="${result.remarks}">Match reasoning goes here</span>
+      </div>
+
+      <h6 class="fw-bold mb-2">
+        <i class="bi bi-calculator me-2 text-primary"></i>Amounts
+      </h6>
+      <div class="border rounded p-2 mb-3">
+        <div class="row text-center">
+          <div class="col-4">
+            <div class="text-muted small">Expected</div>
+            <div class="fw-semibold" th:text="${#numbers.formatDecimal(result.totalExpectedAmount, 1, 2)}">1,000.00</div>
+          </div>
+          <div class="col-4">
+            <div class="text-muted small">Matched</div>
+            <div class="fw-semibold" th:text="${#numbers.formatDecimal(result.totalMatchedAmount, 1, 2)}">1,000.00</div>
+          </div>
+          <div class="col-4">
+            <div class="text-muted small">Difference</div>
+            <div class="fw-semibold" th:text="${#numbers.formatDecimal(result.differenceAmount, 1, 2)}">0.00</div>
+          </div>
+        </div>
+      </div>
+
+      <h6 class="fw-bold mb-2">
+        <i class="bi bi-list-ul me-2 text-primary"></i>Child Records
+        <span class="badge bg-secondary-subtle text-secondary-emphasis ms-1"
+              th:text="${children != null ? #lists.size(children) : 0}">3</span>
+      </h6>
+      <div class="border rounded mb-3">
+        <div class="table-responsive">
+          <table class="table table-sm align-middle mb-0">
+            <thead class="table-light small text-muted text-uppercase">
+            <tr>
+              <th class="ps-2">Record ID</th>
+              <th>Reference No</th>
+              <th class="text-end">Amount</th>
+              <th class="pe-2">Date</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="child : ${children}">
+              <td class="ps-2 fw-semibold" th:text="${child.recordId}">ACC-001</td>
+              <td th:text="${child.referenceNo}">PO-2026-A01-1</td>
+              <td class="text-end" th:text="${#numbers.formatDecimal(child.amount, 1, 2)}">400.00</td>
+              <td class="pe-2 small text-muted" th:text="${child.recordDate}">2026-07-01</td>
+            </tr>
+            <tr th:if="${children == null or #lists.isEmpty(children)}">
+              <td colspan="4" class="text-center text-muted small p-3">
+                No child records found for this bulk record.
+              </td>
+            </tr>
+            </tbody>
+            <tfoot th:if="${children != null and !#lists.isEmpty(children)}">
+            <tr class="table-light fw-semibold">
+              <td class="ps-2" colspan="2">Total of children</td>
+              <td class="text-end" th:text="${#numbers.formatDecimal(result.totalMatchedAmount, 1, 2)}">1,000.00</td>
+              <td class="pe-2"></td>
+            </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <h6 class="fw-bold mb-2">
+        <i class="bi bi-clock-history me-2 text-primary"></i>Reconciliation Info
+      </h6>
+      <div class="border rounded p-2 mb-3">
+        <div class="row">
+          <div class="col-6">
+            <div class="text-muted small">Reconciled By</div>
+            <div th:text="${result.reconciledBy}">admin</div>
+          </div>
+          <div class="col-6">
+            <div class="text-muted small">Reconciled At</div>
+            <div th:text="${#temporals.format(result.reconciledAt, 'yyyy-MM-dd HH:mm')}">2026-07-01 10:30</div>
+          </div>
+        </div>
+        <div class="row mt-2">
+          <div class="col-6">
+            <div class="text-muted small">Confidence</div>
+            <div th:text="${result.confidenceScore + '%'}">100%</div>
+          </div>
+          <div class="col-6">
+            <div class="text-muted small">Children Matched</div>
+            <div th:text="${result.matchedChildCount} + ' of ' + ${result.childCount}">3 of 3</div>
+          </div>
+        </div>
+      </div>
+
+    </th:block>
+  </template>
+</div>
+
+<!-- ===================== Detail Slide-over Panel ===================== -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="bulkDetailOffcanvas"
+     aria-labelledby="bulkOffcanvasTitle">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title" id="bulkOffcanvasTitle">Bulk Result Details</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body" id="bulkOffcanvasBody">
+    <!-- Populated via JS from the matching <template> above -->
+  </div>
+</div>
+
 <!-- Footer -->
 <div th:replace="~{fragments/footer :: footer}"></div>
 
@@ -289,6 +446,33 @@
 <!-- ========================================== -->
 <div th:replace="~{fragments/scripts :: badgeStyles}"></div>
 <div th:replace="~{fragments/scripts :: badgeScripts}"></div>
+
+<!-- Row click opens the detail panel with the bulk record's children -->
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var offcanvasEl = document.getElementById('bulkDetailOffcanvas');
+    var offcanvasBody = document.getElementById('bulkOffcanvasBody');
+    var offcanvasTitle = document.getElementById('bulkOffcanvasTitle');
+    var offcanvas = offcanvasEl ? new bootstrap.Offcanvas(offcanvasEl) : null;
+
+    document.querySelectorAll('.bulk-row').forEach(function (row) {
+      row.addEventListener('click', function (event) {
+        if (event.target.closest('a') || event.target.closest('button')) {
+          return;
+        }
+        var resultId = row.getAttribute('data-result-id');
+        var template = document.getElementById('bulk-detail-tpl-' + resultId);
+        if (!template || !offcanvas) {
+          return;
+        }
+        offcanvasBody.innerHTML = '';
+        offcanvasBody.appendChild(template.content.cloneNode(true));
+        offcanvasTitle.textContent = 'Bulk Result #' + resultId;
+        offcanvas.show();
+      });
+    });
+  });
+</script>
 
 </body>
 </html>

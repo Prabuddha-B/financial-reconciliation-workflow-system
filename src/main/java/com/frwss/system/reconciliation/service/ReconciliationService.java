@@ -33,6 +33,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -488,6 +491,55 @@ public class ReconciliationService {
 
         // Ensure confidence stays within reasonable bounds
         return Math.max(Math.min(confidence, 95.0), 70.0);
+    }
+
+    /**
+     * Looks up the child accounting records behind each bulk reconciliation result so the bulk
+     * results page can show them in the detail panel. The children are read from the comma
+     * separated {@code childRecordIds} stored on every result, using a single query for all results.
+     *
+     * @param bulkResults the bulk results being displayed
+     * @return a map of bulk result id to its child records, in the stored order. Every result has
+     *         an entry; the list is empty when it has no stored children or a child record no
+     *         longer exists.
+     */
+    @Transactional(readOnly = true)
+    public Map<Long, List<AccountingRecord>> getChildRecordsForBulkResults(List<BulkReconciliation> bulkResults) {
+        Map<Long, List<String>> idsByResult = new LinkedHashMap<>();
+        List<String> allIds = new ArrayList<>();
+
+        for (BulkReconciliation result : bulkResults) {
+            List<String> ids = new ArrayList<>();
+            String stored = result.getChildRecordIds();
+            if (stored != null && !stored.isBlank()) {
+                Arrays.stream(stored.split(","))
+                        .map(String::trim)
+                        .filter(id -> !id.isEmpty())
+                        .forEach(ids::add);
+            }
+            idsByResult.put(result.getId(), ids);
+            allIds.addAll(ids);
+        }
+
+        Map<String, AccountingRecord> recordsById = new HashMap<>();
+        if (!allIds.isEmpty()) {
+            for (AccountingRecord record : accountingRecordRepository.findAllById(allIds)) {
+                recordsById.put(record.getRecordId(), record);
+            }
+        }
+
+        Map<Long, List<AccountingRecord>> childrenByResult = new LinkedHashMap<>();
+        idsByResult.forEach((resultId, ids) -> {
+            List<AccountingRecord> children = new ArrayList<>();
+            for (String id : ids) {
+                AccountingRecord child = recordsById.get(id);
+                if (child != null) {
+                    children.add(child);
+                }
+            }
+            childrenByResult.put(resultId, children);
+        });
+        return childrenByResult;
     }
 
     // Get Bulk Reconciliation Results

@@ -32,6 +32,7 @@ import org.springframework.data.domain.PageRequest;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -950,6 +951,72 @@ class ReconciliationServiceTest {
 
         verifyNoInteractions(workflowService);
         verify(reconciliationResultRepository, never()).save(any());
+    }
+
+    // =========================================================================
+    // getChildRecordsForBulkResults()
+    // =========================================================================
+
+    @Test
+    @DisplayName("Should return the stored child records for each bulk result, in stored order")
+    void getChildRecordsForBulkResults_returnsChildrenInStoredOrder() {
+
+        BulkReconciliation bulk = new BulkReconciliation();
+        bulk.setId(1L);
+        bulk.setChildRecordIds("ACC-C3,ACC-C1,ACC-C2");
+
+        AccountingRecord c1 = accountingRecord("ACC-C1", "PO-2026-A01-1", new BigDecimal("400.00"), LocalDate.of(2026, 7, 1));
+        AccountingRecord c2 = accountingRecord("ACC-C2", "PO-2026-A01-2", new BigDecimal("350.00"), LocalDate.of(2026, 7, 1));
+        AccountingRecord c3 = accountingRecord("ACC-C3", "PO-2026-A01-3", new BigDecimal("250.00"), LocalDate.of(2026, 7, 1));
+
+        when(accountingRecordRepository.findAllById(any())).thenReturn(List.of(c1, c2, c3));
+
+        Map<Long, List<AccountingRecord>> result =
+                reconciliationService.getChildRecordsForBulkResults(List.of(bulk));
+
+        assertEquals(3, result.get(1L).size());
+        assertEquals("ACC-C3", result.get(1L).get(0).getRecordId());
+        assertEquals("ACC-C1", result.get(1L).get(1).getRecordId());
+        assertEquals("ACC-C2", result.get(1L).get(2).getRecordId());
+    }
+
+    @Test
+    @DisplayName("Should give a bulk result an empty child list when it has no stored children")
+    void getChildRecordsForBulkResults_noStoredChildren_returnsEmptyListWithoutQuery() {
+
+        BulkReconciliation noChildren = new BulkReconciliation();
+        noChildren.setId(2L);
+        noChildren.setChildRecordIds(null);
+
+        BulkReconciliation blankChildren = new BulkReconciliation();
+        blankChildren.setId(3L);
+        blankChildren.setChildRecordIds("  ");
+
+        Map<Long, List<AccountingRecord>> result =
+                reconciliationService.getChildRecordsForBulkResults(List.of(noChildren, blankChildren));
+
+        assertTrue(result.get(2L).isEmpty());
+        assertTrue(result.get(3L).isEmpty());
+        verifyNoInteractions(accountingRecordRepository);
+    }
+
+    @Test
+    @DisplayName("Should skip child records that no longer exist")
+    void getChildRecordsForBulkResults_missingChild_isSkipped() {
+
+        BulkReconciliation bulk = new BulkReconciliation();
+        bulk.setId(4L);
+        bulk.setChildRecordIds("ACC-C1, ACC-GONE");
+
+        AccountingRecord c1 = accountingRecord("ACC-C1", "PO-2026-A01-1", new BigDecimal("400.00"), LocalDate.of(2026, 7, 1));
+
+        when(accountingRecordRepository.findAllById(any())).thenReturn(List.of(c1));
+
+        Map<Long, List<AccountingRecord>> result =
+                reconciliationService.getChildRecordsForBulkResults(List.of(bulk));
+
+        assertEquals(1, result.get(4L).size());
+        assertEquals("ACC-C1", result.get(4L).get(0).getRecordId());
     }
 
     // =========================================================================
