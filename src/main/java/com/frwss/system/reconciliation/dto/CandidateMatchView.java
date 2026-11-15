@@ -14,6 +14,9 @@ public class CandidateMatchView {
     private Double suggestedConfidence;
     private String reason;
 
+    // How alike the two reference numbers are, 0-100. Only filled in when fuzzy matching is switched on.
+    private Double referenceSimilarity;
+
     public CandidateMatchView(
             String sourceType,
             String recordId,
@@ -64,5 +67,13 @@ public class CandidateMatchView {
 
     public String getReason() {
         return reason;
+    }
+
+    public Double getReferenceSimilarity() {
+        return referenceSimilarity;
+    }
+
+    public void setReferenceSimilarity(Double referenceSimilarity) {
+        this.referenceSimilarity = referenceSimilarity;
     }
 }

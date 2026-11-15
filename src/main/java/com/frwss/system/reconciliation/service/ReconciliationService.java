@@ -20,6 +20,9 @@ import com.frwss.system.repository.ReceiptRepository;
 import com.frwss.system.repository.StockPurchaseRepository;
 import com.frwss.system.workflow.dto.WorkflowRequestDto;
 import com.frwss.system.workflow.dto.WorkflowResponseDto;
+import com.frwss.system.reconciliation.matching.AmountAnomalyDetector;
+import com.frwss.system.reconciliation.matching.ReferenceSimilarity;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,6 +72,19 @@ public class ReconciliationService {
     private final BulkReconciliationRepository bulkReconciliationRepository;
 
     private final WorkflowService workflowService;
+
+    // ---- Experimental: both are OFF unless switched on in application.properties ----
+
+    /** Scales the reference bonus in the candidate score by how alike the references are. */
+    @Value("${reconciliation.fuzzy.enabled:false}")
+    private boolean fuzzyEnabled;
+
+    /** Flags unusual amounts on the manual review page. Read-only. */
+    @Value("${reconciliation.anomaly.enabled:false}")
+    private boolean anomalyEnabled;
+
+    private static final double ANOMALY_THRESHOLD = 2.0;
+    private static final int ANOMALY_MIN_GROUP_SIZE = 8;
 
     public ReconciliationService(
             AccountingRecordRepository accountingRecordRepository,
@@ -1078,6 +1094,14 @@ public class ReconciliationService {
                     "Same amount with date difference of " + daysDifference + " day(s)"
             ));
         }
+        if(fuzzyEnabled){
+            for(CandidateMatchView candidate : candidates){
+                candidate.setReferenceSimilarity(
+                        ReferenceSimilarity.percent(accountingRecord.getReferenceNo(), candidate.getReferenceNo())
+                );
+            }
+        }
+
         candidates.sort((c1, c2) ->
                 Double.compare(c2.getSuggestedConfidence(), c1.getSuggestedConfidence())
         );
@@ -1101,7 +1125,10 @@ public class ReconciliationService {
 
         // strong bonus only if full reference number matches only
         if(accountingReference != null && candidateReference != null){
-            if(accountingReference.equalsIgnoreCase(candidateReference)){
+            if(fuzzyEnabled){
+                // experimental: up to 20, scaled by how alike the references are (100% alike = 20)
+                confidence += ReferenceSimilarity.percent(accountingReference, candidateReference) / 100.0 * 20.0;
+            } else if(accountingReference.equalsIgnoreCase(candidateReference)){
                 confidence += 20.0;
             }
         }
@@ -1115,7 +1142,8 @@ public class ReconciliationService {
             confidence += 5.0;
         }
 
-        return Math.min(confidence, 95.0);
+        double capped = Math.min(confidence, 95.0);
+        return fuzzyEnabled ? Math.round(capped * 10.0) / 10.0 : capped;
     }
     /**
      * A reviewer settles an orphan by choosing the source record it belongs to. Only ORPHAN
@@ -1240,6 +1268,58 @@ public class ReconciliationService {
         return reconciliationResultRepository.findByStatusOrderByReconciledAtDesc(
                 ReconciliationStatus.MANUALLY_RESOLVED
         );
+    }
+
+    /**
+     * Experimental and read-only. For each result, checks whether its accounting record's amount is
+     * unusual compared with the other accounting records in the same module (see
+     * AmountAnomalyDetector). Nothing is saved. Returns an empty map when the feature is switched
+     * off.
+     *
+     * @return result id to a one-sentence explanation, only for results that were flagged
+     */
+    @Transactional(readOnly = true)
+    public Map<Long, String> getAmountAnomalyFlags(List<ReconciliationResult> results){
+        Map<Long, String> flags = new HashMap<>();
+
+        if(!anomalyEnabled || results == null || results.isEmpty()){
+            return flags;
+        }
+
+        List<String> recordIds = results.stream()
+                .map(ReconciliationResult::getAccountingRecordId)
+                .filter(id -> id != null)
+                .distinct()
+                .collect(Collectors.toList());
+
+        Map<String, AccountingRecord> recordsById = new HashMap<>();
+        for(AccountingRecord record : accountingRecordRepository.findAllById(recordIds)){
+            recordsById.put(record.getRecordId(), record);
+        }
+
+        // every amount per module, to compare each flagged-candidate against its own module
+        Map<String, List<java.math.BigDecimal>> amountsByModule = new HashMap<>();
+        for(AccountingRecord record : accountingRecordRepository.findAll()){
+            if(record.getModule() != null && record.getAmount() != null){
+                amountsByModule.computeIfAbsent(record.getModule(), key -> new ArrayList<>()).add(record.getAmount());
+            }
+        }
+
+        for(ReconciliationResult result : results){
+            AccountingRecord record = recordsById.get(result.getAccountingRecordId());
+            if(record == null || record.getModule() == null){
+                continue;
+            }
+            AmountAnomalyDetector.check(
+                    record.getAmount(),
+                    record.getModule(),
+                    amountsByModule.get(record.getModule()),
+                    ANOMALY_THRESHOLD,
+                    ANOMALY_MIN_GROUP_SIZE
+            ).ifPresent(message -> flags.put(result.getId(), message));
+        }
+
+        return flags;
     }
 
     /**

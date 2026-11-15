@@ -9,6 +9,7 @@ import com.frwss.system.model.StockPurchase;
 import com.frwss.system.reconciliation.model.BulkReconciliation;
 import com.frwss.system.reconciliation.model.MatchedSourceType;
 import com.frwss.system.reconciliation.model.ReconciliationResult;
+import com.frwss.system.reconciliation.dto.CandidateMatchView;
 import com.frwss.system.reconciliation.model.ReconciliationStatus;
 import com.frwss.system.reconciliation.repository.BulkReconciliationRepository;
 import com.frwss.system.reconciliation.repository.ReconciliationResultRepository;
@@ -28,9 +29,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -1145,6 +1148,115 @@ class ReconciliationServiceTest {
 
         assertEquals(1, result.get(4L).size());
         assertEquals("ACC-C1", result.get(4L).get(0).getRecordId());
+    }
+
+    // =========================================================================
+    // Experimental: fuzzy reference matching and amount anomaly flags
+    // =========================================================================
+
+    private void stubOrphanWithOneReceiptCandidate() {
+        ReconciliationResult orphan = new ReconciliationResult();
+        orphan.setId(40L);
+        orphan.setAccountingRecordId("ACC-040");
+        orphan.setStatus(ReconciliationStatus.ORPHAN);
+
+        AccountingRecord accounting = accountingRecord(
+                "ACC-040", "RC-2026-001", new BigDecimal("1000.00"), LocalDate.of(2026, 10, 1));
+
+        Receipt receipt = new Receipt();
+        receipt.setReceiptId("RCT-040");
+        receipt.setReferenceNo("RC-2026-002");
+        receipt.setAmount(new BigDecimal("1000.00"));
+        receipt.setReceiptDate(LocalDate.of(2026, 10, 1));
+
+        when(reconciliationResultRepository.findById(40L)).thenReturn(Optional.of(orphan));
+        when(accountingRecordRepository.findById("ACC-040")).thenReturn(Optional.of(accounting));
+        when(receiptRepository.findByAmountAndReceiptDateBetween(any(), any(), any()))
+                .thenReturn(List.of(receipt));
+    }
+
+    @Test
+    @DisplayName("Fuzzy off: candidate score and similarity behave as before")
+    void candidates_fuzzyOff_unchanged() {
+        stubOrphanWithOneReceiptCandidate();
+
+        List<CandidateMatchView> candidates = reconciliationService.getCandidateMatchesForOrphan(40L);
+
+        assertEquals(1, candidates.size());
+        // 60 base + 0 (references are not equal) + 15 (same day)
+        assertEquals(75.0, candidates.get(0).getSuggestedConfidence(), 0.001);
+        assertNull(candidates.get(0).getReferenceSimilarity());
+    }
+
+    @Test
+    @DisplayName("Fuzzy on: a similar reference earns a scaled bonus and shows its similarity")
+    void candidates_fuzzyOn_scalesReferenceBonus() {
+        ReflectionTestUtils.setField(reconciliationService, "fuzzyEnabled", true);
+        stubOrphanWithOneReceiptCandidate();
+
+        List<CandidateMatchView> candidates = reconciliationService.getCandidateMatchesForOrphan(40L);
+
+        assertEquals(1, candidates.size());
+        assertEquals(88.9, candidates.get(0).getReferenceSimilarity(), 0.001);
+        // 60 base + 17.78 (88.9% of 20) + 15 (same day) = 92.78, shown to one decimal
+        assertEquals(92.8, candidates.get(0).getSuggestedConfidence(), 0.001);
+    }
+
+    @Test
+    @DisplayName("Anomaly flags: nothing is read or flagged while the feature is off")
+    void anomalyFlags_off_returnsEmptyWithoutReading() {
+        ReconciliationResult result = new ReconciliationResult();
+        result.setId(50L);
+        result.setAccountingRecordId("ACC-050");
+
+        Map<Long, String> flags = reconciliationService.getAmountAnomalyFlags(List.of(result));
+
+        assertTrue(flags.isEmpty());
+        verifyNoInteractions(accountingRecordRepository);
+    }
+
+    @Test
+    @DisplayName("Anomaly flags: flags only the result whose amount is unusual for its module")
+    void anomalyFlags_on_flagsOnlyTheUnusualAmount() {
+        ReflectionTestUtils.setField(reconciliationService, "anomalyEnabled", true);
+
+        ReconciliationResult unusual = new ReconciliationResult();
+        unusual.setId(50L);
+        unusual.setAccountingRecordId("ACC-050");
+
+        ReconciliationResult typical = new ReconciliationResult();
+        typical.setId(51L);
+        typical.setAccountingRecordId("ACC-051");
+
+        AccountingRecord unusualRecord = payrollRecord("ACC-050", "1000");
+        AccountingRecord typicalRecord = payrollRecord("ACC-051", "100");
+
+        // the whole PAYROLL module: eight typical amounts plus the two records above
+        List<AccountingRecord> everything = new ArrayList<>();
+        for (int i = 0; i < 8; i++) {
+            everything.add(payrollRecord("ACC-1" + i, "100"));
+        }
+        everything.add(typicalRecord);
+        everything.add(unusualRecord);
+
+        when(accountingRecordRepository.findAllById(any())).thenReturn(List.of(unusualRecord, typicalRecord));
+        when(accountingRecordRepository.findAll()).thenReturn(everything);
+
+        Map<Long, String> flags = reconciliationService.getAmountAnomalyFlags(List.of(unusual, typical));
+
+        assertEquals(1, flags.size());
+        assertTrue(flags.get(50L).startsWith("Unusual amount: 1,000.00"));
+        assertFalse(flags.containsKey(51L));
+        // read-only: nothing is ever saved
+        verify(accountingRecordRepository, never()).save(any());
+        verifyNoInteractions(reconciliationResultRepository);
+    }
+
+    private AccountingRecord payrollRecord(String recordId, String amount) {
+        AccountingRecord record = accountingRecord(
+                recordId, "REF-" + recordId, new BigDecimal(amount), LocalDate.of(2026, 10, 1));
+        record.setModule("PAYROLL");
+        return record;
     }
 
     // =========================================================================

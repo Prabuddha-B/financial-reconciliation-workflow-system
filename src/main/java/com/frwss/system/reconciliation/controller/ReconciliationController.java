@@ -157,7 +157,10 @@ public class ReconciliationController {
      */
     @GetMapping("/manual-review")
     public String showManualReviewPage(Model model){
-        model.addAttribute("reviewRecords", reconciliationService.getManualReviewRecords());
+        List<ReconciliationResult> reviewRecords = reconciliationService.getManualReviewRecords();
+        model.addAttribute("reviewRecords", reviewRecords);
+        // experimental, read-only: empty unless reconciliation.anomaly.enabled=true
+        model.addAttribute("anomalyFlags", reconciliationService.getAmountAnomalyFlags(reviewRecords));
 
         return "reconciliation/manual-review";
     }

@@ -244,6 +244,10 @@
                 <span class="badge-confidence"
                       th:classappend="${candidate.suggestedConfidence >= 80 ? 'high' : (candidate.suggestedConfidence >= 50 ? 'medium' : 'low')}"
                       th:text="${candidate.suggestedConfidence + '%'}"></span>
+                <span th:if="${candidate.referenceSimilarity != null}" class="text-muted small ms-3">
+                    Reference similarity
+                    <strong th:text="${candidate.referenceSimilarity + '%'}">100.0%</strong>
+                </span>
             </div>
 
             <div class="reason-box mb-3">
