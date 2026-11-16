@@ -1,3 +1,7 @@
+// -------------------------------------------------------------------------------
+//       Calculates reference-only tax estimates using active tax configurations
+// -------------------------------------------------------------------------------
+
 package com.frwss.system.tax.service;
 
 import com.frwss.system.audit.model.AuditActionType;
@@ -23,21 +27,31 @@ public class TaxEstimationService {
     private final AuditService auditService;
     private final SecurityContextAdapter securityContextAdapter;
 
+    // Constructor
     public TaxEstimationService(
-            TaxConfigurationRepository taxConfigurationRepository, AuditService auditService, SecurityContextAdapter securityContextAdapter
-    ) {
+            TaxConfigurationRepository taxConfigurationRepository, AuditService auditService, SecurityContextAdapter securityContextAdapter) {
         this.taxConfigurationRepository = taxConfigurationRepository;
         this.auditService = auditService;
         this.securityContextAdapter = securityContextAdapter;
     }
 
+    /**
+     * Calculates the estimated tax and total amount using the active tax
+     * configuration matching the requested module and category.
+     * Records successful and failed estimation attempts in the audit log.
+     *
+     * @param request tax estimation input details
+     * @return response containing the estimated tax calculation or error details
+     */
     @Transactional
     public TaxEstimationResponseDto estimateTax(TaxEstimationRequestDto request) {
 
+        // Initialize the response
         TaxEstimationResponseDto response = new TaxEstimationResponseDto();
 
         try {
 
+            // Retrieve the applicable tax configuration
             TaxConfiguration configuration =
                     taxConfigurationRepository
                             .findActiveByModuleAndCategory(
@@ -49,21 +63,21 @@ public class TaxEstimationService {
                                             "No active tax configuration found."
                                     ));
 
+            // Extract the amount and tax rate
             BigDecimal amount = request.getAmount();
-
             BigDecimal taxRate = configuration.getTaxRate();
 
+            // Calculate the estimated tax
             BigDecimal estimatedTax =
-                    amount.multiply(taxRate)
-                            .divide(
+                    amount.multiply(taxRate).divide(
                                     BigDecimal.valueOf(100),
                                     2,
-                                    RoundingMode.HALF_UP
-                            );
+                                    RoundingMode.HALF_UP);
 
-            BigDecimal total =
-                    amount.add(estimatedTax);
+            // Calculate the total including tax
+            BigDecimal total = amount.add(estimatedTax);
 
+            // Populate the response DTO
             response.setModule(request.getModule());
             response.setCategory(request.getCategory());
             response.setOriginalAmount(amount);
@@ -71,10 +85,12 @@ public class TaxEstimationService {
             response.setEstimatedTax(estimatedTax);
             response.setTotalWithTax(total);
 
+            // Identify the user
             String currentUser = securityContextAdapter.getCurrentUsername();
 
             response.setEstimatedBy(currentUser);
 
+            // Record a successful estimation
             auditService.log(
                     AuditActionType.TAX_ESTIMATION,
                     "TaxEstimation",
@@ -110,6 +126,12 @@ public class TaxEstimationService {
         }
     }
 
+    /**
+     * Retrieves active tax rates for a module, using category names as map keys.
+     *
+     * @param module system module used to filter tax configurations
+     * @return map containing category names and their corresponding tax rates
+     */
     @Transactional
     public Map<String, BigDecimal> getTaxRatesByModule(String module) {
 
@@ -127,12 +149,25 @@ public class TaxEstimationService {
         return taxRates;
     }
 
+    /**
+     * Retrieves all currently active tax configurations.
+     *
+     * @return list of active tax configurations
+     */
     @Transactional
     public List<TaxConfiguration> getAllActiveConfigurations() {
 
         return taxConfigurationRepository.findAllActive();
     }
 
+    /**
+     * Checks whether an active tax configuration exists for the specified
+     * module and category.
+     *
+     * @param module system module
+     * @param category tax category
+     * @return true if an active configuration exists; otherwise false
+     */
     @Transactional
     public boolean hasTaxConfiguration(String module, String category) {
 
@@ -143,11 +178,21 @@ public class TaxEstimationService {
                 );
     }
 
+    /**
+     * Retrieves distinct module names associated with active tax configurations.
+     *
+     * @return list of available module names
+     */
     @Transactional
     public List<String> getAvailableModules() {
         return taxConfigurationRepository.findAllActiveModules();
     }
 
+    /**
+     * Retrieves distinct category names associated with active tax configurations.
+     *
+     * @return list of available category names
+     */
     @Transactional
     public List<String> getAvailableCategories() {
         return taxConfigurationRepository.findAllActiveCategories();

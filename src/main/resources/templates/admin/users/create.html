@@ -1,3 +1,7 @@
+<!-- ---------------------------------------------------------------------------->
+<!--                             Create User Page                              -->
+<!-- ---------------------------------------------------------------------------->
+
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
@@ -439,7 +443,7 @@
 
         <div class="container-fluid main-container">
 
-            <!-- Error Message -->
+            <!----------------------- Error Message ------------------------>
             <div th:if="${errorMessage}"
                  class="alert alert-danger alert-dismissible fade show"
                  role="alert">
@@ -452,7 +456,7 @@
 
             </div>
 
-            <!-- PAGE HEADER-->
+            <!----------------------- PAGE HEADER ------------------------------->
             <div class="page-header">
 
                 <div>
@@ -467,11 +471,11 @@
 
             </div>
 
-            <!-- CREATE USER FORM - 2 Column Layout -->
+            <!------------------ CREATE USER FORM - 2 Column Layout ------------------->
 
             <div class="row g-4">
 
-                <!-- Left Column: Form -->
+                <!-------------------- Left Column: Form --------------------->
                 <div class="col-lg-8">
 
                     <div class="card">
@@ -490,7 +494,7 @@
                                   method="post"
                                   id="createUserForm">
 
-                                <!-- Username -->
+                                <!----------- Username -------------------->
                                 <div class="mb-4">
                                     <label class="form-label">
                                         <i class="bi bi-person"></i>
@@ -504,7 +508,7 @@
                                            autofocus>
                                 </div>
 
-                                <!-- Password - NO MIN LENGTH -->
+                                <!--------------- Password - NO MIN LENGTH --------------->
                                 <div class="mb-4">
                                     <label class="form-label">
                                         <i class="bi bi-key"></i>
@@ -517,7 +521,7 @@
                                            required>
                                 </div>
 
-                                <!-- PIN Fields - Side by Side (4 digits only) -->
+                                <!----------- PIN Fields(4 digits only) --------------->
                                 <div class="row g-3 mb-4">
                                     <div class="col-md-6">
                                         <label class="form-label">
@@ -552,7 +556,7 @@
                                     </div>
                                 </div>
 
-                                <!-- Role Selection -->
+                                <!----------- Role Selection ------------------------->
                                 <div class="mb-4">
                                     <label class="form-label">
                                         <i class="bi bi-tag"></i>
@@ -577,7 +581,7 @@
                                     </div>
                                 </div>
 
-                                <!-- Buttons -->
+                                <!-------------- Buttons ------------------------->
                                 <div class="d-flex gap-3 pt-3 border-top">
                                     <button type="submit"
                                             class="btn-primary-custom"
@@ -600,7 +604,7 @@
 
                 </div>
 
-                <!-- Right Column: Info Box - Fills the empty space -->
+                <!---------------- Right Column: Info Box - Fills the empty space ------------------>
                 <div class="col-lg-4">
 
                     <div class="info-box">

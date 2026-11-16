@@ -1,9 +1,13 @@
+// -------------------------------------------------------------------------------
+//       Transfers and validates data submitted when creating a new user account
+// -------------------------------------------------------------------------------
 package com.frwss.system.security.dto;
 
 import jakarta.validation.constraints.NotBlank;
 
 public class CreateUserRequest {
 
+    // Username provided for the new user account.
     @NotBlank
     private String username;
 
@@ -16,9 +20,11 @@ public class CreateUserRequest {
     @NotBlank
     private String pin;
 
+    // Confirms the initial security PIN entered during account creation.
     @NotBlank
     private String confirmPin;
 
+    // Getters and Setters
     public String getUsername() {
         return username;
     }

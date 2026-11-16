@@ -1,3 +1,6 @@
+<!-- ---------------------------------------------------------------------------->
+<!--                     Financial Data File Upload Page                       -->
+<!-- ---------------------------------------------------------------------------->
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
@@ -16,15 +19,12 @@
         <div class="d-flex justify-content-between align-items-start mb-5">
 
             <div>
-
                 <h1 class="display-6 fw-bold mb-2">
                     Upload Data File
                 </h1>
-
                 <p class="text-secondary fs-5 mb-0">
                     Upload receipt and financial datasets for validation before reconciliation.
                 </p>
-
             </div>
 
             <a th:href="@{/ingestion/dashboard}"
@@ -56,9 +56,8 @@
 
                 <form th:action="@{/ingestion/upload}" method="post" enctype="multipart/form-data" onsubmit="return handleUpload();">
 
-                    <!-- Data Type -->
+                    <!--------------------------- Data Type ------------------------------------>
                     <div class="mb-4">
-
                         <label for="dataType" class="form-label fw-semibold">
                             Select Data Type
                         </label>
@@ -73,7 +72,7 @@
                     </div>
 
 
-                    <!-- Drag & Drop Upload Area -->
+                    <!-------------------- Drag & Drop Upload Area --------------------------------->
                     <div id="dropArea" class="border border-2 border-primary rounded-3 text-center p-5 mb-4" style="cursor:pointer;">
                         <div class="mb-3">
                             <i class="bi bi-cloud-arrow-up display-4 text-primary"></i>
@@ -94,13 +93,11 @@
                         <input type="file" id="fileInput" name="file" hidden required accept=".csv,.xlsx">
                     </div>
 
-                    <!-- Upload Feedback -->
-
+                    <!--------------------- Upload Feedback --------------------------------------->
                     <p id="fileName" class="text-success fw-semibold mb-2"></p>
                     <p id="fileError" class="text-danger fw-semibold mb-4"></p>
 
-                    <!-- Upload Button -->
-
+                    <!--------------------- Upload Button ------------------------------------>
                     <div class="d-grid d-md-flex">
 
                         <button id="uploadBtn" type="submit" class="btn btn-primary px-4">
@@ -150,7 +147,6 @@
                         </div>
 
                     </div>
-
                     <p id="uploadStatus" class="text-primary mt-3 mb-0"></p>
 
                 </form>

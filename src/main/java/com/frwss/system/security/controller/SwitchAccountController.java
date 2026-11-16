@@ -1,3 +1,7 @@
+// -------------------------------------------------------------------------------
+//       Handles demo account switching through account validation and PIN verification
+// -------------------------------------------------------------------------------
+
 package com.frwss.system.security.controller;
 
 import com.frwss.system.model.User;
@@ -19,6 +23,7 @@ public class SwitchAccountController {
     private final UserManagementService userManagementService;
     private final DemoAccountSwitchService demoAccountSwitchService;
 
+    // Constructor
     public SwitchAccountController(
             UserManagementService userManagementService,
             DemoAccountSwitchService demoAccountSwitchService) {
@@ -28,7 +33,10 @@ public class SwitchAccountController {
     }
 
 
-//    Displays eligible accounts for demo account switching
+    /**
+     * Displays the account-switching page with the accounts eligible
+     * for the currently authenticated user.
+     */
     @GetMapping("/switch-account")
     public String switchAccountPage(Model model) {
         model.addAttribute("switchAccountRequest",new SwitchAccountRequest());
@@ -36,7 +44,10 @@ public class SwitchAccountController {
         return "security/switch-account";
     }
 
-//    Switches to another enabled account within the same role
+    /**
+     * Validates the selected account, verifies its PIN, and delegates
+     * the authenticated session transition to the account-switching service.
+     */
     @PostMapping("/switch-account")
     public String switchAccount(
             @ModelAttribute SwitchAccountRequest request,

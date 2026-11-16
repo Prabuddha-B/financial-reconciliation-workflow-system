@@ -1,4 +1,6 @@
-// ------------------------- Exposes Workflow REST Endpoints ------------------
+// -------------------------------------------------------------------------------
+//                         Exposes Workflow REST Endpoints
+// -------------------------------------------------------------------------------
 
 package com.frwss.system.workflow.controller;
 
@@ -21,7 +23,9 @@ public class WorkflowController {
         this.workflowService = workflowService;
     }
 
-//     Creates a new workflow record
+    /**
+     * Creates a new workflow record using the submitted request data.
+     */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public WorkflowResponseDto createWorkflow(
@@ -30,7 +34,9 @@ public class WorkflowController {
         return workflowService.createWorkflow(request);
     }
 
-//      Updates Workflow State
+    /**
+     * Updates the state of an existing workflow.
+     */
     @PutMapping("/{workflowId}/state")
     public WorkflowResponseDto updateWorkflowState(
             @PathVariable Long workflowId,
@@ -39,19 +45,25 @@ public class WorkflowController {
         return workflowService.updateWorkflowState(workflowId, request);
     }
 
-//    Retrieves  Workflow History
+    /**
+     * Retrieves the transition history of a specified workflow.
+     */
     @GetMapping("/{workflowId}/history")
     public List<WorkflowHistoryResponseDto> getWorkflowHistory(@PathVariable Long workflowId) {
         return workflowService.getWorkflowHistory(workflowId);
     }
 
-//    Retrieves a single workflow
+    /**
+     * Retrieves a workflow record using its ID.
+     */
     @GetMapping("/{workflowId}")
     public WorkflowResponseDto getWorkflowById(@PathVariable Long workflowId) {
         return workflowService.getWorkflowById(workflowId);
     }
 
-//    Retrieves all workflows
+    /**
+     * Retrieves all workflow records.
+     */
     @GetMapping
     public List<WorkflowResponseDto> getAllWorkflows() {
         return workflowService.getAllWorkflows();

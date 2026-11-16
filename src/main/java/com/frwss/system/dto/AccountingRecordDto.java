@@ -1,3 +1,7 @@
+// -------------------------------------------------------------------------------
+//       Carries accounting record data and its file-validation status
+// -------------------------------------------------------------------------------
+
 package com.frwss.system.dto;
 
 public class AccountingRecordDto {
@@ -9,7 +13,10 @@ public class AccountingRecordDto {
     private String recordDate;
     private String enteredBy;
 
-    // Constructor
+    /**
+     * Initializes an accounting record DTO with the values extracted
+     * from an uploaded financial data file.
+     */
     public AccountingRecordDto(String recordId, String referenceNo, String module, double amount, String recordDate, String enteredBy) {
         this.recordId = recordId;
         this.referenceNo = referenceNo;

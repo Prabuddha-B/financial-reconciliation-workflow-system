@@ -1,3 +1,8 @@
+// -------------------------------------------------------------------------------
+//       Manages administrative operations for system user accounts
+//       including account creation, status changes, and credential resets
+// -------------------------------------------------------------------------------
+
 package com.frwss.system.security.controller;
 
 import com.frwss.system.security.PinVerificationSession;
@@ -21,6 +26,7 @@ public class AdminUserController {
     private final UserManagementService userManagementService;
     private final PinVerificationSession pinVerificationSession;
 
+    // Constructor
     public AdminUserController(
             UserManagementService userManagementService,
             PinVerificationSession pinVerificationSession) {
@@ -30,7 +36,12 @@ public class AdminUserController {
     }
 
 
-//    Displays all users with optional filters
+// --------------------------------  User listing and creation -------------------------------------------
+
+    /**
+     * Retrieves users using the supplied filters and prepares
+     * user-management statistics for the administrator dashboard.
+     */
     @GetMapping
     public String listUsers(
             @RequestParam(required = false) String username,
@@ -63,7 +74,10 @@ public class AdminUserController {
     }
 
 
-//    Creates a new user
+    /**
+     * Creates a new user account and provides feedback
+     * for successful creation or validation failures.
+     */
     @PostMapping("/create")
     public String createUser(
             @ModelAttribute("createUserRequest") CreateUserRequest request,
@@ -83,7 +97,7 @@ public class AdminUserController {
     }
 
 
-//    Displays edit user page
+//------------------------------------ Editing and account status ---------------------------------------------
     @GetMapping("/{id}/edit")
     public String editUser(
             @PathVariable Integer id,
@@ -93,7 +107,9 @@ public class AdminUserController {
         return "admin/users/edit";
     }
 
-//    Updates an existing user
+    /**
+     * Updates the assigned role and enabled status of an existing user.
+     */
     @PostMapping("/{id}/edit")
     public String updateUser(
             @PathVariable Integer id,
@@ -151,7 +167,9 @@ public class AdminUserController {
     }
 
 
-//    Displays password reset form
+//-------------------------------------------- Password and PIN management --------------------------------------------
+
+
     @GetMapping("/{id}/reset-password/form")
     public String resetPasswordForm(
             @PathVariable Integer id,
@@ -169,7 +187,10 @@ public class AdminUserController {
     }
 
 
-//    Resets user's password
+    /**
+     * Resets a user's password after confirming that
+     * the administrator has completed PIN verification.
+     */
     @PostMapping("/{id}/reset-password/form")
     public String resetPassword(
             @PathVariable Integer id,
@@ -234,7 +255,10 @@ public class AdminUserController {
     }
 
 
-    // Resets user's PIN
+    /**
+     * Resets a user's PIN after confirming that
+     * the administrator has completed PIN verification.
+     */
     @PostMapping("/{id}/reset-pin")
     public String resetPin(
             @PathVariable Integer id,
@@ -267,7 +291,7 @@ public class AdminUserController {
         return "redirect:/admin/users";
     }
 
-    // Bulk Enable Users
+    //------------------------------------------   Bulk operations --------------------------------------------
     @PostMapping("/bulk/enable")
     public String bulkEnable(
             @RequestParam("userIds") String userIds,
@@ -311,7 +335,9 @@ public class AdminUserController {
         return "redirect:/admin/users";
     }
 
-    // Bulk Reset Password
+    /**
+     * Resets the passwords of multiple selected user accounts.
+     */
     @PostMapping("/bulk/reset-password")
     public String bulkResetPassword(
             @RequestParam("userIds") String userIds,

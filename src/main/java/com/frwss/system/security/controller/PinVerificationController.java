@@ -1,3 +1,6 @@
+// -------------------------------------------------------------------------------
+//       Handles additional PIN verification for sensitive user operations
+// -------------------------------------------------------------------------------
 package com.frwss.system.security.controller;
 
 import com.frwss.system.security.PinVerificationSession;
@@ -16,6 +19,7 @@ public class PinVerificationController {
     private final UserManagementService userManagementService;
     private final PinVerificationSession pinVerificationSession;
 
+    // Constructor
     public PinVerificationController(
             UserManagementService userManagementService,
             PinVerificationSession pinVerificationSession) {
@@ -25,7 +29,9 @@ public class PinVerificationController {
     }
 
 
-//    Displays the PIN verification page
+    /**
+     * Displays the PIN verification form for the currently authenticated user.
+     */
     @GetMapping("/verify-pin")
     public String verifyPinPage(Model model) {
 
@@ -37,7 +43,10 @@ public class PinVerificationController {
         return "security/verify-pin";
     }
 
-//    Verifies the current user's PIN before executing the requested sensitive operation
+    /**
+     * Verifies the submitted PIN, updates the session verification status,
+     * and redirects the user to the originally requested destination.
+     */
     @PostMapping("/verify-pin")
     public String verifyPin(
             @ModelAttribute PinVerificationRequest request,

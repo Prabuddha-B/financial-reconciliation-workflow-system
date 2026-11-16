@@ -1,4 +1,6 @@
-//--------------------------- Transfers Workflow Response Data -----------------------------------------
+// ----------------------------------------------------------------------------------------------
+//              Packages workflow results and status information for frontend responses
+// ----------------------------------------------------------------------------------------------
 
 package com.frwss.system.workflow.dto;
 
@@ -12,19 +14,12 @@ import java.util.stream.Collectors;
 public class WorkflowResponseDto {
 
     private Long workflowId;
-
     private String sourceType;
-
     private String sourceRecordId;
-
     private WorkflowState currentState;
-
     private String message;
-
     private String createdBy;
-
     private String comments;
-
     private String details;
 
 //    Getters and Setters

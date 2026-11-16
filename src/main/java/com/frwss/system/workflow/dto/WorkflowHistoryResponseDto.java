@@ -1,5 +1,6 @@
-// ------------------------- Stores Workflow History Response ------------------
-
+// -------------------------------------------------------------------------------
+//       Prepares workflow transition details for activity history responses
+// -------------------------------------------------------------------------------
 package com.frwss.system.workflow.dto;
 
 import java.time.LocalDateTime;
@@ -15,33 +16,40 @@ public class WorkflowHistoryResponseDto {
     public String getFromState() {
         return fromState;
     }
+
     public void setFromState(String fromState) {
         this.fromState = fromState;
     }
+
     public String getToState() {
         return toState;
     }
+
     public void setToState(String toState) {
         this.toState = toState;
     }
+
     public String getPerformedBy() {
         return performedBy;
     }
+
     public void setPerformedBy(String performedBy) {
         this.performedBy = performedBy;
     }
+
     public String getJustification() {
         return justification;
     }
+
     public void setJustification(String justification) {
         this.justification = justification;
     }
+
     public LocalDateTime getTransitionTime() {
         return transitionTime;
     }
+
     public void setTransitionTime(LocalDateTime transitionTime) {
         this.transitionTime = transitionTime;
     }
-
-
 }

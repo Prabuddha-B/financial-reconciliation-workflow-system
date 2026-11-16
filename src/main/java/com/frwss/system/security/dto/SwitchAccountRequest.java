@@ -1,3 +1,7 @@
+// -------------------------------------------------------------------------------
+//       Transfers form data submitted for demo account switching
+// -------------------------------------------------------------------------------
+
 package com.frwss.system.security.dto;
 
 import jakarta.validation.constraints.NotBlank;

@@ -1,3 +1,7 @@
+// -------------------------------------------------------------------------------
+//       Carries payroll information and its file-validation status
+// -------------------------------------------------------------------------------
+
 package com.frwss.system.dto;
 
 import java.math.BigDecimal;
@@ -19,7 +23,10 @@ public class PayrollDto {
     private boolean valid;
     private String errorMessage;
 
-    // Constructor
+    /**
+     * Initializes a payroll DTO with employee, salary, payment, and
+     * record information extracted from an uploaded financial file.
+     */
     public PayrollDto(String payrollId, String employeeId, String employeeName, BigDecimal salary, LocalDate paymentDate, String referenceNo, String status, LocalDateTime createdAt, String enteredBy) {
         setPayrollId(payrollId);
         setEmployeeId(employeeId);

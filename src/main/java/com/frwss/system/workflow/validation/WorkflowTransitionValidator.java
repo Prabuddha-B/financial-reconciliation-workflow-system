@@ -1,4 +1,6 @@
-// ---------------------------------- Handles Workflow Transition Validation Logic -----------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+//             Validates whether a requested workflow state transition follows the defined workflow rules
+// -------------------------------------------------------------------------------------------------------------------
 
 package com.frwss.system.workflow.validation;
 
@@ -6,11 +8,10 @@ import com.frwss.system.workflow.model.WorkflowState;
 
 public class WorkflowTransitionValidator {
 
-    // Validates Workflow State Transitions
-    public static boolean isValidTransition(
-            WorkflowState currentState,
-            WorkflowState newState
-    ) {
+    /**
+     * Checks whether the transition from the current stat to the requested new state is permitted.
+     */
+    public static boolean isValidTransition(WorkflowState currentState, WorkflowState newState) {
 
         // ENTERED -> REVIEWED
         if (currentState == WorkflowState.ENTERED && newState == WorkflowState.REVIEWED) {

@@ -1,5 +1,6 @@
-//------------ Handles user management operations ------------------
-
+// ------------------------------------------------------------------------------------------
+//       Handles user account management, credential operations, and audit logging
+// ------------------------------------------------------------------------------------------
 package com.frwss.system.security.service;
 
 import com.frwss.system.audit.model.AuditActionType;
@@ -32,13 +33,13 @@ public class UserManagementService {
     private final SecurityContextAdapter securityContextAdapter;
 
 
+    // Constructor
     public UserManagementService(
             UserRepository userRepository,
             RoleRepository roleRepository,
             AuditService auditService,
             PasswordEncoder passwordEncoder,
-            SecurityContextAdapter securityContextAdapter
-    ) {
+            SecurityContextAdapter securityContextAdapter) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.auditService = auditService;
@@ -79,7 +80,10 @@ public class UserManagementService {
     }
 
 
-//    Creates a new user
+    /**
+     * Validates and creates a new user account, encodes its credentials,
+     * assigns the selected role, and records the creation event.
+     */
     @Transactional
     public void createUser(CreateUserRequest request) {
 
@@ -162,7 +166,10 @@ public class UserManagementService {
     }
 
 
-    //    Updates an existing user
+    /**
+     * Updates a user's role and account status while preventing
+     * the currently authenticated user from disabling their own account.
+     */
     @Transactional
     public void updateUser(Integer userId, String roleName, boolean enabled) {
 
@@ -216,7 +223,11 @@ public class UserManagementService {
         }
     }
 
-    //    Resets a user's password
+    //-------------------------------- Password and PIN management ---------------------------------------
+
+    /**
+     * Encodes and updates a user's password and records the reset event.
+     */
     @Transactional
     public void resetPassword(Integer userId,String password) {
 
@@ -264,6 +275,10 @@ public class UserManagementService {
         );
     }
 
+    /**
+     * Verifies the submitted PIN against the stored PIN hash
+     * of the currently authenticated user.
+     */
     @Transactional(readOnly = true)
     public boolean verifyCurrentUserPin(String pin) {
 
@@ -286,7 +301,7 @@ public class UserManagementService {
         );
     }
 
-    //    Returns enabled demo accounts with the same role as the current user
+    //-------------------------------------- Account switching ------------------------------------------
     @Transactional(readOnly = true)
     public List<User> getEligibleSwitchAccounts() {
 
@@ -299,7 +314,10 @@ public class UserManagementService {
         );
     }
 
-    //    Validates the selected demo account before switching sessions
+    /**
+     * Validates that the selected account is enabled, belongs to the
+     * same role, and is different from the currently authenticated account.
+     */
     @Transactional(readOnly = true)
     public User validateSwitchAccount(Integer userId) {
 
@@ -362,7 +380,7 @@ public class UserManagementService {
         }
     }
 
-    // Enables a single user
+    // -------------------------------- Individual account status operations ----------------------------
     @Transactional
     public void enableUser(Integer userId) {
 
@@ -416,7 +434,7 @@ public class UserManagementService {
         );
     }
 
-    // Enables multiple user
+    //-------------------------------------- Bulk operations -----------------------------------------
     @Transactional
     public void bulkEnable(List<Integer> userIds) {
         for (Integer userId : userIds) {
@@ -432,7 +450,10 @@ public class UserManagementService {
         }
     }
 
-    // Bulk password reset
+    /**
+     * Resets the passwords of multiple users and records an audit event
+     * for each affected account.
+     */
     @Transactional
     public void bulkResetPassword(List<Integer> userIds,String temporaryPassword) {
 

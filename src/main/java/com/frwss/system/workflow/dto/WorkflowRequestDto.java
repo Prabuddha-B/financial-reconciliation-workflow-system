@@ -1,5 +1,6 @@
-//-------------------------------- Transfers Workflow Request Data -------------------------------
-
+// -------------------------------------------------------------------------------
+//       Captures the information submitted when a new workflow is created
+// -------------------------------------------------------------------------------
 package com.frwss.system.workflow.dto;
 
 import com.frwss.system.workflow.model.WorkflowState;

@@ -1,3 +1,6 @@
+// -------------------------------------------------------------------------------
+//       Manages tax configurations and records administrative changes
+// -------------------------------------------------------------------------------
 package com.frwss.system.tax.service;
 
 import com.frwss.system.audit.model.AuditActionType;
@@ -29,17 +32,29 @@ public class TaxConfigurationService {
         this.securityContextAdapter = securityContextAdapter;
     }
 
+    /**
+     * Retrieves all tax configurations, including active and inactive records.
+     */
     @Transactional(readOnly = true)
     public List<TaxConfiguration> getAllConfigurations() {
         return taxConfigurationRepository.findAll();
     }
 
+    /**
+     * Retrieves a tax configuration by its ID.
+     * @param id unique identifier of the tax configuration
+     * @return the matching tax configuration
+     */
     @Transactional(readOnly = true)
     public TaxConfiguration getConfiguration(Long id) {
         return taxConfigurationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Tax configuration not found"));
     }
 
+    /**
+     * Updates the tax rate and description of an existing configuration
+     * and records the modification in the audit log.
+     */
     @Transactional
     public void updateTaxRate(Long id, BigDecimal taxRate, String description) {
 
@@ -62,6 +77,10 @@ public class TaxConfigurationService {
         );
     }
 
+    /**
+     * Creates a new active tax configuration after checking for an existing
+     * active configuration with the same module and category.
+     */
     @Transactional
     public TaxConfiguration createConfiguration(TaxConfiguration configuration) {
 
@@ -91,6 +110,10 @@ public class TaxConfigurationService {
         return savedConfiguration;
     }
 
+    /**
+     * Deactivates an existing tax configuration without deleting its record
+     * and records the change in the audit log.
+     */
     @Transactional
     public void deactivateConfiguration(Long id) {
 
@@ -112,6 +135,10 @@ public class TaxConfigurationService {
         );
     }
 
+    /**
+     * Reactivates an inactive tax configuration after checking that no other
+     * active configuration exists for the same module and category.
+     */
     @Transactional
     public void activateConfiguration(Long id) {
 

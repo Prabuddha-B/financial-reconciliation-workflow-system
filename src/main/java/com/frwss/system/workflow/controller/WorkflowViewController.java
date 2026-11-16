@@ -1,5 +1,6 @@
-// --------------------------------- Handles Workflow UI Pages ---------------------------------------
-
+// -------------------------------------------------------------------------------
+//       Manages workflow web pages and role-based user interactions
+// -------------------------------------------------------------------------------
 package com.frwss.system.workflow.controller;
 
 
@@ -19,6 +20,7 @@ import com.frwss.system.security.SecurityContextAdapter;
 @Controller
 @RequestMapping("/workflow")
 public class WorkflowViewController {
+
     private final WorkflowService workflowService;
     private final SecurityContextAdapter securityContextAdapter;
 
@@ -28,7 +30,9 @@ public class WorkflowViewController {
         this.securityContextAdapter = securityContextAdapter;
     }
 
-    //    Displays Workflow Approval Page
+    /**
+     * Displays all workflows and the number awaiting approval.
+     */
     @GetMapping("/approvals")
     public String showWorkflowApprovals(Model model) {
 
@@ -42,7 +46,9 @@ public class WorkflowViewController {
         return "workflow/approvals";
     }
 
-//    Displays Workflow Status Page
+    /**
+     * Displays the current workflow details and its transition history.
+     */
     @GetMapping("/status/{workflowId}")
     public String showWorkflowStatus(@PathVariable Long workflowId, Model model) {
         List<WorkflowHistoryResponseDto> history = workflowService.getWorkflowHistory(workflowId);
@@ -58,7 +64,9 @@ public class WorkflowViewController {
         return "workflow/status";
     }
 
-//    Handles Workflow State Transitions
+    /**
+     * Processes workflow state changes after checking the user's role and permissions.
+     */
     @PostMapping("/{workflowId}/transition")
     public String updateWorkflowState(
             @PathVariable Long workflowId,
@@ -87,6 +95,7 @@ public class WorkflowViewController {
 
                 workflowService.updateWorkflowState(workflowId, request);
                 return "redirect:/workflow/status/" + workflowId;
+
             } catch ( RuntimeException ex ) {
                 List<WorkflowHistoryResponseDto> history = workflowService.getWorkflowHistory(workflowId);
 

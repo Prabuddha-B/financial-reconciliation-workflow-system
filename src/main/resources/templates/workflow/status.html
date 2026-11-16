@@ -1,3 +1,6 @@
+<!-- ---------------------------------------------------------------------------->
+<!--              Workflow Status and Transition Management Page               -->
+<!-- ---------------------------------------------------------------------------->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
@@ -185,7 +188,7 @@
 
 <body>
 
-  <!-- Nav Bar -->
+  <!-------------------------- Nav Bar -------------------------------------->
   <div th:replace="~{fragments/navbar :: navbar}"></div>
 
   <div class="container py-4 py-lg-5">
@@ -204,7 +207,7 @@
     <!-- ===================== Workflow Header Section ===================== -->
     <div class="d-flex justify-content-between align-items-start mb-5 mt-2">
 
-      <!-- Left Section -->
+      <!--------------------- Left Section ------------------------>
       <div>
 
         <h1 class="display-6 fw-bold mb-2">
@@ -215,7 +218,7 @@
           Review workflow progress, perform state transitions, and track approval history with full audit visibility.
         </p>
 
-        <!-- Workflow Information Badges -->
+        <!---------------------- Workflow Information Badges -------------------->
         <div class="d-flex flex-wrap gap-2">
 
             <span class="badge rounded-pill bg-light text-dark border px-3 py-2">
@@ -247,7 +250,7 @@
 
       </div>
 
-      <!-- Right Section -->
+      <!------------------- Right Section ---------------------------->
       <div class="text-end">
 
         <a th:href="@{/workflow/approvals}"
@@ -263,7 +266,7 @@
     <!-- ===================== Workflow Overview Dashboard ===================== -->
     <div class="row g-4 mb-5">
 
-      <!-- Workflow ID -->
+      <!---------------- Workflow ID -------------------->
       <div class="col-12 col-md-6 col-xl">
         <div class="workflow-overview-card">
 
@@ -289,7 +292,7 @@
         </div>
       </div>
 
-      <!-- Source Type -->
+      <!----------------- Source Type ------------------->
       <div class="col-12 col-md-6 col-xl">
         <div class="workflow-overview-card">
 
@@ -315,7 +318,7 @@
         </div>
       </div>
 
-      <!-- Source Record ID -->
+      <!------------------ Source Record ID -------------->
       <div class="col-12 col-md-6 col-xl">
         <div class="workflow-overview-card">
 
@@ -341,7 +344,7 @@
         </div>
       </div>
 
-      <!-- Current Stage -->
+      <!------------------ Current Stage ----------------->
       <div class="col-12 col-md-6 col-xl">
         <div class="workflow-overview-card">
 
@@ -386,7 +389,7 @@
         </div>
       </div>
 
-      <!-- History Entries -->
+      <!------------------ History Entries ------------------>
       <div class="col-12 col-md-6 col-xl">
         <div class="workflow-overview-card">
 
@@ -486,7 +489,7 @@
       <div class="card-body">
         <form th:action="@{/workflow/{id}/transition(id=${workflow.workflowId})}" method="post" class="row g-3">
 
-          <!-- New State -->
+          <!---------------------- New State --------------------------->
           <div class="col-12 col-md-4">
             <label class="form-label">New State</label>
 
@@ -519,7 +522,7 @@
             <div class="form-text">Only valid next states are shown for the current workflow state</div>
           </div>
 
-          <!-- Performed By -->
+          <!---------------------- Performed By ------------------------->
           <div class="col-12 col-md-4">
             <label class="form-label">Performed By</label>
             <input type="text" class="form-control" th:value="${currentUser}" readonly>
@@ -528,14 +531,14 @@
             </div>
           </div>
 
-          <!-- Justification -->
+          <!--------------------- Justification ------------------------->
           <div class="col-12">
             <label class="form-label">Justification</label>
             <textarea name="justification" rows="4" class="form-control" required></textarea>
             <div class="form-text">Provide concise but complete reasoning for the audit trail.</div>
           </div>
 
-          <!-- Update Btn -->
+          <!---------------------- Update Btn ---------------------------->
           <div class="col-12 d-flex flex-wrap gap-2">
             <button type="submit" class="btn btn-primary">
               Update Workflow
@@ -560,7 +563,7 @@
         </div>
       </div>
 
-      <!-- Details Table -->
+      <!----------------------- Details Table -------------------------------->
       <div class="card-body p-0">
         <div class="table-responsive">
           <table class="table table-striped table-hover mb-0 align-middle">
@@ -625,7 +628,7 @@
 
         <div class="row">
 
-          <!-- User Who Performed Latest Transition -->
+          <!------------------- User Who Performed Latest Transition --------------------->
           <div class="col-md-4">
             <small class="text-muted">Performed By</small>
             <div class="fw-semibold"
@@ -634,7 +637,7 @@
             </div>
           </div>
 
-          <!-- Latest Workflow State Change -->
+          <!-------------------- Latest Workflow State Change ----------------------------->
           <div class="col-md-4">
             <small class="text-muted">State Transition</small>
             <div class="fw-semibold">
@@ -648,7 +651,7 @@
             </div>
           </div>
 
-          <!-- Transition Timestamp -->
+          <!-------------------- Transition Timestamp -------------------------------------->
           <div class="col-md-4">
             <small class="text-muted">Transition Time</small>
             <div class="fw-semibold"
@@ -656,6 +659,7 @@
               2026-06-21 10:30:00
             </div>
           </div>
+
         </div>
       </div>
     </div>
@@ -768,7 +772,8 @@
     </div>
 
   </div>
-  <!-- Footer -->
+
+  <!------------------------- Footer -------------------------------->
   <div th:replace="~{fragments/footer :: footer}"></div>
   <div th:replace="~{fragments/scripts :: badgeStyles}"></div>
   <div th:replace="~{fragments/scripts :: badgeScripts}"></div>

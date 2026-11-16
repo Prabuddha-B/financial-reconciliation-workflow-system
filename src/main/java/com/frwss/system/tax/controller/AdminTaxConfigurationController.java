@@ -1,3 +1,6 @@
+// -------------------------------------------------------------------------------
+//       Handles administrative operations for tax configurations.
+// -------------------------------------------------------------------------------
 package com.frwss.system.tax.controller;
 
 import com.frwss.system.tax.model.TaxConfiguration;
@@ -20,22 +23,27 @@ public class AdminTaxConfigurationController {
         this.taxConfigurationService = taxConfigurationService;
     }
 
+    /**
+     * Retrieves all tax configurations and displays them on the administrative listing page.
+     */
     @GetMapping
     public String listConfigurations(Model model) {
         model.addAttribute("configurations",taxConfigurationService.getAllConfigurations());
         return "admin/tax-configurations/list";
     }
 
+    /**
+     * Validates and creates a new tax configuration.
+     */
     @GetMapping("/create")
     public String createConfigurationForm(Model model) {
-
         model.addAttribute("configuration", new TaxConfiguration());
-
         return "admin/tax-configurations/create";
     }
 
-
-
+    /**
+     * Validates and creates a new tax configuration.
+     */
     @PostMapping("/create")
     public String createConfiguration(
             @Valid @ModelAttribute("configuration") TaxConfiguration configuration,
@@ -68,6 +76,9 @@ public class AdminTaxConfigurationController {
         }
     }
 
+    /**
+    * Deactivates a tax configuration without deleting its stored record.
+    */
     @PostMapping("/{id}/deactivate")
     public String deactivateConfiguration(
             @PathVariable Long id,
@@ -84,6 +95,10 @@ public class AdminTaxConfigurationController {
     }
 
 
+    /**
+     * Activates a tax configuration after checking for an existing active configuration
+     * with the same module and category.
+     */
     @PostMapping("/{id}/activate")
     public String activateConfiguration(
             @PathVariable Long id,
@@ -116,6 +131,9 @@ public class AdminTaxConfigurationController {
         return "admin/tax-configurations/edit";
     }
 
+    /**
+     * Validates and updates the tax rate and description of an existing configuration.
+     */
     @PostMapping("/{id}/edit")
     public String updateConfiguration(
             @PathVariable Long id,

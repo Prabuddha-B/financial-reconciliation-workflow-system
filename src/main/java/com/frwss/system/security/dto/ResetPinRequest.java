@@ -1,3 +1,7 @@
+// -------------------------------------------------------------------------------
+//       Transfers the new PIN submitted for a user PIN reset operation
+// -------------------------------------------------------------------------------
+
 package com.frwss.system.security.dto;
 
 // DTO for resetting a user's PIN

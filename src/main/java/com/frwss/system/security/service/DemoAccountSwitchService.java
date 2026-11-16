@@ -1,3 +1,7 @@
+// -------------------------------------------------------------------------------
+//       Handles demo account switching and records the operation in the audit trail
+// -------------------------------------------------------------------------------
+
 package com.frwss.system.security.service;
 
 import com.frwss.system.audit.model.AuditActionType;
@@ -16,6 +20,7 @@ public class DemoAccountSwitchService {
     private final AuditService auditService;
     private final SecurityContextAdapter securityContextAdapter;
 
+    // Constructor
     public DemoAccountSwitchService(
             CustomUserDetailsService userDetailsService,
             AuditService auditService,
@@ -26,7 +31,10 @@ public class DemoAccountSwitchService {
         this.securityContextAdapter = securityContextAdapter;
     }
 
-//    Switches the authenticated demo account
+    /**
+     * Replaces the current Spring Security authentication with the target
+     * account's authentication and records the account-switch event.
+     */
     public void switchAccount(User targetUser) {
 
         String previousUser =

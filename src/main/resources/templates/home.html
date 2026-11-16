@@ -35,7 +35,7 @@
         }
 
         /* ======================================
-           DARK MODE
+                        DARK MODE
         ====================================== */
 
         [data-bs-theme="dark"]{
@@ -55,7 +55,7 @@
         }
 
         /* ======================================
-           GLOBAL
+                         GLOBAL
         ====================================== */
 
         body{
@@ -74,7 +74,7 @@
         }
 
         /* ======================================
-           HERO
+                         HERO
         ====================================== */
 
         .dashboard-hero{
@@ -123,7 +123,7 @@
         }
 
         /* ======================================
-           KPI CARDS
+                      KPI CARDS
         ====================================== */
 
         .kpi-card{
@@ -213,9 +213,9 @@
         }
 
         /* ======================================
-           STANDARD CARDS
-           (Quick Actions, System Health,
-            Recent Activity)
+                      STANDARD CARDS
+             (Quick Actions, System Health,
+                   Recent Activity)
         ====================================== */
 
         .action-card,
@@ -258,7 +258,7 @@
         }
 
         /* ================================================= */
-        /* QUICK ACTIONS                                     */
+        /*                  QUICK ACTIONS                    */
         /* ================================================= */
 
         .quick-actions-title{
@@ -299,8 +299,8 @@
         }
 
         /* ======================================
-           MODULE COLORED HOVER BORDERS
-        ====================================== */
+               MODULE COLORED HOVER BORDERS
+         ====================================== */
 
         .action-card-primary:hover{
             border-color:var(--frwss-primary);
@@ -331,7 +331,7 @@
         }
 
         /* ======================================
-           CARD CONTENT
+                       CARD CONTENT
         ====================================== */
 
         .action-icon{
@@ -371,7 +371,7 @@
         }
 
         /* ======================================
-           FRWSS MODULE COLORS
+                  FRWSS MODULE COLORS
         ====================================== */
 
         .action-blue{
@@ -403,7 +403,7 @@
         }
 
         /* ======================================
-           DARK MODE
+                         DARK MODE
         ====================================== */
 
         [data-bs-theme="dark"] .quick-actions-title{
@@ -440,7 +440,7 @@
 
 
         /* ======================================
-           TABLES
+                          TABLES
         ====================================== */
 
         .table{
@@ -460,7 +460,7 @@
         }
 
         /* ======================================
-           CARD HEADERS
+                      CARD HEADERS
         ====================================== */
 
         .card-header{
@@ -471,7 +471,7 @@
         }
 
         /* ======================================
-           LINKS
+                            LINKS
         ====================================== */
 
         .text-muted{
@@ -630,8 +630,8 @@
 
 
         /* ======================================
-   MODULE-SPECIFIC HOVER BORDERS
-====================================== */
+              MODULE-SPECIFIC HOVER BORDERS
+        ====================================== */
 
         .action-card{
             border:1px solid rgba(148,163,184,.15);
@@ -695,8 +695,8 @@
             border-color:#EF4444;
         }
         /* ======================================
-   SYSTEM HEALTH
-====================================== */
+                     SYSTEM HEALTH
+        ====================================== */
 
         .health-card,
         .activity-card{
@@ -730,7 +730,7 @@
         }
 
         /* ======================================
-           RECENT ACTIVITY
+                     RECENT ACTIVITY
         ====================================== */
 
         .activity-item{
@@ -794,10 +794,10 @@
 </head>
 <body>
 
-    <!-- Nav Bar -->
+    <!--------------------- Nav Bar -------------------------->
     <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-    <!-- Hero Section -->
+    <!--------------------- Hero Section ---------------------->
     <section class="dashboard-hero">
 
         <div class="container">
@@ -832,7 +832,7 @@
 
     <div class="container">
 
-        <!-- Section Header -->
+        <!------------------- Section Header ------------>
         <div class="mb-4">
 
             <h2 class="section-title h3 mb-2">
@@ -845,10 +845,10 @@
 
         </div>
 
-        <!-- KPI Cards -->
+        <!------------------- KPI Cards -------------------->
         <div class="row g-4 mb-5">
 
-            <!-- Total Records -->
+            <!--------------------- Total Records --------------------->
             <div class="col-lg-3 col-md-6">
 
                 <div class="kpi-card primary h-100">
@@ -884,7 +884,7 @@
 
             </div>
 
-            <!-- Reconciled -->
+            <!--------------------- Reconciled -------------------------->
             <div class="col-lg-3 col-md-6">
 
                 <div class="kpi-card success h-100">
@@ -920,7 +920,7 @@
 
             </div>
 
-            <!-- Pending Approval -->
+            <!------------------- Pending Approval ------------------------>
             <div class="col-lg-3 col-md-6">
 
                 <div class="kpi-card warning h-100">
@@ -956,7 +956,7 @@
 
             </div>
 
-            <!-- Audit Entries -->
+            <!------------------- Audit Entries -------------------------->
             <div class="col-lg-3 col-md-6">
 
                 <div class="kpi-card info h-100">
@@ -993,7 +993,7 @@
             </div>
         </div>
 
-        <!-- Quick Actions -->
+        <!---------------- Quick Actions ----------------------->
         <div class="quick-actions-section mb-5">
 
             <div class="mb-4">
@@ -1190,10 +1190,10 @@
 
         </div>
 
-        <!-- System Health & Recent Activity -->
+        <!---------------------- System Health & Recent Activity ----------------->
         <div class="row g-4 mt-4">
 
-            <!-- SYSTEM HEALTH -->
+            <!-------------------- SYSTEM HEALTH --------------------->
             <div class="col-lg-5">
 
                 <div class="card health-card h-100">
@@ -1209,91 +1209,79 @@
                         </p>
 
                         <div class="health-item">
-                    <span>
-                        <i class="bi bi-circle-fill text-success me-2"></i>
-                        Database Connection
-                    </span>
+                            <span>
+                                 <i class="bi bi-circle-fill text-success me-2"></i>
+                                     Database Connection
+                            </span>
 
                             <span class="text-success fw-semibold">
-                        Connected
-                    </span>
+                                 Connected
+                            </span>
                         </div>
 
                         <div class="health-item">
-                    <span>
-                        <i class="bi bi-circle-fill text-success me-2"></i>
-                        Audit Chain Integrity
-                    </span>
+                            <span>
+                                <i class="bi bi-circle-fill text-success me-2"></i>
+                                Audit Chain Integrity
+                            </span>
 
                             <span th:if="${chainValid != null and chainValid}"
                                   class="text-success fw-semibold">
-                        Valid
-                    </span>
+                                Valid
+                            </span>
 
-                            <span th:if="${chainValid != null and !chainValid}"
-                                  class="text-danger fw-semibold">
-                        Broken
-                    </span>
+                            <span th:if="${chainValid != null and !chainValid}"  class="text-danger fw-semibold">
+                                Broken
+                                </span>
 
                             <span th:if="${chainValid == null}"
                                   class="text-warning fw-semibold">
-                        Unknown
-                    </span>
+                                Unknown
+                            </span>
                         </div>
 
                         <div class="health-item">
-                    <span>
-                        <i class="bi bi-circle-fill text-success me-2"></i>
-                        Workflow Engine
-                    </span>
+                            <span>
+                                <i class="bi bi-circle-fill text-success me-2"></i>
+                                Workflow Engine
+                            </span>
 
                             <span class="text-success fw-semibold">
-                        Active
-                    </span>
+                                Active
+                            </span>
                         </div>
 
                         <div class="health-item">
-                    <span>
-                        <i class="bi bi-circle-fill text-success me-2"></i>
-                        Reconciliation Engine
-                    </span>
-
+                            <span>
+                                <i class="bi bi-circle-fill text-success me-2"></i>
+                                Reconciliation Engine
+                            </span>
                             <span class="text-success fw-semibold">
-                        Active
-                    </span>
+                            Active
+                            </span>
                         </div>
 
                         <div class="health-item">
-                    <span>
-                        <i class="bi bi-circle-fill text-success me-2"></i>
-                        Tax Estimation Engine
-                    </span>
+                            <span>
+                                <i class="bi bi-circle-fill text-success me-2"></i>
+                                    Tax Estimation Engine
+                            </span>
 
                             <span class="text-success fw-semibold">
-                        Active
-                    </span>
+                                Active
+                            </span>
                         </div>
 
                         <div class="health-item border-0">
-                    <span>
-                        <i class="bi bi-circle-fill text-success me-2"></i>
-                        File Storage Service
-                    </span>
+                            <span>
+                                <i class="bi bi-circle-fill text-success me-2"></i>
+                                 File Storage Service
+                            </span>
 
                             <span class="text-success fw-semibold">
-                        Operational
-                    </span>
+                                Operational
+                            </span>
                         </div>
-
-<!--                        <div class="mt-4">-->
-<!--                            <a href="/admin/system-status"-->
-<!--                               class="btn btn-outline-primary w-100">-->
-
-<!--                                View System Status-->
-<!--                                <i class="bi bi-arrow-right ms-2"></i>-->
-
-<!--                            </a>-->
-<!--                        </div>-->
 
                     </div>
 

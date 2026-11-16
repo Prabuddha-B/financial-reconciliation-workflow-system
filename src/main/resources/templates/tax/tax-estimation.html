@@ -1,3 +1,6 @@
+<!-- ---------------------------------------------------------------------------->
+<!--                           Tax Estimation Page                             -->
+<!-- ---------------------------------------------------------------------------->
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
@@ -5,7 +8,7 @@
 
 <style>
 
-    /*  TAX HEADER */
+    /*                  TAX HEADER                  */
 
     .tax-header {
         padding: 0.5rem 0 1rem;
@@ -34,8 +37,8 @@
     }
 
     /* ========================================
-   TAX REFERENCE NOTICE
-======================================== */
+               TAX REFERENCE NOTICE
+    ======================================== */
 
     .tax-reference-banner {
         display: flex;
@@ -88,8 +91,8 @@
     }
 
     /* =====================================================
-   TAX PAGE
-===================================================== */
+                              TAX PAGE
+    ===================================================== */
 
     .tax-card {
         background: var(--frwss-surface);
@@ -105,7 +108,7 @@
 
 
     /* =====================================================
-       CARD HEADER
+                         CARD HEADER
     ===================================================== */
 
     .tax-card-header {
@@ -129,7 +132,7 @@
 
 
     /* =====================================================
-       FORM ICON
+                           FORM ICON
     ===================================================== */
 
     .tax-icon-box {
@@ -147,7 +150,7 @@
 
 
     /* =====================================================
-       STEP INDICATOR
+                        STEP INDICATOR
     ===================================================== */
 
     .tax-steps {
@@ -190,7 +193,7 @@
 
 
     /* =====================================================
-       FORM CONTROLS
+                         FORM CONTROLS
     ===================================================== */
 
     .form-label {
@@ -222,7 +225,7 @@
 
 
     /* =====================================================
-       INPUT GROUP
+                           INPUT GROUP
     ===================================================== */
 
     .input-group-text {
@@ -234,7 +237,7 @@
 
 
     /* =====================================================
-       RESULT HEADER BADGE
+                        RESULT HEADER BADGE
     ===================================================== */
 
     .tax-generated-badge {
@@ -248,7 +251,7 @@
 
 
     /* =====================================================
-       KPI CARDS
+                          KPI CARDS
     ===================================================== */
 
     .tax-kpi-card {
@@ -305,7 +308,7 @@
     }
 
 
-    /* KPI COLORS */
+    /*            KPI COLORS              */
 
     .tax-rate {
         background: rgba(124,58,237,.08);
@@ -345,7 +348,7 @@
 
 
     /* =====================================================
-       RESULT META DATA
+                     RESULT META DATA
     ===================================================== */
 
     .tax-meta-section {
@@ -373,7 +376,7 @@
 
 
     /* =====================================================
-       EMPTY STATE
+                        EMPTY STATE
     ===================================================== */
 
     .tax-empty-icon {
@@ -400,7 +403,7 @@
 
 
     /* =====================================================
-       ALERTS
+                               ALERTS
     ===================================================== */
 
     .tax-alert {
@@ -426,7 +429,7 @@
 
 
     /* =====================================================
-       RESPONSIVE
+                           RESPONSIVE
     ===================================================== */
 
     @media (max-width: 992px) {
@@ -503,23 +506,21 @@
 
 <body class="d-flex flex-column min-vh-100">
 
-    <!-- Nav Bar -->
+    <!------------------  Nav Bar ------------------------------->
     <div th:replace="~{fragments/navbar :: navbar}"></div>
 
     <div class="container py-4 py-lg-5">
 
 
-        <!-- =====TAX HEADER ========= -->
+        <!-- ===== TAX HEADER ========= -->
         <div class="tax-header mb-5">
 
             <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center">
 
                 <div>
-
                     <h1 class="tax-title">
                         Tax Estimation
                     </h1>
-
                     <p class="tax-subtitle">
                         Generate reference-only tax estimates for financial review and internal comparison
                     </p>
@@ -527,13 +528,9 @@
                 </div>
 
                 <div class="d-flex gap-2 mt-3 mt-lg-0">
-
-                    <a th:href="@{/}"
-                       class="btn btn-outline-secondary">
-
+                    <a th:href="@{/}" class="btn btn-outline-secondary">
                         <i class="bi bi-arrow-left me-1"></i>
                         Dashboard
-
                     </a>
 
                 </div>
@@ -550,11 +547,9 @@
             </div>
 
             <div class="tax-reference-content">
-
                 <div class="tax-reference-title">
                     Reference Only
                 </div>
-
                 <div class="tax-reference-text">
                     This tax estimate is provided for internal review and comparison purposes only and must not be used for official tax filing.
                 </div>
@@ -566,14 +561,14 @@
         <div class="row g-4 align-items-stretch">
 
 
-            <!-- ESTIMATION FORM -->
+            <!----------------------- ESTIMATION FORM ----------------------------->
             <div class="col-lg-4">
 
                 <div class="card shadow-sm border-0 h-100">
 
                     <div class="card-body p-4">
 
-                        <!-- Header -->
+                        <!-------------------- Header --------------------------->
                         <div class="d-flex align-items-center mb-4">
 
                             <div class="rounded-3 bg-primary-subtle text-primary p-3 me-3">
@@ -594,7 +589,7 @@
                               th:object="${request}"
                               method="post">
 
-                            <!-- Module -->
+                            <!--------------------- Module ----------------------->
                             <div class="mb-3">
 
                                 <label class="form-label fw-semibold">
@@ -616,7 +611,7 @@
 
                             </div>
 
-                            <!-- Category -->
+                            <!--------------------- Category --------------------------->
                             <div class="mb-3">
 
                                 <label class="form-label fw-semibold">
@@ -638,7 +633,7 @@
 
                             </div>
 
-                            <!-- Amount -->
+                            <!-------------------- Amount --------------------------->
                             <div class="mb-4">
 
                                 <label class="form-label fw-semibold">
@@ -667,7 +662,7 @@
 
                             </div>
 
-                            <!-- Buttons -->
+                            <!-------------------- Buttons ---------------------->
                             <div class="row g-2">
 
                                 <div class="col-8">
@@ -704,12 +699,12 @@
             </div>
 
 
-            <!-- RESULT PANEL -->
+            <!----------------------- RESULT PANEL ------------------------------->
             <div class="col-lg-8">
 
                 <div class="card shadow-sm border-0 h-100">
 
-                    <!-- Header -->
+                    <!-------------------- Header ------------------------>
                     <div class="card-header bg-transparent border-bottom">
 
                         <div class="d-flex justify-content-between align-items-center">
@@ -738,7 +733,7 @@
 
                     </div>
 
-                    <!-- EMPTY STATE -->
+                    <!------------------- EMPTY STATE --------------------------->
                     <div th:if="${result == null}"
                          class="card-body text-center py-5">
 
@@ -754,11 +749,11 @@
 
                     </div>
 
-                    <!-- RESULT STATE -->
+                    <!------------------ RESULT STATE ----------------------------->
                     <div th:if="${result != null}"
                          class="card-body">
 
-                        <!-- KPI CARDS -->
+                        <!------------- KPI CARDS -------------->
                         <div class="row g-3 mb-4">
 
                             <!-- Tax Rate -->
@@ -868,7 +863,7 @@
 
                         </div>
 
-                        <!-- Cal Summary -->
+                        <!---------------- Cal Summary ------------------>
                         <div class="tax-calculation-summary mt-4">
 
                             <h6 class="fw-bold mb-3">
@@ -915,7 +910,7 @@
 
                         </div>
 
-                        <!-- DETAILS -->
+                        <!----------------- DETAILS ----------------------->
                         <div class="row">
 
                             <div class="col-md-6">
@@ -1008,11 +1003,12 @@
 
     </div>
 
-<!-- Footer -->
+<!---------------- Footer -------------------------------->
 <div th:replace="~{fragments/footer :: footer}"></div>
 
 <div th:replace="~{fragments/scripts :: badgeStyles}"></div>
 <div th:replace="~{fragments/scripts :: badgeScripts}"></div>
+
 
     <script>
         document.querySelectorAll('input[type="number"]').forEach(function (input) {

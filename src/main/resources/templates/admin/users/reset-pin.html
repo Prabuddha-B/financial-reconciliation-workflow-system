@@ -1,12 +1,12 @@
+<!-- ---------------------------------------------------------------------------->
+<!--                              Reset PIN Page                               -->
+<!-- ---------------------------------------------------------------------------->
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head th:replace="~{fragments/header :: header('Reset PIN')}"></head>
 
 <style>
-    /* ============================================================
-       FRWSS PRO UX/UI DESIGN - Reset PIN
-       ============================================================ */
 
     .main-container {
         padding: 2rem;
@@ -308,7 +308,7 @@
     }
 
     /* ==========================================
-   Dark Mode Support
+                 Dark Mode Support
    ========================================== */
 
     [data-bs-theme="dark"] .card,
@@ -431,7 +431,7 @@
     }
 
     /* ==========================================
-   Reset PIN - Dark Mode Fixes
+              Reset PIN - Dark Mode Fixes
    ========================================== */
 
     /* Page subtitle */
@@ -486,7 +486,7 @@
 
         <div class="container-fluid main-container">
 
-            <!-- Error Message -->
+            <!-------------------- Error Message --------------------------->
             <div th:if="${errorMessage}"
                  class="alert alert-danger alert-dismissible fade show"
                  role="alert">
@@ -501,7 +501,7 @@
 
             </div>
 
-            <!-- Success Message -->
+            <!------------------- Success Message ---------------------->
             <div th:if="${successMessage}"
                  class="alert alert-success alert-dismissible fade show"
                  role="alert">
@@ -517,7 +517,7 @@
             </div>
 
 
-            <!-- PAGE HEADER -->
+            <!------------------- PAGE HEADER ------------------------->
             <div class="page-header">
 
                 <div>
@@ -533,7 +533,7 @@
             </div>
 
 
-            <!-- RESET PIN FORM -->
+            <!---------------------- RESET PIN FORM -------------------->
             <div class="row g-4">
 
                 <div class="col-lg-8">

@@ -1,3 +1,6 @@
+<!-- ---------------------------------------------------------------------------->
+<!--                         User Management List Page                         -->
+<!-- ---------------------------------------------------------------------------->
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
@@ -13,7 +16,7 @@
 
         <div class="container-fluid main-container">
 
-            <!-- Success Message -->
+            <!----------------------- Success Message ---------------------------->
             <div th:if="${successMessage}"
                  class="alert alert-success alert-dismissible fade show"
                  role="alert">
@@ -28,7 +31,7 @@
 
             </div>
 
-            <!-- Error Message -->
+            <!---------------------- Error Message ---------------------------->
             <div th:if="${errorMessage}"
                  class="alert alert-danger alert-dismissible fade show"
                  role="alert">
@@ -44,7 +47,7 @@
             </div>
 
 
-            <!-- PAGE HEADER -->
+            <!------------------------ PAGE HEADER ------------------------------>
             <div class="page-header mb-4">
 
                 <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
@@ -69,7 +72,7 @@
 
             </div>
 
-            <!-- USER SUMMARY CARDS -->
+            <!--------------------- USER SUMMARY CARDS ------------------------------>
             <div class="row g-3 mb-4">
 
                 <div class="col-lg-3 col-md-6">
@@ -198,7 +201,7 @@
 
             </div>
 
-            <!-- FILTER SECTION -->
+            <!----------------------- FILTER SECTION ----------------------------->
             <div class="filter-section">
 
                 <div class="card">
@@ -217,7 +220,7 @@
 
                             <div class="row g-3 align-items-end">
 
-                                <!-- Search -->
+                                <!---------------- Search ------------------->
 
                                 <div class="col-lg-4">
 
@@ -228,9 +231,9 @@
 
                                     <div class="input-group">
 
-                            <span class="input-group-text">
-                                <i class="bi bi-search"></i>
-                            </span>
+                                     <span class="input-group-text">
+                                            <i class="bi bi-search"></i>
+                                     </span>
 
                                         <input
                                                 type="text"
@@ -243,7 +246,7 @@
 
                                 </div>
 
-                                <!-- Role -->
+                                <!------------------- Role ----------------------->
 
                                 <div class="col-lg-3">
 
@@ -281,7 +284,7 @@
 
                                 </div>
 
-                                <!-- Status -->
+                                <!-------------------- Status ---------------------->
 
                                 <div class="col-lg-3">
 
@@ -309,7 +312,7 @@
 
                                 </div>
 
-                                <!-- Actions -->
+                                <!----------------------- Actions ----------------------->
 
                                 <div class="col-lg-2 d-flex gap-2">
 
@@ -336,7 +339,7 @@
 
             </div>
 
-            <!-- BULK ACTIONS BAR -->
+            <!-------------------- BULK ACTIONS BAR ------------------------------>
             <div id="bulkActionsWrapper" class="bulk-actions-wrapper">
                 <div class="bulk-actions-bar">
                     <div class="bulk-info">
@@ -360,7 +363,7 @@
                 </div>
             </div>
 
-            <!-- TABLE -->
+            <!------------------------- TABLE --------------------------------->
             <div class="table-container">
 
                 <div class="card">
@@ -388,25 +391,25 @@
 
                                 <tr th:each="user : ${users}" th:id="'user-' + ${user.userId}">
 
-                                    <!-- Checkbox -->
+                                    <!-------------- Checkbox -------------->
                                     <td>
                                         <input class="form-check-input user-checkbox" type="checkbox"
                                                th:value="${user.userId}" onchange="updateSelection()">
                                     </td>
 
-                                    <!-- User -->
+                                    <!---------------- User ---------------------->
                                     <td>
                                         <span class="username-text" th:text="${user.username}"></span>
                                     </td>
 
-                                    <!-- Role -->
+                                    <!----------------- Role ----------------->
                                     <td>
                                             <span class="badge bg-primary role-badge"
                                                   th:text="${#lists.isEmpty(user.roles) ? 'No Role' : #lists.toList(user.roles)[0].name.replace('ROLE_','')}">
                                             </span>
                                     </td>
 
-                                    <!-- Status -->
+                                    <!------------------ Status ------------------>
                                     <td>
                                             <span th:if="${user.enabled}"
                                                   class="status-badge active">
@@ -420,12 +423,12 @@
                                             </span>
                                     </td>
 
-                                    <!-- Created -->
+                                    <!----------------- Created ----------------------->
                                     <td>
                                         <span class="created-date" th:text="${#temporals.format(user.createdAt,'dd MMM yyyy')}"></span>
                                     </td>
 
-                                    <!-- Actions -->
+                                    <!------------------ Actions ------------------->
                                     <td>
                                         <div class="action-group">
 
@@ -494,7 +497,7 @@
 
                                 </tr>
 
-                                <!-- Empty State -->
+                                <!-------------------- Empty State -------------------------->
                                 <tr th:if="${#lists.isEmpty(users)}">
                                     <td colspan="6" class="text-center py-4">
                                         <i class="bi bi-people" style="font-size: 2rem; color: #dee2e6;"></i>
@@ -520,7 +523,7 @@
     </main>
 
 
-    <!-- CONFIRMATION MODAL -->
+    <!----------------------- CONFIRMATION MODAL ---------------------------->
     <div class="modal fade" id="bulkConfirmModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">

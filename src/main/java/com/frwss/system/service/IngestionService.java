@@ -1,3 +1,7 @@
+// --------------------------------------------------------------------------------------------
+//       Processes uploaded financial files, validates records, and persists data
+// --------------------------------------------------------------------------------------------
+
 package com.frwss.system.service;
 
 import com.frwss.system.dto.AccountingRecordDto;
@@ -51,17 +55,20 @@ public class IngestionService {
 
     private static final Logger log = LoggerFactory.getLogger(IngestionService.class);
 
-    public record SaveSummary(int savedCount, int skippedDuplicateCount, int skippedInvalidCount) {
-    }
+    /**
+     * Holds the results of saving uploaded records, including skipped duplicates and invalid entries.
+     * */
+    public record SaveSummary(int savedCount, int skippedDuplicateCount, int skippedInvalidCount) { }
 
-    public record DashboardSummary(long totalCount, long validCount, long invalidCount) {
-    }
+    /**
+     * Holds the aggregate record counts displayed on the ingestion dashboard.
+     * */
+    public record DashboardSummary(long totalCount, long validCount, long invalidCount) { }
 
     private static final DateTimeFormatter[] DATE_FORMATTERS = new DateTimeFormatter[] {
             DateTimeFormatter.ISO_LOCAL_DATE,
-            // Day-first is tried before month-first because that is the local
+
             // convention: 05/08/2026 means 5 August. Month-first is only used
-            // when the value cannot be day-first, e.g. 08/15/2026.
             DateTimeFormatter.ofPattern("d/M/yyyy"),
             DateTimeFormatter.ofPattern("dd/MM/yyyy"),
             DateTimeFormatter.ofPattern("M/d/yyyy"),
@@ -85,12 +92,14 @@ public class IngestionService {
     private final AccountingRecordRepository accountingRecordRepository;
     private final FinancialRecordRepository financialRecordRepository;
 
+    // Constructor
     public IngestionService(
             ReceiptRepository receiptRepository,
             PayrollRepository payrollRepository,
             StockPurchaseRepository stockPurchaseRepository,
             AccountingRecordRepository accountingRecordRepository,
             FinancialRecordRepository financialRecordRepository) {
+
         this.receiptRepository = receiptRepository;
         this.payrollRepository = payrollRepository;
         this.stockPurchaseRepository = stockPurchaseRepository;
@@ -98,7 +107,12 @@ public class IngestionService {
         this.financialRecordRepository = financialRecordRepository;
     }
 
-//    Process file and returns only records
+//    -------------------------------- Entry points and dashboard -------------------------------------------
+
+    /**
+     * Processes an uploaded file and returns the extracted records without
+     * exposing the full preview summary.
+     */
     public List<?> processFile(MultipartFile file, String dataType) {
         try {
             return processFileForPreview(file, dataType).getRecords();
@@ -107,7 +121,10 @@ public class IngestionService {
         }
     }
 
-//    Main Preview
+    /**
+     * Selects the appropriate preview processor based on the financial
+     * record type selected for the uploaded file.
+     */
     public IngestionResult processFileForPreview(MultipartFile file, String dataType) throws IOException {
         log.info("Processing preview file: fileName={}, size={}, dataType={}",
                 file != null ? file.getOriginalFilename() : null,
@@ -122,7 +139,9 @@ public class IngestionService {
         };
     }
 
-//    Counts for Summary
+    /**
+     * Retrieves record counts from the ingestion repositories for the dashboard.
+     * */
     public DashboardSummary getDashboardSummary() {
         long receiptCount = receiptRepository.count();
         long payrollCount = payrollRepository.count();
@@ -134,6 +153,10 @@ public class IngestionService {
         return new DashboardSummary(total, total, 0);
     }
 
+    /**
+     * Routes validated preview records to the persistence method
+     * corresponding to their selected financial record type.
+     */
     public SaveSummary saveProcessedRecords(List<?> records, String dataType) {
         if (records == null || records.isEmpty()) {
             return new SaveSummary(0, 0, 0);
@@ -148,7 +171,11 @@ public class IngestionService {
         };
     }
 
-//    Previewing Methods
+//  --------------------------------- Previewing Methods ------------------------------------------------------
+
+    /**
+     * Reads and prepares receipt records for preview.
+     * */
     private IngestionResult previewReceipts(MultipartFile file) throws IOException {
         List<ReceiptDto> records = new ArrayList<>();
         if (isXlsx(file)) {
@@ -159,6 +186,9 @@ public class IngestionService {
         return buildResult(records);
     }
 
+    /**
+     * Reads and prepares payroll records for preview.
+     * */
     private IngestionResult previewPayroll(MultipartFile file) throws IOException {
         List<PayrollDto> records = new ArrayList<>();
         if (isXlsx(file)) {
@@ -169,6 +199,9 @@ public class IngestionService {
         return buildResult(records);
     }
 
+    /**
+     * Reads and prepares stock purchase records for preview.
+     * */
     private IngestionResult previewStock(MultipartFile file) throws IOException {
         List<StockPurchaseDto> records = new ArrayList<>();
         if (isXlsx(file)) {
@@ -179,6 +212,9 @@ public class IngestionService {
         return buildResult(records);
     }
 
+    /**
+     * Reads and prepares accounting records for preview.
+     * */
     private IngestionResult previewAccounting(MultipartFile file) throws IOException {
         List<AccountingRecordDto> records = new ArrayList<>();
         if (isXlsx(file)) {
@@ -189,7 +225,12 @@ public class IngestionService {
         return buildResult(records);
     }
 
-//    Saving to DB skip duplicates
+// ------------------- Persistence methods : convert valid DTOs into database entities ------------------------------
+
+    /**
+     * Converts valid receipt DTOs into entities, skips duplicates and invalid
+     * records, and saves the accepted receipts.
+     */
     private SaveSummary persistReceipts(List<ReceiptDto> dtos) {
         List<Receipt> entities = new ArrayList<>();
         int skippedDuplicates = 0;
@@ -229,6 +270,10 @@ public class IngestionService {
         return new SaveSummary(entities.size(), skippedDuplicates, skippedInvalid);
     }
 
+    /**
+     * Converts valid payroll DTOs into entities, skips duplicates and invalid
+     * records, and saves the accepted payroll records.
+     */
     private SaveSummary persistPayroll(List<PayrollDto> dtos) {
         List<Payroll> entities = new ArrayList<>();
         int skippedDuplicates = 0;
@@ -267,6 +312,10 @@ public class IngestionService {
         return new SaveSummary(entities.size(), skippedDuplicates, skippedInvalid);
     }
 
+    /**
+     * Converts valid stock purchase DTOs into entities, skips duplicates and
+     * invalid records, and saves the accepted purchases.
+     */
     private SaveSummary persistStock(List<StockPurchaseDto> dtos) {
         List<StockPurchase> entities = new ArrayList<>();
         int skippedDuplicates = 0;
@@ -306,6 +355,10 @@ public class IngestionService {
         return new SaveSummary(entities.size(), skippedDuplicates, skippedInvalid);
     }
 
+    /**
+     * Converts valid accounting DTOs into entities, skips duplicates and
+     * invalid records, and saves the accepted accounting records.
+     */
     private SaveSummary persistAccounting(List<AccountingRecordDto> dtos) {
         List<AccountingRecord> entities = new ArrayList<>();
         int skippedDuplicates = 0;
@@ -342,7 +395,7 @@ public class IngestionService {
         return new SaveSummary(entities.size(), skippedDuplicates, skippedInvalid);
     }
 
-//    Read CSV and XLSX
+// ----------------------------- File-reading methods : Read CSV and XLSX ------------------------------------------
     private void readReceiptCsv(MultipartFile file, List<ReceiptDto> records) throws IOException {
         try (CSVParser parser = createDelimitedParser(file)) {
             boolean firstRecord = true;
@@ -531,7 +584,10 @@ public class IngestionService {
         }
     }
 
-//    Builders for DTO
+//    --------------------------------- DTO-building and validation -----------------------------------------
+    /**
+     * Calculates the total, valid, and invalid record counts for a preview.
+     * */
     private ReceiptDto buildReceiptDto(String[] data) {
         try {
             ReceiptDto dto = new ReceiptDto(
@@ -640,7 +696,9 @@ public class IngestionService {
         return new IngestionResult(records, records.size(), validCount, records.size() - validCount);
     }
 
-//    Validation
+    /**
+     * Determines whether a supported ingestion DTO has passed validation.
+     * */
     private boolean isValidRecord(Object record) {
         if (record instanceof ReceiptDto dto) {
             return dto.isValid();
@@ -657,6 +715,10 @@ public class IngestionService {
         return false;
     }
 
+    /**
+     * Imports financial records directly from a CSV file while checking
+     * for existing records before saving new entries.
+     */
     public void processCSV(MultipartFile file) throws IOException {
         try (BufferedReader reader = createReader(file);
              CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.builder()

@@ -1,3 +1,7 @@
+// -------------------------------------------------------------------------------
+//       Carries stock purchase information and its file-validation status
+// -------------------------------------------------------------------------------
+
 package com.frwss.system.dto;
 
 public class StockPurchaseDto {

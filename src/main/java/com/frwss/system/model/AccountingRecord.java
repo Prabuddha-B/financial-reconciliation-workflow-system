@@ -1,3 +1,7 @@
+// -------------------------------------------------------------------------------
+//       Represents accounting records and their associated reconciliation metadata
+// -------------------------------------------------------------------------------
+
 package com.frwss.system.model;
 
 import jakarta.persistence.*;
@@ -31,6 +35,7 @@ public class AccountingRecord{
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+//  Metadata used to identify and group records belonging to bulk transactions
     @Column(name = "parent_record_id")
     private String parentRecordId;
 
@@ -40,6 +45,7 @@ public class AccountingRecord{
     @Column(name = "bulk_reference_prefix")
     private String bulkReferencePrefix;
 
+//  Payment-related metadata retained for reconciliation and tracking
     @Column(name = "payment_transaction_id", unique = true)
     private String paymentTransactionId;
 
@@ -144,27 +150,21 @@ public class AccountingRecord{
     public void setRecordDate(LocalDate recordDate) { this.recordDate = recordDate; }
     public void setEnteredBy(String enteredBy) { this.enteredBy = enteredBy; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
-
     public void setPaymentTransactionId(String paymentTransactionId) {
         this.paymentTransactionId = paymentTransactionId;
     }
-
     public void setPaymentStatus(String paymentStatus) {
         this.paymentStatus = paymentStatus;
     }
-
     public void setPaymentGateway(String paymentGateway) {
         this.paymentGateway = paymentGateway;
     }
-
     public void setPaymentProcessedAt(LocalDateTime paymentProcessedAt) {
         this.paymentProcessedAt = paymentProcessedAt;
     }
-
     public void setPaymentWebhookReceivedAt(LocalDateTime paymentWebhookReceivedAt) {
         this.paymentWebhookReceivedAt = paymentWebhookReceivedAt;
     }
-
     public void setPaymentReconciled(Boolean paymentReconciled) {
         isPaymentReconciled = paymentReconciled;
     }

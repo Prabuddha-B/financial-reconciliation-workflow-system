@@ -1,3 +1,6 @@
+<!-- ---------------------------------------------------------------------------->
+<!--                              FRWSS Login Page                             -->
+<!-- ---------------------------------------------------------------------------->
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
@@ -291,7 +294,7 @@
     <div class="container-fluid">
         <div class="row g-0">
 
-            <!-- Branding -->
+            <!-------------------------- Branding ----------------------------------------->
             <div class="col-lg-6">
                 <div class="left-panel">
                     <div class="logo" aria-label="FRWSS">
@@ -316,7 +319,7 @@
                 </div>
             </div>
 
-            <!-- Login -->
+            <!--------------------------- Login ------------------------------------->
             <div class="col-lg-6">
                 <div class="login-wrap">
                     <div class="login-card">
@@ -326,7 +329,7 @@
                             <p class="text-muted">Please sign in to continue to FRWSS</p>
                         </div>
 
-                        <!-- Alert -->
+                        <!------------------------------ Alert --------------------------------------->
                         <div th:if="${alertMessage != null}"
                              th:class="'alert alert-' + ${alertType} + ' d-flex align-items-center mb-4'">
                             <i th:class="${alertType == 'success'} ? 'bi bi-check-circle-fill me-2' : (${alertType == 'warning'} ? 'bi bi-exclamation-triangle-fill me-2' : 'bi bi-exclamation-circle-fill me-2')"
@@ -334,7 +337,7 @@
                             <span th:text="${alertMessage}"></span>
                         </div>
 
-                        <!-- Login Form -->
+                        <!---------------------------- Login Form -------------------------------------->
                         <form th:action="@{/login}" method="post" id="loginForm">
                             <input type="hidden"
                                    th:if="${_csrf != null}"

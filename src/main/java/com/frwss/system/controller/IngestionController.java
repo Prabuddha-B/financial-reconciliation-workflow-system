@@ -1,3 +1,6 @@
+// -----------------------------------------------------------------------------------------
+//       Coordinates financial file uploads, preview, and record-saving requests
+// ----------------------------------------------------------------------------------------
 package com.frwss.system.controller;
 
 import com.frwss.system.dto.IngestionResult;
@@ -22,27 +25,41 @@ public class IngestionController {
 
     private final IngestionService ingestionService;
 
+    // Constructor
     public IngestionController(IngestionService ingestionService) {
         this.ingestionService = ingestionService;
     }
 
+    /**
+     * Displays the main financial data ingestion dashboard.
+     * */
     @GetMapping("/ingestion")
     public String ingestionPage(Model model) {
         populateDashboardStats(model);
         return "ingestion/dashboard";
     }
 
+    /**
+     *  Displays the ingestion dashboard through its dedicated dashboard route.
+     *  */
     @GetMapping("/ingestion/dashboard")
     public String dashboard(Model model) {
         populateDashboardStats(model);
         return "ingestion/dashboard";
     }
 
+    /**
+     * Displays the file upload interface.
+     * */
     @GetMapping("/ingestion/upload")
     public String showUploadPage(Model model) {
         return "ingestion/upload";
     }
 
+    /**
+     * Processes an uploaded file for preview and temporarily stores the
+     * processed records in the user's session until they are saved.
+     */
     @PostMapping({"/ingestion/preview", "/ingestion/upload"})
     public String previewFile(
             @RequestParam("file") MultipartFile file,
@@ -85,6 +102,9 @@ public class IngestionController {
         }
     }
 
+    /**
+     * Handles errors raised during multipart file uploads.
+     * */
     @ExceptionHandler({MultipartException.class, MaxUploadSizeExceededException.class})
     public String handleMultipartFailure(Exception e, Model model) {
         log.error("Multipart upload failed", e);
@@ -92,6 +112,10 @@ public class IngestionController {
         return "ingestion/upload";
     }
 
+    /**
+     * Retrieves pending preview records from the session and delegates
+     * their persistence to the ingestion service.
+     */
     @PostMapping("/ingestion/save")
     public String saveFile(HttpSession session, RedirectAttributes ra) {
         List<?> records = (List<?>) session.getAttribute("pendingRecords");
@@ -106,6 +130,7 @@ public class IngestionController {
             IngestionService.SaveSummary summary = ingestionService.saveProcessedRecords(records, dataType);
 
             String message = "Saved " + summary.savedCount() + " records.";
+
             if (summary.skippedDuplicateCount() > 0) {
                 message += " Skipped " + summary.skippedDuplicateCount() + " duplicate records.";
             }
@@ -124,17 +149,24 @@ public class IngestionController {
         return "redirect:/ingestion/upload";
     }
 
+    /**
+     * Processes and saves an uploaded CSV file without the preview workflow.
+     * */
     @PostMapping("/upload-csv")
     public String handleFileUpload(@RequestParam("file") MultipartFile file, RedirectAttributes ra) {
         try {
             ingestionService.processCSV(file);
-            ra.addFlashAttribute("message", "File processed and records saved to pgAdmin!");
+            ra.addFlashAttribute("message", "File processed and records saved!");
+
         } catch (Exception e) {
             ra.addFlashAttribute("error", "Failed to process: " + e.getMessage());
         }
         return "redirect:/ingestion/upload";
     }
 
+    /**
+     * Loads the record counts displayed on the ingestion dashboard.
+     * */
     private void populateDashboardStats(Model model) {
         IngestionService.DashboardSummary summary = ingestionService.getDashboardSummary();
         model.addAttribute("total", summary.totalCount());

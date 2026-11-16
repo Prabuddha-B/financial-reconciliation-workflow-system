@@ -1,3 +1,7 @@
+// -------------------------------------------------------------------------------
+//       Transfers the PIN submitted for user identity verification
+// -------------------------------------------------------------------------------
+
 package com.frwss.system.security.dto;
 
 // DTO used to verify a user's approval PIN

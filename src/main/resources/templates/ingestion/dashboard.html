@@ -1,3 +1,6 @@
+<!-- ---------------------------------------------------------------------------->
+<!--                        Data Ingestion Dashboard Page                      -->
+<!-- ---------------------------------------------------------------------------->
 <!DOCTYPE html>
 
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
@@ -5,8 +8,6 @@
 <head th:replace="~{fragments/header :: header('Data Ingestion Dashboard')}"></head>
 
 <style>
-
-
 
     .ingestion-header{
         background: linear-gradient(
@@ -92,7 +93,7 @@
         font-size:.9rem;
     }
 
-    /* DARK MODE */
+    /*                DARK MODE                       */
 
     [data-bs-theme="dark"] .ingestion-header{
 
@@ -110,8 +111,8 @@
     }
 
     /* ==========================================
-   INGESTION ACTION CARDS
-========================================== */
+              INGESTION ACTION CARDS
+    ========================================== */
 
     .ingestion-action-card{
         border-radius:18px;
@@ -144,7 +145,7 @@
         font-size:1.75rem;
     }
 
-    /* Dark Mode */
+    /*                   Dark Mode                        */
 
     [data-bs-theme="dark"] .ingestion-action-card{
 
@@ -161,8 +162,8 @@
     }
 
     /* ==========================================
-   INGESTION STATISTICS
-========================================== */
+                INGESTION STATISTICS
+    ========================================== */
 
     .ingestion-stat-card{
         border:none;
@@ -222,7 +223,7 @@
         max-width:220px;
     }
 
-    /* DARK MODE */
+    /*                DARK MODE                */
 
     [data-bs-theme="dark"] .ingestion-stat-card{
         background:var(--bs-dark);
@@ -245,31 +246,23 @@
         <div class="d-flex justify-content-between align-items-start mb-5">
 
             <div>
-
                 <h1 class="display-5 fw-bold mb-2">
                     Data Ingestion Dashboard
                 </h1>
-
                 <div class="mb-3">
 
-
-
                 </div>
-
                 <p class="text-secondary fs-5 mb-0">
                     Upload, validate and review receipt data files before reconciliation.
                 </p>
-
             </div>
 
             <div>
-
                 <a th:href="@{/}"
                    class="btn btn-outline-secondary px-4">
                     <i class="bi bi-arrow-left me-2"></i>
                     Dashboard
                 </a>
-
             </div>
 
         </div>
@@ -277,7 +270,7 @@
         <!-- ================= Primary Actions ================= -->
         <div class="row g-4 mb-5">
 
-            <!-- Upload File -->
+            <!----------------------- Upload File -------------------------------------->
             <div class="col-lg-6">
 
                 <div class="card ingestion-action-card ingestion-upload-card h-100 border-0 shadow-sm">
@@ -331,7 +324,7 @@
 
             </div>
 
-            <!-- Manual Entry -->
+            <!---------------------- Manual Entry ---------------------------------------->
             <div class="col-lg-6">
 
                 <div class="card ingestion-action-card ingestion-manual-card h-100 border-0 shadow-sm">
@@ -390,118 +383,82 @@
         <!-- ================= Ingestion Statistics ================= -->
         <div class="row g-4 mb-5">
 
-            <!-- Total Records -->
+            <!------------------------ Total Records ------------------------------>
             <div class="col-lg-4 col-md-6">
 
                 <div class="card ingestion-stat-card stat-total h-100">
-
                     <div class="card-body">
-
                         <div class="d-flex justify-content-between align-items-start">
-
                             <div>
-
                                 <div class="stat-label">
                                     Total Records
                                 </div>
-
                                 <div class="stat-value"
                                      th:text="${total != null ? total : 0}">
                                     0
                                 </div>
-
                                 <div class="stat-description">
                                     Records available in the ingestion repository
                                 </div>
-
                             </div>
-
                             <div class="stat-icon bg-primary-subtle text-primary">
                                 <i class="bi bi-database"></i>
                             </div>
-
                         </div>
-
                     </div>
-
                 </div>
 
             </div>
 
-            <!-- Valid Records -->
+            <!------------------------ Valid Records --------------------------------->
             <div class="col-lg-4 col-md-6">
 
                 <div class="card ingestion-stat-card stat-success h-100">
-
                     <div class="card-body">
-
                         <div class="d-flex justify-content-between align-items-start">
-
                             <div>
-
                                 <div class="stat-label">
                                     Valid Records
                                 </div>
-
                                 <div class="stat-value text-success"
                                      th:text="${validCount != null ? validCount : 0}">
                                     0
                                 </div>
-
                                 <div class="stat-description">
                                     Successfully passed validation checks
                                 </div>
-
                             </div>
-
                             <div class="stat-icon bg-success-subtle text-success">
                                 <i class="bi bi-check-circle"></i>
                             </div>
-
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
 
-            <!-- Invalid Records -->
+            <!----------------------- Invalid Records --------------------------------->
             <div class="col-lg-4 col-md-12">
-
                 <div class="card ingestion-stat-card stat-danger h-100">
-
                     <div class="card-body">
-
                         <div class="d-flex justify-content-between align-items-start">
-
                             <div>
-
                                 <div class="stat-label">
                                     Invalid Records
                                 </div>
-
                                 <div class="stat-value text-danger"
                                      th:text="${invalidCount != null ? invalidCount : 0}">
                                     0
                                 </div>
-
                                 <div class="stat-description">
                                     Records requiring review or correction
                                 </div>
-
                             </div>
-
                             <div class="stat-icon bg-danger-subtle text-danger">
                                 <i class="bi bi-exclamation-circle"></i>
                             </div>
-
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
 
         </div>
@@ -557,7 +514,7 @@
 
     </div>
 
-    <!-- Footer -->
+    <!----------------------- Footer ----------------------------------->
     <div th:replace="~{fragments/footer :: footer}"></div>
     <div th:replace="~{fragments/scripts :: badgeStyles}"></div>
     <div th:replace="~{fragments/scripts :: badgeScripts}"></div>

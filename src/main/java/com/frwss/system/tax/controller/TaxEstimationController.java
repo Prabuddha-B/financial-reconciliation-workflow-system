@@ -1,3 +1,6 @@
+// -------------------------------------------------------------------------------
+//       Handles web requests for the Tax Estimation module
+// -------------------------------------------------------------------------------
 package com.frwss.system.tax.controller;
 
 import com.frwss.system.tax.dto.TaxEstimationRequestDto;
@@ -13,10 +16,21 @@ public class TaxEstimationController {
 
     private final TaxEstimationService taxEstimationService;
 
+    /**
+     * Initializes the controller with the tax estimation service.
+     *
+     * @param taxEstimationService service responsible for tax estimation operations
+     */
     public TaxEstimationController(TaxEstimationService taxEstimationService) {
         this.taxEstimationService = taxEstimationService;
     }
 
+    /**
+     * Displays the tax estimation page with the available modules and categories.
+     *
+     * @param model model used to provide form data and configuration options to the view
+     * @return the tax estimation page
+     */
     @GetMapping
     public String showTaxEstimationPage(Model model) {
         model.addAttribute("request", new TaxEstimationRequestDto());
@@ -25,9 +39,15 @@ public class TaxEstimationController {
         return "tax/tax-estimation";
     }
 
+    /**
+     * Processes a tax estimation request and returns the page with the calculated result.
+     *
+     * @param request submitted tax estimation details
+     * @param model model used to provide the request, result, and configuration options
+     * @return the tax estimation page displaying the estimation result
+     */
     @PostMapping("/estimate")
-    public String estimateTax(
-            @ModelAttribute("request") TaxEstimationRequestDto request, Model model) {
+    public String estimateTax(@ModelAttribute("request") TaxEstimationRequestDto request, Model model) {
 
         TaxEstimationResponseDto response = taxEstimationService.estimateTax(request);
 

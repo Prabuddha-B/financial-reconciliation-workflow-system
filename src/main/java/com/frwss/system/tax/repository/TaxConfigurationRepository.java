@@ -1,3 +1,6 @@
+// -------------------------------------------------------------------------------
+//       Provides database access operations for tax configurations
+// -------------------------------------------------------------------------------
 package com.frwss.system.tax.repository;
 
 import com.frwss.system.tax.model.TaxConfiguration;
@@ -13,7 +16,10 @@ import java.util.Optional;
 public interface TaxConfigurationRepository extends JpaRepository<TaxConfiguration, Long> {
 
 
-//     Find an active tax configuration by module and category.
+    /**
+     * Retrieves an active tax configuration matching the specified module
+     * and category.
+     */
     @Query("""
             SELECT t
             FROM TaxConfiguration t
@@ -27,7 +33,9 @@ public interface TaxConfigurationRepository extends JpaRepository<TaxConfigurati
     );
 
 
-//     Find all active configurations for a module.
+    /**
+     * Retrieves all active tax configurations associated with a specified module.
+     */
     @Query("""
             SELECT t
             FROM TaxConfiguration t
@@ -38,7 +46,9 @@ public interface TaxConfigurationRepository extends JpaRepository<TaxConfigurati
             @Param("module") String module
     );
 
-//    Find every active configuration.
+    /**
+     * Retrieves every active tax configuration in the system.
+     */
     @Query("""
             SELECT t
             FROM TaxConfiguration t
@@ -46,12 +56,19 @@ public interface TaxConfigurationRepository extends JpaRepository<TaxConfigurati
             """)
     List<TaxConfiguration> findAllActive();
 
-//    Check whether a configuration already exists.
+    /**
+     * Checks whether an active configuration already exists for the given
+     * module and category.
+     */
     boolean existsByModuleAndCategoryAndIsActiveTrue(
             String module,
             String category
     );
 
+    /**
+     * Retrieves distinct module names from active tax configurations
+     * in alphabetical order.
+     */
     @Query("""
        SELECT DISTINCT t.module
        FROM TaxConfiguration t
@@ -61,6 +78,10 @@ public interface TaxConfigurationRepository extends JpaRepository<TaxConfigurati
     List<String> findAllActiveModules();
 
 
+    /**
+     * Retrieves distinct category names from active tax configurations
+     * in alphabetical order.
+     */
     @Query("""
        SELECT DISTINCT t.category
        FROM TaxConfiguration t

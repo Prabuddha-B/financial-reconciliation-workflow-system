@@ -1,16 +1,16 @@
+<!-- ---------------------------------------------------------------------------->
+<!--                        Administrator Dashboard Page                       -->
+<!-- ---------------------------------------------------------------------------->
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head th:replace="~{fragments/header :: header('Administrator Dashboard')}"></head>
 
 <style>
-    /* ============================================================
-       FRWSS ADMIN DASHBOARD - Enterprise Banking Style
-       ============================================================ */
 
     /* ============================================================
-   DARK MODE DASHBOARD
-   ============================================================ */
+                               DARK MODE DASHBOARD
+     ============================================================ */
 
     [data-bs-theme="dark"] .stat-card .stat-number {
         color: #ffffff;
@@ -54,11 +54,11 @@
     }
 
     /* ============================================================
-       HERO HEADER
+                                  HERO HEADER
        ============================================================ */
 
     /* ============================================================
-   HERO HEADER - LIGHT MODE (DEFAULT)
+                     HERO HEADER - LIGHT MODE
    ============================================================ */
     .hero-header {
         background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
@@ -75,7 +75,7 @@
     }
 
     /* ============================================================
-   HERO HEADER - DARK MODE
+                         HERO HEADER - DARK MODE
    ============================================================ */
     [data-bs-theme="dark"] .hero-header {
         background: linear-gradient(135deg, #1a2332 0%, #2d3748 100%);
@@ -205,7 +205,7 @@
     }
 
     /* ============================================================
-       STATISTICS CARDS (CLICKABLE)
+                          CLICKABLE STATISTICS CARDS
        ============================================================ */
     .stat-card {
         background: white;
@@ -309,7 +309,7 @@
     }
 
     /* ============================================================
-       SECTION DIVIDERS
+                             SECTION DIVIDERS
        ============================================================ */
     .section-divider {
         display: flex;
@@ -338,7 +338,7 @@
     }
 
     /* ============================================================
-       CHARTS
+                                    CHARTS
        ============================================================ */
     .chart-card {
         background: white;
@@ -383,7 +383,7 @@
     }
 
     /* ============================================================
-       QUICK ACTIONS
+                                QUICK ACTIONS
        ============================================================ */
     .quick-action-card {
         background: white;
@@ -437,7 +437,7 @@
     }
 
     /* ============================================================
-       SYSTEM SUMMARY
+                               SYSTEM SUMMARY
        ============================================================ */
     .summary-card {
         background: white;
@@ -484,7 +484,7 @@
     }
 
     /* ============================================================
-       RECENT ACTIVITY
+                              RECENT ACTIVITY
        ============================================================ */
     .activity-card {
         background: var(--frwss-surface);
@@ -694,7 +694,7 @@
     }
 
     /* ============================================================
-       RESPONSIVE
+                                  RESPONSIVE
        ============================================================ */
     @media (max-width: 992px) {
         .main-container { padding: 1.5rem; }
@@ -757,7 +757,7 @@
     }
 
     /* ============================================================
-   DARK MODE - CARDS
+                           DARK MODE - CARDS
    ============================================================ */
 
     [data-bs-theme="dark"] .chart-card,
@@ -822,7 +822,7 @@
 
         <div class="container-fluid main-container">
 
-            <!-- === HERO HEADER === -->
+            <!-- ================ HERO HEADER ======================== -->
             <div class="hero-header">
                 <div class="hero-left">
                     <h1 class="hero-title">
@@ -850,7 +850,7 @@
                 </div>
             </div>
 
-            <!-- === USER STATISTICS SECTION === -->
+            <!-- ============= USER STATISTICS SECTION ================= -->
             <div class="section-divider">
                 <span class="divider-line"></span>
                 <span class="divider-label">
@@ -862,7 +862,7 @@
 
             <div class="row g-3 mb-4">
 
-                <!-- Total Users -->
+                <!------------------ Total Users ----------------------->
                 <div class="col-xl-3 col-lg-4 col-md-6">
                     <a th:href="@{/admin/users}" class="stat-card accent-blue">
                         <div class="stat-icon blue"><i class="bi bi-people-fill"></i></div>
@@ -873,7 +873,7 @@
                     </a>
                 </div>
 
-                <!-- Active Users -->
+                <!----------------- Active Users ------------------------>
                 <div class="col-xl-3 col-lg-4 col-md-6">
                     <div class="stat-card accent-green">
                         <div class="stat-icon green"><i class="bi bi-person-check-fill"></i></div>
@@ -883,7 +883,7 @@
                     </div>
                 </div>
 
-                <!-- Disabled Users -->
+                <!----------------- Disabled Users ------------------------->
                 <div class="col-xl-3 col-lg-4 col-md-6">
                     <div class="stat-card accent-red">
                         <div class="stat-icon red"><i class="bi bi-person-x-fill"></i></div>
@@ -893,7 +893,7 @@
                     </div>
                 </div>
 
-                <!-- Role Distribution -->
+                <!---------------- Role Distribution ------------------------->
                 <div class="col-xl-3 col-lg-4 col-md-6">
                     <div class="stat-card accent-purple">
                         <div class="stat-icon purple"><i class="bi bi-person-badge"></i></div>
@@ -913,7 +913,7 @@
 
             </div>
 
-            <!-- === RECONCILIATION STATISTICS SECTION === -->
+            <!-- ================== RECONCILIATION STATISTICS SECTION =================== -->
             <div class="section-divider">
                 <span class="divider-line"></span>
                 <span class="divider-label">
@@ -925,7 +925,7 @@
 
             <div class="row g-3 mb-4">
 
-                <!-- Total Reconciliation Results -->
+                <!---------------------- Total Reconciliation Results --------------------->
                 <div class="col-xl-3 col-lg-4 col-md-6">
                     <a th:href="@{/reconciliation}" class="stat-card accent-blue">
                         <div class="stat-icon blue"><i class="bi bi-list-check"></i></div>
@@ -936,7 +936,7 @@
                     </a>
                 </div>
 
-                <!-- Exact Matches -->
+                <!----------------------- Exact Matches ----------------------------->
                 <div class="col-xl-3 col-lg-4 col-md-6">
                     <a th:href="@{/reconciliation?status=EXACT}" class="stat-card accent-green">
                         <div class="stat-icon green"><i class="bi bi-check-circle-fill"></i></div>
@@ -947,7 +947,7 @@
                     </a>
                 </div>
 
-                <!-- Partial Matches -->
+                <!----------------------- Partial Matches -------------------------------->
                 <div class="col-xl-3 col-lg-4 col-md-6">
                     <a th:href="@{/reconciliation?status=PARTIAL}" class="stat-card accent-orange">
                         <div class="stat-icon orange"><i class="bi bi-clock-history"></i></div>
@@ -958,7 +958,7 @@
                     </a>
                 </div>
 
-                <!-- Orphan Records -->
+                <!------------------------ Orphan Records ----------------------------->
                 <div class="col-xl-3 col-lg-4 col-md-6">
                     <a th:href="@{/reconciliation/orphans}" class="stat-card accent-red">
                         <div class="stat-icon red"><i class="bi bi-exclamation-triangle-fill"></i></div>
@@ -969,7 +969,7 @@
                     </a>
                 </div>
 
-                <!-- Manually Resolved -->
+                <!---------------------- Manually Resolved -------------------------->
                 <div class="col-xl-3 col-lg-4 col-md-6">
                     <a th:href="@{/reconciliation/manual-review}" class="stat-card accent-purple">
                         <div class="stat-icon purple"><i class="bi bi-pencil-square"></i></div>
@@ -980,7 +980,7 @@
                     </a>
                 </div>
 
-                <!-- Pending Approval -->
+                <!---------------------- Pending Approval -------------------------->
                 <div class="col-xl-3 col-lg-4 col-md-6">
                     <a th:href="@{/workflow/approvals}" class="stat-card accent-gold">
                         <div class="stat-icon gold"><i class="bi bi-clock"></i></div>
@@ -991,7 +991,7 @@
                     </a>
                 </div>
 
-                <!-- Approved -->
+                <!----------------------- Approved -------------------------->
                 <div class="col-xl-3 col-lg-4 col-md-6">
                     <a th:href="@{/reconciliation?status=APPROVED}" class="stat-card accent-green">
                         <div class="stat-icon green"><i class="bi bi-check2-circle"></i></div>
@@ -1002,7 +1002,7 @@
                     </a>
                 </div>
 
-                <!-- Rejected -->
+                <!----------------------- Rejected ------------------------>
                 <div class="col-xl-3 col-lg-4 col-md-6">
                     <a th:href="@{/reconciliation?status=REJECTED}" class="stat-card accent-red">
                         <div class="stat-icon red"><i class="bi bi-x-circle"></i></div>
@@ -1015,7 +1015,7 @@
 
             </div>
 
-            <!-- === CHARTS SECTION === -->
+            <!-- ================= CHARTS SECTION =========================== -->
             <div class="section-divider">
                 <span class="divider-line"></span>
                 <span class="divider-label">
@@ -1027,7 +1027,7 @@
 
             <div class="row g-3 mb-4">
 
-                <!-- Chart 1: User Status Doughnut -->
+                <!-------------------- Chart 1: User Status Doughnut ---------------------->
                 <div class="col-lg-4 col-md-6">
                     <div class="chart-card">
                         <div class="chart-title">User Status</div>
@@ -1038,7 +1038,7 @@
                     </div>
                 </div>
 
-                <!-- Chart 2: Reconciliation Status Distribution -->
+                <!-------------------- Chart 2: Reconciliation Status Distribution --------->
                 <div class="col-lg-4 col-md-6">
                     <div class="chart-card">
                         <div class="chart-title">Reconciliation Status</div>
@@ -1049,7 +1049,7 @@
                     </div>
                 </div>
 
-                <!-- Chart 3: Role Distribution -->
+                <!--------------------- Chart 3: Role Distribution ----------------------->
                 <div class="col-lg-4 col-md-6">
                     <div class="chart-card">
                         <div class="chart-title">Role Distribution</div>
@@ -1062,7 +1062,7 @@
 
             </div>
 
-            <!-- === QUICK ACTIONS === -->
+            <!-- =================== QUICK ACTIONS ============================ -->
             <div class="section-divider">
                 <span class="divider-line"></span>
                 <span class="divider-label">
@@ -1108,10 +1108,10 @@
 
             </div>
 
-            <!-- === SYSTEM SUMMARY + RECENT ACTIVITY === -->
+            <!-- ===================== SYSTEM SUMMARY + RECENT ACTIVITY ========================= -->
             <div class="row g-3">
 
-                <!-- System Summary -->
+                <!--------------------- System Summary ------------------------->
                 <div class="col-lg-6">
                     <div class="summary-card">
                         <div class="summary-title">
@@ -1151,7 +1151,7 @@
                     </div>
                 </div>
 
-                <!-- Recent Activity -->
+                <!-------------------- Recent Activity -------------------------->
                 <div class="col-lg-6">
                     <div class="activity-card">
                         <div class="activity-title">

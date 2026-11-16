@@ -1,3 +1,6 @@
+<!-- ---------------------------------------------------------------------------->
+<!--                             Verify PIN Page                               -->
+<!-- ---------------------------------------------------------------------------->
 <!DOCTYPE html>
 <html lang="en"
       xmlns:th="http://www.thymeleaf.org">
@@ -5,9 +8,6 @@
 <head th:replace="~{fragments/header :: header('Verify PIN')}"></head>
 
 <style>
-    /* ============================================================
-       FRWSS PRO UX/UI DESIGN - Verify PIN (Centered Portal Style)
-       ============================================================ */
 
     .main-container {
         display: flex;
@@ -27,7 +27,7 @@
         border: 1px solid #f0f2f5;
     }
 
-    /* Lock Icon */
+    /*                     Lock Icon                         */
     .lock-icon-wrapper {
         display: flex;
         justify-content: center;
@@ -46,7 +46,7 @@
         color: #0d6efd;
     }
 
-    /* Title */
+    /*                        Title                           */
     .verify-title {
         text-align: center;
         font-weight: 700;
@@ -62,7 +62,7 @@
         margin-bottom: 2rem;
     }
 
-    /* Form */
+    /*                            Form                        */
     .form-label {
         font-weight: 600;
         font-size: 0.9rem;
@@ -150,7 +150,7 @@
         margin: 1.25rem 0;
     }
 
-    /* Alert messages */
+    /*                          Alert messages                          */
     .alert {
         border: none;
         border-radius: 12px;
@@ -179,7 +179,7 @@
         font-size: 0.7rem;
     }
 
-    /* Responsive */
+    /*                             Responsive                           */
     @media (max-width: 576px) {
         .main-container {
             padding: 1rem;
@@ -211,7 +211,7 @@
     }
 
     /* ==========================================
-   Dark Mode - Verify PIN Page
+            Dark Mode - Verify PIN Page
    ========================================== */
 
     [data-bs-theme="dark"] .verify-card {
@@ -276,10 +276,10 @@
         <div class="container-fluid main-container">
 
 
-            <!-- VERIFY PIN CARD -->
+            <!--------------------- VERIFY PIN CARD --------------------------->
             <div class="verify-card">
 
-                <!-- Success Message -->
+                <!------------------- Success Message -------------------------->
                 <div th:if="${successMessage}"
                      class="alert alert-success alert-dismissible fade show"
                      role="alert">
@@ -294,7 +294,7 @@
 
                 </div>
 
-                <!-- Error Message -->
+                <!-------------------- Error Message ----------------------------->
                 <div th:if="${errorMessage}"
                      class="alert alert-danger alert-dismissible fade show"
                      role="alert">
@@ -309,18 +309,18 @@
 
                 </div>
 
-                <!-- Lock Icon -->
+                <!--------------------- Lock Icon ----------------------------->
                 <div class="lock-icon-wrapper">
                     <div class="lock-icon">
                         <i class="bi bi-shield-lock"></i>
                     </div>
                 </div>
 
-                <!-- Title -->
+                <!------------------- Title -------------------------------->
                 <h2 class="verify-title">Verify PIN</h2>
                 <p class="verify-subtitle">Enter your security PIN to continue with the sensitive operation.</p>
 
-                <!-- Form -->
+                <!------------------------ Form ------------------------------>
                 <form th:action="@{/security/verify-pin}"
                       th:object="${pinVerificationRequest}"
                       method="post">

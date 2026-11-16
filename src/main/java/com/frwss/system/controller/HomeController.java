@@ -1,3 +1,7 @@
+// -------------------------------------------------------------------------------
+//       Collects system statistics and audit information for the home dashboard
+// -------------------------------------------------------------------------------
+
 package com.frwss.system.controller;
 
 import com.frwss.system.audit.model.AuditLog;
@@ -28,6 +32,10 @@ public class HomeController {
         this.auditService = auditService;
     }
 
+    /**
+     * Retrieves accounting, reconciliation, and audit statistics
+     * and supplies them to the home dashboard.
+     */
     @GetMapping("/")
     public String home(Model model) {
         // Total records

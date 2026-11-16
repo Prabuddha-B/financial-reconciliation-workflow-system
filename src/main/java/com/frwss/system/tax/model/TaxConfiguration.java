@@ -1,3 +1,6 @@
+// -------------------------------------------------------------------------------
+//       Represents tax configuration rules stored in the database
+// -------------------------------------------------------------------------------
 package com.frwss.system.tax.model;
 
 import jakarta.persistence.*;
@@ -50,6 +53,10 @@ public class TaxConfiguration {
     @Column(name = "updated_by")
     private String updatedBy;
 
+    /**
+     * Initializes creation and update timestamps before a new tax configuration
+     * is persisted.
+     */
     @PrePersist
     protected void onCreate() {
         LocalDateTime now = LocalDateTime.now();
@@ -57,6 +64,10 @@ public class TaxConfiguration {
         updatedAt = now;
     }
 
+    /**
+     * Refreshes the last-updated timestamp before an existing configuration
+     * is persisted with changes.
+     */
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
@@ -66,54 +77,71 @@ public class TaxConfiguration {
     public Long getId() {
         return id;
     }
+
     public void setId(Long id) {
         this.id = id;
     }
+
     public String getCategory() {
         return category;
     }
+
     public void setCategory(String category) {
         this.category = category;
     }
+
     public String getModule() {
         return module;
     }
+
     public void setModule(String module) {
         this.module = module;
     }
+
     public BigDecimal getTaxRate() {
         return taxRate;
     }
+
     public void setTaxRate(BigDecimal taxRate) {
         this.taxRate = taxRate;
     }
+
     public String getDescription() {
         return description;
     }
+
     public void setDescription(String description) {
         this.description = description;
     }
+
     public Boolean getIsActive() {
         return isActive;
     }
+
     public void setIsActive(Boolean active) {
         isActive = active;
     }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
+
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
+
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
     }
+
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
+
     public String getUpdatedBy() {
         return updatedBy;
     }
+
     public void setUpdatedBy(String updatedBy) {
         this.updatedBy = updatedBy;
     }

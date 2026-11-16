@@ -1,12 +1,12 @@
+<!-- ---------------------------------------------------------------------------->
+<!--                       Create Tax Configuration Page                       -->
+<!-- ---------------------------------------------------------------------------->
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head th:replace="~{fragments/header :: header('Create Tax Configuration')}"></head>
 
 <style>
-    /* ============================================================
-       FRWSS PRO UX/UI DESIGN - Create Tax Configuration
-       ============================================================ */
 
     .main-container {
         padding: 2rem;
@@ -15,14 +15,14 @@
     }
 
     /* ============================================================
-       BACKGROUND - Subtle Gradient
+                   BACKGROUND - Subtle Gradient
        ============================================================ */
     [data-bs-theme="light"] body {
         background: linear-gradient(135deg, #f8fafc 0%, #eef2f6 100%);
     }
 
     /* ============================================================
-       BREADCRUMB
+                                BREADCRUMB
        ============================================================ */
     .breadcrumb-nav {
         display: flex;
@@ -53,7 +53,7 @@
     }
 
     /* ============================================================
-       PAGE HEADER
+                                PAGE HEADER
        ============================================================ */
     .page-header {
         margin-bottom: 2rem;
@@ -96,7 +96,7 @@
     }
 
     /* ============================================================
-       CARD WITH ACCENT BAR
+                        CARD WITH ACCENT BAR
        ============================================================ */
     .card-accent {
         border: none;
@@ -145,7 +145,7 @@
     }
 
     /* ============================================================
-       SECTION HEADERS
+                           SECTION HEADERS
        ============================================================ */
     .section-title {
         font-weight: 600;
@@ -167,7 +167,7 @@
     }
 
     /* ============================================================
-       FORM LABELS
+                              FORM LABELS
        ============================================================ */
     .form-label {
         font-weight: 600;
@@ -199,7 +199,7 @@
     }
 
     /* ============================================================
-       FORM CONTROLS
+                               FORM CONTROLS
        ============================================================ */
     .form-control {
         border-radius: 10px;
@@ -242,7 +242,7 @@
     }
 
     /* ============================================================
-       BUTTONS
+                                   BUTTONS
        ============================================================ */
     .btn-primary-custom {
         padding: 0.7rem 2rem;
@@ -288,7 +288,7 @@
     }
 
     /* ============================================================
-       FOOTER BUTTONS
+                              FOOTER BUTTONS
        ============================================================ */
     .form-footer {
         margin-top: 1.5rem;
@@ -300,7 +300,7 @@
     }
 
     /* ============================================================
-       INFO BOX WITH ACCENT
+                            INFO BOX WITH ACCENT
        ============================================================ */
     .info-box {
         background: #f8fafc;
@@ -386,7 +386,7 @@
     }
 
     /* ============================================================
-       ALERT MESSAGES
+                              ALERT MESSAGES
        ============================================================ */
     .alert {
         border: none;
@@ -412,7 +412,7 @@
     }
 
     /* ============================================================
-       TOOLTIP STYLES
+                           TOOLTIP STYLES
        ============================================================ */
     .tooltip-inner {
         border-radius: 8px;
@@ -423,7 +423,7 @@
     }
 
     /* ============================================================
-       RESPONSIVE
+                            RESPONSIVE
        ============================================================ */
     @media (max-width: 768px) {
         .main-container {
@@ -592,7 +592,7 @@
 
         <div class="container-fluid main-container">
 
-            <!-- Error Message -->
+            <!---------------------- Error Message --------------------------->
             <div th:if="${errorMessage}"
                  class="alert alert-danger alert-dismissible fade show"
                  role="alert">
@@ -609,7 +609,7 @@
 
 
 
-            <!-- PAGE HEADER -->
+            <!-------------------- PAGE HEADER ------------------------>
             <div class="page-header">
 
                 <div class="title-wrapper">
@@ -631,7 +631,7 @@
             </div>
 
 
-            <!-- MAIN FORM -->
+            <!----------------------- MAIN FORM ------------------------------>
             <div class="row g-4">
 
                 <div class="col-lg-8">
@@ -652,7 +652,7 @@
                                   method="post">
 
 
-                                <!-- SECTION 1: Basic Information -->
+                                <!-------------------- SECTION 1: Basic Information ---------------->
                                 <div class="section-title">
                                     <i class="bi bi-info-circle"></i>
                                     Basic Information
@@ -660,7 +660,7 @@
 
                                 <div class="row g-3">
 
-                                    <!-- Module -->
+                                    <!------------------- Module ---------------------->
                                     <div class="col-md-6">
                                         <div class="mb-3">
                                             <label class="form-label">
@@ -685,7 +685,7 @@
                                         </div>
                                     </div>
 
-                                    <!-- Category -->
+                                    <!------------------- Category ----------------------->
                                     <div class="col-md-6">
                                         <div class="mb-3">
                                             <label class="form-label">
@@ -713,7 +713,7 @@
                                 </div>
 
 
-                                <!-- SECTION 2: Tax Details -->
+                                <!-------------------- SECTION 2: Tax Details ---------------------->
 
                                 <div class="section-title mt-3">
                                     <i class="bi bi-percent"></i>
@@ -750,7 +750,7 @@
                                 </div>
 
 
-                                <!-- SECTION 3: Additional Information -->
+                                <!------------------- SECTION 3: Additional Information --------------->
 
                                 <div class="section-title mt-3">
                                     <i class="bi bi-card-text"></i>
@@ -784,7 +784,7 @@
                                 </div>
 
 
-                                <!-- FORM FOOTER -->
+                                <!---------------------- FORM FOOTER -------------------->
                                 <div class="form-footer">
                                     <button type="submit" class="btn-primary-custom">
                                         <i class="bi bi-plus-circle"></i>
@@ -807,7 +807,7 @@
                 </div>
 
 
-                <!-- RIGHT COLUMN: INFO BOX -->
+                <!-------------------- RIGHT COLUMN: INFO BOX ------------------------->
                 <div class="col-lg-4">
 
                     <div class="info-box">

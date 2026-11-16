@@ -1,34 +1,25 @@
+// -------------------------------------------------------------------------------
+//       Holds aggregated statistics displayed on the Administrator Dashboard
+// -------------------------------------------------------------------------------
 package com.frwss.system.admin.dto;
 
-/**
- * ------------------------------------------------------------
- * Admin Dashboard Data DTO
- * ------------------------------------------------------------
- * Holds all statistics displayed on the Admin Dashboard.
- * This object is populated by the AdminDashboardService
- * and passed to the dashboard view.
- * ------------------------------------------------------------
- */
 public class AdminDashboardData {
 
-    // ------------------------------------------------------------
+
     // User Statistics
-    // ------------------------------------------------------------
     private long totalUsers;
     private long activeUsers;
     private long disabledUsers;
 
-    // ------------------------------------------------------------
+
     // Role Statistics
-    // ------------------------------------------------------------
     private long administratorCount;
     private long approverCount;
     private long auditorCount;
     private long entryStaffCount;
 
-    // ------------------------------------------------------------
+
     // Reconciliation Statistics
-    // ------------------------------------------------------------
     private long totalReconciliationResults;
     private long exactMatches;
     private long partialMatches;
@@ -39,34 +30,26 @@ public class AdminDashboardData {
     private long rejected;
     private long bulkMatches;
 
-    // ------------------------------------------------------------
     // Workflow Statistics
-    // ------------------------------------------------------------
     private long totalWorkflows;
     private long pendingWorkflows;
     private long approvedWorkflows;
     private long rejectedWorkflows;
 
-    // ------------------------------------------------------------
     // Audit Statistics
-    // ------------------------------------------------------------
     private long totalAuditLogs;
 
-    // ------------------------------------------------------------
     // Tax Configuration Statistics
-    // ------------------------------------------------------------
     private long totalTaxConfigurations;
 
-    // ------------------------------------------------------------
     // System Health
-    // ------------------------------------------------------------
     private String systemStatus;
 
     // ============================================================
     // Getters & Setters
     // ============================================================
 
-    // User Statistics
+    // --------------------------- User Statistics --------------------------------------------
     public long getTotalUsers() {
         return totalUsers;
     }
@@ -91,7 +74,7 @@ public class AdminDashboardData {
         this.disabledUsers = disabledUsers;
     }
 
-    // Role Statistics
+    // ------------------------------- Role Statistics -------------------------------------------------
     public long getAdministratorCount() {
         return administratorCount;
     }
@@ -124,7 +107,7 @@ public class AdminDashboardData {
         this.entryStaffCount = entryStaffCount;
     }
 
-    // Reconciliation Statistics
+    // ------------------------ Reconciliation Statistics -----------------------------------
     public long getTotalReconciliationResults() {
         return totalReconciliationResults;
     }
@@ -197,7 +180,7 @@ public class AdminDashboardData {
         this.bulkMatches = bulkMatches;
     }
 
-    // Workflow Statistics
+    // ----------------------- Workflow Statistics -------------------------------------
     public long getTotalWorkflows() {
         return totalWorkflows;
     }
@@ -230,7 +213,7 @@ public class AdminDashboardData {
         this.rejectedWorkflows = rejectedWorkflows;
     }
 
-    // Audit Statistics
+    // ------------------ Audit Statistics-------------------------------
     public long getTotalAuditLogs() {
         return totalAuditLogs;
     }
@@ -239,7 +222,7 @@ public class AdminDashboardData {
         this.totalAuditLogs = totalAuditLogs;
     }
 
-    // Tax Statistics
+    // ------------------ Tax Statistics --------------------------------
     public long getTotalTaxConfigurations() {
         return totalTaxConfigurations;
     }
@@ -248,7 +231,7 @@ public class AdminDashboardData {
         this.totalTaxConfigurations = totalTaxConfigurations;
     }
 
-    // System Health
+    // -------------- System Health--------------------------
     public String getSystemStatus() {
         return systemStatus;
     }

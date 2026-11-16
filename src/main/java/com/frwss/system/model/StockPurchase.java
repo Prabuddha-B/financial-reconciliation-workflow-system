@@ -1,3 +1,6 @@
+// -------------------------------------------------------------------------------
+//       Represents stock purchase records stored in the system
+// -------------------------------------------------------------------------------
 package com.frwss.system.model;
 
 import jakarta.persistence.*;

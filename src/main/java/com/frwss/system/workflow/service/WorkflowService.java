@@ -1,5 +1,6 @@
-// --------------------------- Defines Workflow Business Operations ---------------------------------------
-
+// -------------------------------------------------------------------------------------------------------
+//                      Defines the available business operations supported by the workflow subsystem
+// -------------------------------------------------------------------------------------------------------
 package com.frwss.system.workflow.service;
 
 import com.frwss.system.workflow.dto.WorkflowRequestDto;
@@ -10,20 +11,21 @@ import java.util.*;
 
 public interface WorkflowService {
 
-//    Creates a ne wworkflow Record
+    /** Creates a new workflow record. */
     WorkflowResponseDto createWorkflow(WorkflowRequestDto workflowRequestDto);
 
-//    Updates workflow State
+    /** Updates the state of an existing workflow. */
     WorkflowResponseDto updateWorkflowState(Long workflowId, WorkflowStateUpdateRequestDto request);
 
-//    Retrieves  workflow Transition History
+    /** Retrieves the transition history of a workflow. */
     List<WorkflowHistoryResponseDto> getWorkflowHistory(Long workflowId);
 
-//    Retrieves a single workflow
+    /** Retrieves a workflow using its ID. */
     WorkflowResponseDto getWorkflowById(Long workflowId);
 
-//    Retrieves all workflows
+    /** Retrieves all workflow records. */
     List<WorkflowResponseDto> getAllWorkflows();
 
+    /** Retrieves the latest activity of a workflow. */
     WorkflowHistoryResponseDto getLatestWorkflowActivity(Long workflowId);
 }

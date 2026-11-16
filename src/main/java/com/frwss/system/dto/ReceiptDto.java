@@ -1,3 +1,7 @@
+// -------------------------------------------------------------------------------
+//       Carries receipt information and its file-validation status
+// -------------------------------------------------------------------------------
+
 package com.frwss.system.dto;
 
 import java.math.BigDecimal;
@@ -14,7 +18,10 @@ public class ReceiptDto {
     private boolean valid;
     private String errorMessage;
 
-    //    Constructor
+    /**
+     * Initializes a receipt DTO with the receipt details extracted
+     * from an uploaded financial data file.
+     */
     public ReceiptDto(String receiptId, String referenceNo, String payerName, BigDecimal amount, String date, String enteredBy) {
         setReceiptId(receiptId);
         setReferenceNo(referenceNo);

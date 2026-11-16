@@ -1,3 +1,6 @@
+<!-- ---------------------------------------------------------------------------->
+<!--                        Workflow Summary Dashboard                         -->
+<!-- ---------------------------------------------------------------------------->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
@@ -5,7 +8,7 @@
 
 <style>
   /* ============================================================
-     DASHBOARD STAT CARDS
+                         DASHBOARD STAT CARDS
      ============================================================ */
 
   .dashboard-stat-card {
@@ -34,7 +37,7 @@
   }
 
   /* ============================================================
-     ICONS
+                                ICONS
      ============================================================ */
 
   .stat-icon {
@@ -72,7 +75,7 @@
   }
 
   /* ============================================================
-     CONTENT
+                                  CONTENT
      ============================================================ */
 
   .stat-content {
@@ -103,7 +106,7 @@
   }
 
   /* ============================================================
-     RESPONSIVE
+                              RESPONSIVE
      ============================================================ */
 
   @media (max-width: 768px) {
@@ -174,6 +177,7 @@
           <div class="stat-content">
             <div class="stat-label">TOTAL WORKFLOWS</div>
 
+            <!-- Dynamic Workflow Count -->
             <div class="stat-value"
                  th:text="${#lists.size(workflows)}">
               0
@@ -273,7 +277,7 @@
         <div class="table-responsive">
           <table class="table table-hover align-middle mb-0">
 
-            <!-- Workflow Records Columns -->
+            <!-------------------  Workflow Records Columns -------------------------------->
             <thead class="table-light text-uppercase small text-muted">
             <tr>
               <th class="ps-3">Workflow ID</th>
@@ -285,10 +289,10 @@
             </tr>
             </thead>
 
-            <!-- Workflow Records -->
+            <!--------------------- Workflow Records ------------------------------->
             <tbody>
 
-              <!-- REVIEWED workflows are highlighted -->
+              <!-------------------- REVIEWED workflows are highlighted ------------------------->
               <tr th:each="workflow : ${workflows}" th:style="${workflow.currentState.name() == 'REVIEWED'} ? 'border-left: 4px solid #ffc107;' : ''">
                 <td class="fw-semibold ps-3" th:text="${workflow.workflowId}"></td>
                 <td th:text="${workflow.sourceType}"></td>
@@ -297,7 +301,7 @@
                     th:text="${#strings.isEmpty(workflow.detailsSummary()) ? '—' : #strings.abbreviate(workflow.detailsSummary(), 90)}"></td>
                 <td>
 
-                  <!-- Workflow State Badges -->
+                  <!---------------------- Workflow State Badges ------------------------>
                   <span th:if="${workflow.currentState.name() == 'ENTERED'}" class="badge rounded-pill bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle"
                         th:text="${workflow.currentState}">
                     ENTERED
@@ -320,14 +324,14 @@
                 </td>
                 <td class="text-md-end pe-3">
 
-                  <!-- Navigate to workflow review page -->
+                  <!------------------ Navigate to workflow review page ------------------------>
                   <a th:href="@{/workflow/status/{id}(id=${workflow.workflowId})}" class="btn btn-sm btn-outline-primary">
                     Review Workflow
                   </a>
                 </td>
               </tr>
 
-              <!-- Empty State When No Workflow Records Exists -->
+              <!--------------------- Empty State When No Workflow Records Exists ------------------------->
               <tr th:if="${#lists.isEmpty(workflows)}">
                 <td colspan="6" class="text-center p-5">
                   <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary-subtle text-primary mb-3"
@@ -349,11 +353,8 @@
 
 
   </div>
-  <!-- Footer -->
+  <!---------------------- Footer -------------------------->
   <div th:replace="~{fragments/footer :: footer}"></div>
-  <!-- ========================================== -->
-  <!-- INCLUDE SCRIPTS FRAGMENT                   -->
-  <!-- ========================================== -->
   <div th:replace="~{fragments/scripts :: badgeStyles}"></div>
   <div th:replace="~{fragments/scripts :: badgeScripts}"></div>
 

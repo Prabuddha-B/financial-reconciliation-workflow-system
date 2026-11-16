@@ -1,5 +1,6 @@
-// ------------------------- Implements Workflow Business Logic ------------------
-
+// -------------------------------------------------------------------------------
+//                         Implements Workflow Business Logic
+// -------------------------------------------------------------------------------
 package com.frwss.system.workflow.service;
 
 import com.frwss.system.workflow.dto.WorkflowRequestDto;
@@ -32,6 +33,7 @@ public class WorkflowServiceImpl implements WorkflowService {
     private final AuditService auditService;
     private final ReconciliationService reconciliationService;
 
+    // Constructor
     public WorkflowServiceImpl(WorkflowRecordRepository workflowRecordRepository,
                                WorkflowTransitionLogRepository workflowTransitionLogRepository,
                                AuditService auditService,
@@ -42,12 +44,15 @@ public class WorkflowServiceImpl implements WorkflowService {
         this.reconciliationService = reconciliationService;
     }
 
-//    Creates a new workflow record
+    /**
+     * Creates a new workflow record with its initial state set to ENTERED.
+     */
     @Override
     public WorkflowResponseDto createWorkflow(WorkflowRequestDto request) {
 
         WorkflowRecord workflowRecord = new WorkflowRecord();
 
+        // Populate the entity
         workflowRecord.setSourceType(request.getSourceType());
         workflowRecord.setSourceRecordId(request.getSourceRecordId());
         workflowRecord.setCreatedBy(request.getCreatedBy());
@@ -74,38 +79,49 @@ public class WorkflowServiceImpl implements WorkflowService {
         return response;
     }
 
-//    Updates workflow state
+    /**
+     * Validates and updates a workflow state, records the transition history,
+     * and triggers the related audit and reconciliation operations.
+     */
     @Override
     @Transactional
     public WorkflowResponseDto updateWorkflowState(Long workflowId, WorkflowStateUpdateRequestDto request) {
 
+        // Retrieve the existing workflow
         WorkflowRecord workflowRecord = workflowRecordRepository.findById(workflowId).orElseThrow(() -> new WorkflowNotFoundException("Workflow not found"));
 
+        // Capture the previous state
         WorkflowState oldState = workflowRecord.getCurrentState();
 
+        // Validate the requested transition
         if(!WorkflowTransitionValidator.isValidTransition(oldState, request.getNewState())){
             throw new InvalidWorkflowTransitionException("Segregation of Duties Violation: Users cannot verify records they previously reviewed.");
         }
 
+        // Validate the justification
         if (request.getJustification() == null || request.getJustification().trim().isEmpty()) {
             throw new RuntimeException("Justification is required");
         }
 
+        // Enforce creator-reviewer separation
         if(workflowRecord.getCreatedBy().equals(request.getPerformedBy())){
             throw new RuntimeException("Creator cannot review or approve their own workflow");
         }
 
+        // Prevent consecutive transitions by the same user
         WorkflowTransitionLog latestTransition = workflowTransitionLogRepository.findTopByWorkflowIdOrderByTransitionTimeDesc(workflowId);
 
         if (latestTransition != null && latestTransition.getPerformedBy().equals(request.getPerformedBy())) {
             throw new RuntimeException("Same user cannot perform consecutive workflow transitions");
         }
 
+        // Update the workflow entity
         workflowRecord.setCurrentState(request.getNewState());
         workflowRecord.setUpdatedAt(LocalDateTime.now());
 
         WorkflowRecord updatedRecord = workflowRecordRepository.save(workflowRecord);
 
+        // Create a transition-history record
         WorkflowTransitionLog log = new WorkflowTransitionLog();
 
         log.setWorkflowId(updatedRecord.getWorkflowId());
@@ -117,6 +133,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 
         workflowTransitionLogRepository.save(log);
 
+        // Integrate with manual reconciliation resolution
         if ("RECONCILIATION".equals(updatedRecord.getSourceType())) {
 
             Long reconciliationResultId = Long.parseLong(updatedRecord.getSourceRecordId());
@@ -128,6 +145,7 @@ public class WorkflowServiceImpl implements WorkflowService {
             }
         }
 
+        // Record an audit event
         auditService.log(
                 AuditActionType.WORKFLOW_STATE_CHANGED,
                 "WorkflowRecord",
@@ -142,13 +160,17 @@ public class WorkflowServiceImpl implements WorkflowService {
         response.setSourceType(updatedRecord.getSourceType());
         response.setSourceRecordId(updatedRecord.getSourceRecordId());
         response.setCurrentState(updatedRecord.getCurrentState());
+
+        // Return the response
         response.setMessage("Workflow State Updated Successfully");
         response.setCreatedBy(updatedRecord.getCreatedBy());
 
         return response;
     }
 
-//    Retrieves Workflow History
+    /**
+     * Retrieves the complete transition history of a workflow.
+     */
     @Override
     public List<WorkflowHistoryResponseDto> getWorkflowHistory(Long workflowId) {
 
@@ -169,7 +191,9 @@ public class WorkflowServiceImpl implements WorkflowService {
         return history;
     }
 
-//    Retrieves a single workflow
+    /**
+     * Retrieves a workflow record using its unique workflow ID.
+     */
     @Override
     public WorkflowResponseDto getWorkflowById(Long workflowId) {
 
@@ -188,7 +212,9 @@ public class WorkflowServiceImpl implements WorkflowService {
         return response;
     }
 
-//    Retrieves all workflows
+    /**
+     * Retrieves all workflow records ordered by their display priority.
+     */
     @Override
     public List<WorkflowResponseDto> getAllWorkflows() {
 
@@ -218,7 +244,9 @@ public class WorkflowServiceImpl implements WorkflowService {
         return workflows;
     }
 
-    // Determines workflow display priority for approval dashboard
+    /**
+     * Determines the display priority of a workflow based on its current state.
+     */
     private int getWorkflowPriority(WorkflowState state) {
         return switch (state) {
             case REVIEWED -> 1;   // Needs reviewer decision
@@ -228,7 +256,9 @@ public class WorkflowServiceImpl implements WorkflowService {
         };
     }
 
-    //    Retrieves Latest Workflow Activity
+    /**
+     * Retrieves the latest recorded transition activity of a workflow.
+     */
     @Override
     public WorkflowHistoryResponseDto getLatestWorkflowActivity(Long workflowId) {
 

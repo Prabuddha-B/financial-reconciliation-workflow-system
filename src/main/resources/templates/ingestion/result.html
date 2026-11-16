@@ -1,3 +1,6 @@
+<!-- ---------------------------------------------------------------------------->
+<!--                     Uploaded Financial Data Preview Page                  -->
+<!-- ---------------------------------------------------------------------------->
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
@@ -5,7 +8,7 @@
 
 <body class="bg-light">
 
-    <!-- ======= Reusable Navigation Bar =============== -->
+    <!-- ============  Navigation Bar =============== -->
     <div th:replace="~{fragments/navbar :: navbar}"></div>
 
     <!-- ============== Main Page Container ============= -->
@@ -54,7 +57,7 @@
         <!-- ================= Record Summary ================= -->
             <div class="row g-4 mb-5">
 
-                <!-- Total Records -->
+                <!--------------------------- Total Records ------------------------------------>
                 <div class="col-12 col-md-4">
 
                     <div class="card shadow-sm h-100 border-0">
@@ -85,8 +88,7 @@
                     </div>
                 </div>
 
-
-                <!-- Valid Records -->
+                <!-------------------------- Valid Records ---------------------------------------->
                 <div class="col-12 col-md-4">
 
                     <div class="card shadow-sm h-100 border-success-subtle">
@@ -116,8 +118,7 @@
                     </div>
                 </div>
 
-
-                <!-- Invalid Records -->
+                <!--------------------------- Invalid Records ----------------------------------------->
                 <div class="col-12 col-md-4">
 
                     <div class="card shadow-sm h-100 border-danger-subtle">
@@ -155,7 +156,7 @@
 
                     <div class="row align-items-center g-3">
 
-                        <!-- Search -->
+                        <!--------------------------- Search ---------------------------------------->
                         <div class="col-lg-7">
 
                             <label for="searchInput" class="form-label fw-semibold">
@@ -171,7 +172,7 @@
                             'Search...')))">
                         </div>
 
-                        <!-- Filter Buttons -->
+                        <!------------------------ Filter Buttons -------------------------------------->
                         <div class="col-lg-5">
 
                             <label class="form-label fw-semibold">
@@ -208,7 +209,7 @@
 
             <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
 
-                <!-- Information -->
+                <!-------------------------------- Information --------------------------------->
                 <div>
                     <h6 class="fw-semibold mb-1">
                         Ready to Continue
@@ -220,7 +221,7 @@
 
                 </div>
 
-                <!-- Actions -->
+                <!---------------------------------- Actions ------------------------------------->
                 <div class="d-flex gap-2">
 
                     <form th:action="@{/ingestion/save}" method="post">
@@ -249,12 +250,12 @@
             No matching records found.
         </p>
 
-        <!-- Dynamic Tables -->
+        <!--------------------------------- Dynamic Tables --------------------------------------->
         <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
 
             <div th:if="${dataType == 'RECEIPT'}">
 
-                <!-- Receipt Table -->
+                <!------------------------- Receipt Table --------------------------------->
                 <table class="table table-bordered">
                     <thead>
                     <tr>
@@ -288,7 +289,7 @@
 
             <div th:if="${dataType == 'PAYROLL'}">
 
-                <!-- Payroll Table-->
+                <!-------------------------------- Payroll Table------------------------------------->
                 <table class="table table-bordered">
                     <thead>
                     <tr>
@@ -322,7 +323,7 @@
 
             <div th:if="${dataType == 'STOCK'}">
 
-                <!-- Stock Table-->
+                <!---------------------------------- Stock Table -------------------------------------->
                 <table class="table table-bordered table-hover">
                     <thead class="table-dark">
                     <tr>
@@ -360,7 +361,7 @@
 
             <div th:if="${dataType == 'ACCOUNTING'}">
 
-                <!-- Accounting Table -->
+                <!-------------------------------- Accounting Table -------------------------------------->
                 <table class="table table-bordered table-hover">
                     <thead class="table-dark">
                     <tr>
@@ -483,11 +484,8 @@
         </script>
     </div>
 
-<!-- Footer -->
+<!----------------------- Footer --------------------------------------->
 <div th:replace="~{fragments/footer :: footer}"></div>
-<!-- ========================================== -->
-<!-- INCLUDE SCRIPTS FRAGMENT                   -->
-<!-- ========================================== -->
 <div th:replace="~{fragments/scripts :: badgeStyles}"></div>
 <div th:replace="~{fragments/scripts :: badgeScripts}"></div>
 

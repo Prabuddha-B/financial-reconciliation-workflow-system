@@ -1,3 +1,6 @@
+<!-- ---------------------------------------------------------------------------->
+<!--                            Access Denied Page                             -->
+<!-- ---------------------------------------------------------------------------->
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
@@ -19,7 +22,7 @@
 
                         <div class="card-body text-center p-5">
 
-                            <!-- Icon -->
+                            <!----------------------- - Icon ---------------------------------->
                             <div class="mb-4">
                                 <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-danger-subtle"
                                      style="width:110px;height:110px;">
@@ -30,17 +33,17 @@
                                 </div>
                             </div>
 
-                            <!-- Status -->
+                            <!------------------------- Status ---------------------------------->
                             <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2 mb-3">
                                 HTTP 403 • Access Restricted
                             </span>
 
-                            <!-- Heading -->
+                            <!--------------------------- Heading ------------------------------>
                             <h1 class="fw-bold mb-3">
                                 Access Denied
                             </h1>
 
-                            <!-- Description -->
+                            <!-------------------------- Description ---------------------------->
                             <p class="text-muted fs-5 mb-4">
 
                                 You do not have sufficient permissions to access
@@ -48,7 +51,7 @@
 
                             </p>
 
-                            <!-- Information Card -->
+                            <!------------------------ Information Card ---------------------------->
                             <div class="alert alert-light border text-start mb-4">
 
                                 <div class="d-flex">
@@ -76,7 +79,7 @@
 
                             </div>
 
-                            <!-- Actions -->
+                            <!------------------------- Actions ------------------------------------>
                             <div class="d-grid gap-2 d-md-flex justify-content-md-center">
 
                                 <a th:href="@{/}"
@@ -113,9 +116,7 @@
 
     <div th:replace="~{fragments/footer :: footer}"></div>
 
-<!-- ========================================== -->
-<!-- INCLUDE SCRIPTS FRAGMENT                   -->
-<!-- ========================================== -->
+
 <div th:replace="~{fragments/scripts :: badgeStyles}"></div>
 <div th:replace="~{fragments/scripts :: badgeScripts}"></div>
 </body>

@@ -1,5 +1,6 @@
-// ---------------------- Provides Database Access For Workflow Records -------------------------------------
-
+// ----------------------------------------------------------------------------------------------------------
+//                          Provides Database Operations For Workflow Records
+// ----------------------------------------------------------------------------------------------------------
 package com.frwss.system.workflow.repository;
 
 import com.frwss.system.workflow.model.WorkflowRecord;
@@ -12,7 +13,6 @@ import java.util.Optional;
 public interface WorkflowRecordRepository extends JpaRepository<WorkflowRecord, Long> {
 
     // Find workflow linked to a source record
-    Optional<WorkflowRecord> findBySourceTypeAndSourceRecordId(String sourceType, String sourceRecordId
-    );
+    Optional<WorkflowRecord> findBySourceTypeAndSourceRecordId(String sourceType, String sourceRecordId);
 
 }

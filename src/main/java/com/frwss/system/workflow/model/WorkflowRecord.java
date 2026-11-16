@@ -1,4 +1,6 @@
-//-------------------------- Stores Workflow Record Information -----------------------------------------
+//-------------------------------------------------------------------------------------------------------
+//                      JPA Entity Representing a  Workflow Record Information
+//-------------------------------------------------------------------------------------------------------
 
 package com.frwss.system.workflow.model;
 
@@ -12,33 +14,41 @@ public class WorkflowRecord {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    // Unique identifier of the workflow - PRIMARY KEY
     @Column(name = "workflow_id")
     private Long workflowId;
 
+    // Identifies the originating module or record type
     @Column(name = "source_type")
     private String sourceType;
 
+    // Identifies the original source record
     @Column(name = "source_record_id")
     private String sourceRecordId;
 
+    // Stores the current workflow state
     @Enumerated(EnumType.STRING)
     @Column(name = "current_state")
     private WorkflowState currentState;
 
+    // Identifies who created the workflow
     @Column(name = "created_by")
     private String createdBy;
 
+    // Workflow creation timestamp
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    // Last update timestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // Free-text comments entered by the submitter when the workflow was created
+    // Submitter's comments
     @Column(name = "comments", length = 2000)
     private String comments;
 
-    // Summary supplied by the source module (e.g. matched record and justification)
+    // Additional information supplied by the source module
     @Column(name = "details", length = 2000)
     private String details;
 

@@ -1,3 +1,7 @@
+// -------------------------------------------------------------------------------
+//       Handles manual creation, searching, and updating of financial records
+// -------------------------------------------------------------------------------
+
 package com.frwss.system.controller;
 
 import com.frwss.system.dto.ManualEntryForm;
@@ -26,6 +30,9 @@ public class ManualEntryController {
     @Autowired private StockPurchaseRepository stockPurchaseRepository;
     @Autowired private AccountingRecordRepository accountingRecordRepository;
 
+    /**
+     * Displays the manual-entry form for the selected financial record type.
+     * */
     @GetMapping("/manual")
     public String manualHome(@RequestParam(value = "dataType", required = false, defaultValue = "RECEIPT") String dataType,
                              @RequestParam(value = "mode", required = false, defaultValue = "ADD") String mode,
@@ -38,6 +45,10 @@ public class ManualEntryController {
         return "ingestion/manual-entry";
     }
 
+    /**
+     * Searches for an existing financial record using its primary key
+     * and prepares the retrieved record for editing.
+     */
     @PostMapping("/manual/update/search")
     public String searchForUpdate(@RequestParam("dataType") String dataType,
                                   @RequestParam(value = "receiptId", required = false) String receiptId,
@@ -76,6 +87,9 @@ public class ManualEntryController {
         return "ingestion/manual-entry";
     }
 
+    /**
+     * Validates and saves a new financial record based on the selected data type.
+     */
     @PostMapping("/manual/add")
     public String addNew(@RequestParam("dataType") String dataType,
                          @ModelAttribute("record") ManualEntryForm record,
@@ -102,6 +116,10 @@ public class ManualEntryController {
         return "ingestion/manual-form";
     }
 
+    /**
+     * Retrieves an existing record, applies permitted changes,
+     * and saves the updated entity.
+     */
     @PostMapping("/manual/update")
     public String updateExisting(@RequestParam("dataType") String dataType,
                                  @ModelAttribute("record") ManualEntryForm incoming,
@@ -135,6 +153,10 @@ public class ManualEntryController {
         return new ManualEntryForm();
     }
 
+    /**
+     * Validates the mandatory identifiers required to create
+     * a new record of the selected financial data type.
+     */
     private void validateRequiredKeysForAdd(String dataType, ManualEntryForm record) {
         switch (dataType) {
             case "RECEIPT": {
@@ -221,6 +243,10 @@ public class ManualEntryController {
         }
     }
 
+    /**
+     * Converts a manual-entry form into the corresponding
+     * financial entity based on the selected data type.
+     */
     private Object saveNew(String dataType, ManualEntryForm record) {
         switch (dataType) {
             case "RECEIPT": return receiptRepository.save(toReceipt(record));
@@ -241,6 +267,10 @@ public class ManualEntryController {
         }
     }
 
+    /**
+     * Applies the permitted form-field changes to the existing
+     * entity without replacing its primary key.
+     */
     private Object applyAllowedUpdates(String dataType, Object existing, ManualEntryForm incoming) {
         switch (dataType) {
             case "RECEIPT": {
@@ -340,6 +370,10 @@ public class ManualEntryController {
         return record;
     }
 
+    /**
+     * Converts a financial entity into the shared manual-entry
+     * form representation for displaying or editing its data.
+     */
     private ManualEntryForm toForm(Object entity) {
         ManualEntryForm form = new ManualEntryForm();
         if (entity instanceof Receipt receipt) {

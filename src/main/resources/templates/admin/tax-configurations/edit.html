@@ -1,28 +1,27 @@
+<!-- ---------------------------------------------------------------------------->
+<!--                       Edit Tax Configuration Page                         -->
+<!-- ---------------------------------------------------------------------------->
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head th:replace="~{fragments/header :: header('Edit Tax Configuration')}"></head>
 
 <style>
-    /* ============================================================
-       FRWSS PRO UX/UI DESIGN - Edit Tax Configuration
-       ============================================================ */
-
-    .main-container {
+ .main-container {
         padding: 2rem;
         max-width: 1200px;
         margin: 0 auto;
     }
 
     /* ============================================================
-       BACKGROUND - Subtle Gradient
+                    BACKGROUND - Subtle Gradient
        ============================================================ */
     [data-bs-theme="light"] body {
         background: linear-gradient(135deg, #f8fafc 0%, #eef2f6 100%);
     }
 
     /* ============================================================
-       BREADCRUMB
+                                 BREADCRUMB
        ============================================================ */
     .breadcrumb-nav {
         display: flex;
@@ -53,7 +52,7 @@
     }
 
     /* ============================================================
-       PAGE HEADER
+                                PAGE HEADER
        ============================================================ */
     .page-header {
         margin-bottom: 2rem;
@@ -123,7 +122,7 @@
     }
 
     /* ============================================================
-       CARD WITH ACCENT BAR
+                         CARD WITH ACCENT BAR
        ============================================================ */
     .card-accent {
         border: none;
@@ -172,7 +171,7 @@
     }
 
     /* ============================================================
-       SECTION HEADERS
+                             SECTION HEADERS
        ============================================================ */
     .section-title {
         font-weight: 600;
@@ -194,7 +193,7 @@
     }
 
     /* ============================================================
-       READONLY FIELDS
+                            READONLY FIELDS
        ============================================================ */
     .form-control[readonly] {
         background: #f8f9fa;
@@ -204,7 +203,7 @@
     }
 
     /* ============================================================
-       FORM LABELS
+                                FORM LABELS
        ============================================================ */
     .form-label {
         font-weight: 600;
@@ -236,7 +235,7 @@
     }
 
     /* ============================================================
-       FORM CONTROLS
+                               FORM CONTROLS
        ============================================================ */
     .form-control {
         border-radius: 10px;
@@ -279,8 +278,8 @@
     }
 
     /* ============================================================
-       BUTTONS
-       ============================================================ */
+                                  BUTTONS
+         ============================================================ */
     .btn-warning-custom {
         padding: 0.7rem 2rem;
         border-radius: 10px;
@@ -325,7 +324,7 @@
     }
 
     /* ============================================================
-       FORM FOOTER
+                                  FORM FOOTER
        ============================================================ */
     .form-footer {
         margin-top: 1.5rem;
@@ -337,7 +336,7 @@
     }
 
     /* ============================================================
-       INFO BOX WITH ACCENT
+                             INFO BOX WITH ACCENT
        ============================================================ */
     .info-box {
         background: #f8fafc;
@@ -423,7 +422,7 @@
     }
 
     /* ============================================================
-       ALERT MESSAGES
+                               ALERT MESSAGES
        ============================================================ */
     .alert {
         border: none;
@@ -449,7 +448,7 @@
     }
 
     /* ============================================================
-       TOOLTIP STYLES
+                               TOOLTIP STYLES
        ============================================================ */
     .tooltip-inner {
         border-radius: 8px;
@@ -460,7 +459,7 @@
     }
 
     /* ============================================================
-       RESPONSIVE
+                              RESPONSIVE
        ============================================================ */
     @media (max-width: 768px) {
         .main-container {
@@ -628,7 +627,7 @@
 
         <div class="container-fluid main-container">
 
-            <!-- Error Message -->
+            <!------------------------ Error Message ----------------------->
             <div th:if="${errorMessage}"
                  class="alert alert-danger alert-dismissible fade show"
                  role="alert">
@@ -645,7 +644,7 @@
 
 
 
-            <!-- PAGE HEADER -->
+            <!----------------------- PAGE HEADER ------------------------>
             <div class="page-header">
 
                 <div class="title-wrapper">
@@ -659,7 +658,7 @@
                         </p>
                     </div>
 
-                    <!-- Status Badge -->
+                    <!----------------- Status Badge ----------------->
                     <span class="badge-status" th:classappend="${configuration.isActive ? 'active' : 'inactive'}">
                             <span class="dot"></span>
                             <span th:text="${configuration.isActive ? 'Active' : 'Inactive'}"></span>
@@ -668,7 +667,7 @@
 
             </div>
 
-            <!-- MAIN FORM -->
+            <!--------------------- MAIN FORM ------------------------>
             <div class="row g-4">
 
                 <div class="col-lg-8">
@@ -689,7 +688,7 @@
                                   method="post">
 
 
-                                <!-- SECTION 1: Basic Information-->
+                                <!------------------ SECTION 1: Basic Information------------------->
                                 <div class="section-title">
                                     <i class="bi bi-info-circle"></i>
                                     Basic Information
@@ -697,7 +696,7 @@
 
                                 <div class="row g-3">
 
-                                    <!-- Module - Readonly -->
+                                    <!----------------- Module - Readonly -------------------->
                                     <div class="col-md-6">
                                         <div class="mb-3">
                                             <label class="form-label">
@@ -710,7 +709,7 @@
                                         </div>
                                     </div>
 
-                                    <!-- Category - Readonly -->
+                                    <!---------------- Category - Readonly ------------------->
                                     <div class="col-md-6">
                                         <div class="mb-3">
                                             <label class="form-label">
@@ -726,7 +725,7 @@
                                 </div>
 
 
-                                <!-- SECTION 2: Tax Details -->
+                                <!------------------ SECTION 2: Tax Details ------------------------>
                                 <div class="section-title mt-3">
                                     <i class="bi bi-percent"></i>
                                     Tax Details
@@ -760,7 +759,7 @@
                                 </div>
 
 
-                                <!-- SECTION 3: Additional Information -->
+                                <!-------------------- SECTION 3: Additional Information --------------->
                                 <div class="section-title mt-3">
                                     <i class="bi bi-card-text"></i>
                                     Additional Information
@@ -793,7 +792,7 @@
                                 </div>
 
 
-                                <!-- SECTION 4: Status (Readonly) -->
+                                <!---------------------- SECTION 4: Status (Readonly) --------------------->
                                 <div class="section-title mt-3">
                                     <i class="bi bi-circle"></i>
                                     Status
@@ -814,7 +813,7 @@
                                 </div>
 
 
-                                <!-- FORM FOOTER -->
+                                <!------------------------ FORM FOOTER---------------------->
                                 <div class="form-footer">
                                     <button type="submit" class="btn-warning-custom">
                                         <i class="bi bi-check-circle"></i>
@@ -837,7 +836,7 @@
                 </div>
 
 
-                <!-- RIGHT COLUMN: INFO BOX -->
+                <!------------------------- RIGHT COLUMN: INFO BOX -------------------------->
                 <div class="col-lg-4">
 
                     <div class="info-box">

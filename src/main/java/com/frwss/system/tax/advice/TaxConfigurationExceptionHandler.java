@@ -1,3 +1,7 @@
+// -------------------------------------------------------------------------------
+//       Provides centralized exception handling for tax-related controllers.
+// -------------------------------------------------------------------------------
+
 package com.frwss.system.tax.advice;
 
 import org.springframework.web.bind.annotation.ControllerAdvice;
