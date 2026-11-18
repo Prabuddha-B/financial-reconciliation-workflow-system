@@ -1,5 +1,7 @@
 package com.frwss.system.messaging.service;
 
+import com.frwss.system.messaging.exception.MessagingAccessDeniedException;
+import com.frwss.system.messaging.exception.MessagingNotFoundException;
 import com.frwss.system.messaging.model.Notification;
 import com.frwss.system.messaging.model.NotificationType;
 import com.frwss.system.messaging.repository.NotificationRepository;
@@ -103,10 +105,10 @@ public class NotificationService {
     @Transactional
     public void markAsRead(Long notificationId, Long userId) {
         Notification notification = notificationRepository.findById(notificationId)
-                .orElseThrow(() -> new RuntimeException("Notification not found"));
+                .orElseThrow(() -> new MessagingNotFoundException("Notification not found"));
 
         if (!notification.getRecipientId().equals(userId)) {
-            throw new RuntimeException("You are not authorized to read this notification");
+            throw new MessagingAccessDeniedException("You are not authorized to read this notification");
         }
 
         if (!notification.getIsRead()) {
@@ -132,10 +134,10 @@ public class NotificationService {
     @Transactional
     public void deleteNotification(Long notificationId, Long userId) {
         Notification notification = notificationRepository.findById(notificationId)
-                .orElseThrow(() -> new RuntimeException("Notification not found"));
+                .orElseThrow(() -> new MessagingNotFoundException("Notification not found"));
 
         if (!notification.getRecipientId().equals(userId)) {
-            throw new RuntimeException("You are not authorized to delete this notification");
+            throw new MessagingAccessDeniedException("You are not authorized to delete this notification");
         }
 
         notification.setIsDeleted(true);

@@ -1,6 +1,7 @@
 package com.frwss.system.messaging.controller;
 
 import com.frwss.system.messaging.dto.MessageDto;
+import com.frwss.system.messaging.exception.MessagingAccessDeniedException;
 import com.frwss.system.messaging.model.Message;
 import com.frwss.system.messaging.service.MessageService;
 import com.frwss.system.model.User;
@@ -177,6 +178,11 @@ public class MessageController {
         try {
             Long userId = getCurrentUserId();
             Message message = messageService.getMessage(id);
+
+            // only the sender or the recipient may open a message
+            if (!message.getRecipientId().equals(userId) && !message.getSenderId().equals(userId)) {
+                throw new MessagingAccessDeniedException("You are not authorized to view this message");
+            }
 
             if (message.getRecipientId().equals(userId) && !message.getIsRead()) {
                 messageService.markAsRead(id, userId);
