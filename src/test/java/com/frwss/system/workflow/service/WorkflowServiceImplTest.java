@@ -1,7 +1,9 @@
 package com.frwss.system.workflow.service;
 
 import com.frwss.system.audit.service.AuditService;
+import com.frwss.system.messaging.service.NotificationEvents;
 import com.frwss.system.reconciliation.service.ReconciliationService;
+import org.springframework.test.util.ReflectionTestUtils;
 import com.frwss.system.workflow.dto.WorkflowHistoryResponseDto;
 import com.frwss.system.workflow.dto.WorkflowRequestDto;
 import com.frwss.system.workflow.dto.WorkflowResponseDto;
@@ -523,6 +525,90 @@ class WorkflowServiceImplTest {
                 any(),
                 any()
         );
+    }
+
+    @Test
+    @DisplayName("Should tell the submitter when their workflow is approved")
+    void updateWorkflowState_verified_notifiesSubmitterOfApproval() {
+
+        NotificationEvents notificationEvents = mock(NotificationEvents.class);
+        ReflectionTestUtils.setField(workflowService, "notificationEvents", notificationEvents);
+
+        WorkflowRecord workflowRecord = new WorkflowRecord();
+        workflowRecord.setWorkflowId(1L);
+        workflowRecord.setSourceType("RECONCILIATION");
+        workflowRecord.setSourceRecordId("1001");
+        workflowRecord.setCreatedBy("creator");
+        workflowRecord.setCurrentState(WorkflowState.REVIEWED);
+
+        WorkflowStateUpdateRequestDto request = new WorkflowStateUpdateRequestDto();
+        request.setPerformedBy("approver");
+        request.setNewState(WorkflowState.VERIFIED);
+        request.setJustification("Verified successfully");
+
+        when(workflowRecordRepository.findById(1L)).thenReturn(Optional.of(workflowRecord));
+        when(workflowTransitionLogRepository.findTopByWorkflowIdOrderByTransitionTimeDesc(1L)).thenReturn(null);
+        when(workflowRecordRepository.save(any(WorkflowRecord.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        workflowService.updateWorkflowState(1L, request);
+
+        verify(notificationEvents).workflowDecided("creator", "1001", "RECONCILIATION", true);
+    }
+
+    @Test
+    @DisplayName("Should tell the submitter when their workflow is rejected")
+    void updateWorkflowState_rejected_notifiesSubmitterOfRejection() {
+
+        NotificationEvents notificationEvents = mock(NotificationEvents.class);
+        ReflectionTestUtils.setField(workflowService, "notificationEvents", notificationEvents);
+
+        WorkflowRecord workflowRecord = new WorkflowRecord();
+        workflowRecord.setWorkflowId(2L);
+        workflowRecord.setSourceType("RECONCILIATION");
+        workflowRecord.setSourceRecordId("1002");
+        workflowRecord.setCreatedBy("creator");
+        workflowRecord.setCurrentState(WorkflowState.REVIEWED);
+
+        WorkflowStateUpdateRequestDto request = new WorkflowStateUpdateRequestDto();
+        request.setPerformedBy("approver");
+        request.setNewState(WorkflowState.REJECTED);
+        request.setJustification("Amounts do not agree");
+
+        when(workflowRecordRepository.findById(2L)).thenReturn(Optional.of(workflowRecord));
+        when(workflowTransitionLogRepository.findTopByWorkflowIdOrderByTransitionTimeDesc(2L)).thenReturn(null);
+        when(workflowRecordRepository.save(any(WorkflowRecord.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        workflowService.updateWorkflowState(2L, request);
+
+        verify(notificationEvents).workflowDecided("creator", "1002", "RECONCILIATION", false);
+    }
+
+    @Test
+    @DisplayName("Should not send a decision notification for the intermediate REVIEWED step")
+    void updateWorkflowState_reviewedOnly_sendsNoDecisionNotification() {
+
+        NotificationEvents notificationEvents = mock(NotificationEvents.class);
+        ReflectionTestUtils.setField(workflowService, "notificationEvents", notificationEvents);
+
+        WorkflowRecord workflowRecord = new WorkflowRecord();
+        workflowRecord.setWorkflowId(3L);
+        workflowRecord.setSourceType("RECONCILIATION");
+        workflowRecord.setSourceRecordId("1003");
+        workflowRecord.setCreatedBy("creator");
+        workflowRecord.setCurrentState(WorkflowState.ENTERED);
+
+        WorkflowStateUpdateRequestDto request = new WorkflowStateUpdateRequestDto();
+        request.setPerformedBy("approver");
+        request.setNewState(WorkflowState.REVIEWED);
+        request.setJustification("Looks fine so far");
+
+        when(workflowRecordRepository.findById(3L)).thenReturn(Optional.of(workflowRecord));
+        when(workflowTransitionLogRepository.findTopByWorkflowIdOrderByTransitionTimeDesc(3L)).thenReturn(null);
+        when(workflowRecordRepository.save(any(WorkflowRecord.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        workflowService.updateWorkflowState(3L, request);
+
+        verifyNoInteractions(notificationEvents);
     }
 
     @Test

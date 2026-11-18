@@ -1,5 +1,7 @@
 package com.frwss.system.reconciliation.controller;
 
+import com.frwss.system.messaging.service.NotificationEvents;
+import org.springframework.beans.factory.annotation.Autowired;
 import com.frwss.system.reconciliation.model.BulkReconciliation;
 import com.frwss.system.reconciliation.model.ReconciliationResult;
 import com.frwss.system.reconciliation.model.ReconciliationStatus;
@@ -31,6 +33,10 @@ public class ReconciliationController {
     private final WorkflowRecordRepository workflowRecordRepository;
     private final SecurityContextAdapter securityContextAdapter;
 
+    // Optional: when it is not available (for example in a unit test) notifications are simply skipped.
+    @Autowired(required = false)
+    private NotificationEvents notificationEvents;
+
     public ReconciliationController(ReconciliationService reconciliationService,
                                     WorkflowService workflowService,
                                     WorkflowRecordRepository workflowRecordRepository, SecurityContextAdapter securityContextAdapter) {
@@ -38,6 +44,19 @@ public class ReconciliationController {
         this.workflowService = workflowService;
         this.workflowRecordRepository = workflowRecordRepository;
         this.securityContextAdapter = securityContextAdapter;
+    }
+
+    /** Tells the current user how many exact, partial and orphan results exist after a run. */
+    private void notifyRunFinished() {
+        if (notificationEvents == null) {
+            return;
+        }
+        notificationEvents.reconciliationFinished(
+                securityContextAdapter.getCurrentUsername(),
+                reconciliationService.getResultsByStatus(ReconciliationStatus.EXACT).size(),
+                reconciliationService.getResultsByStatus(ReconciliationStatus.PARTIAL).size(),
+                reconciliationService.getResultsByStatus(ReconciliationStatus.ORPHAN).size()
+        );
     }
 
     /**
@@ -169,6 +188,7 @@ public class ReconciliationController {
     @PostMapping("/run-exact")
     public String runExactReconciliation(RedirectAttributes redirectAttributes){
         reconciliationService.runExactReconciliation(securityContextAdapter.getCurrentUsername());
+        notifyRunFinished();
 
         redirectAttributes.addFlashAttribute(
                 "successMessage",
@@ -185,6 +205,7 @@ public class ReconciliationController {
     @PostMapping("/run-partial")
     public String runPartialReconciliation(RedirectAttributes redirectAttributes){
         reconciliationService.runPartialReconciliation(securityContextAdapter.getCurrentUsername(), 3);
+        notifyRunFinished();
 
         redirectAttributes.addFlashAttribute(
                 "successMessage",
@@ -339,7 +360,13 @@ public class ReconciliationController {
             }
 
             // Submit to workflow
-            reconciliationService.sendToWorkflowReview(resultId, performedBy,comments);
+            ReconciliationResult submitted =
+                    reconciliationService.sendToWorkflowReview(resultId, performedBy,comments);
+            if (notificationEvents != null) {
+                notificationEvents.workflowSubmitted(
+                        submitted.getWorkflowId(), performedBy,
+                        "Reconciliation record " + submitted.getAccountingRecordId() + " needs approval.");
+            }
 
             redirectAttributes.addFlashAttribute(
                     "successMessage",
@@ -364,6 +391,7 @@ public class ReconciliationController {
         try {
             String performedBy = securityContextAdapter.getCurrentUsername();
             reconciliationService.runOneToManyReconciliation(performedBy, tolerancePercent);
+            notifyRunFinished();
 
             redirectAttributes.addFlashAttribute(
                     "successMessage",

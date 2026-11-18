@@ -1,5 +1,7 @@
 package com.frwss.system.messaging.service;
 
+import com.frwss.system.messaging.exception.MessagingAccessDeniedException;
+import com.frwss.system.messaging.exception.MessagingException;
 import com.frwss.system.messaging.model.Message;
 import com.frwss.system.messaging.model.NotificationType;
 import com.frwss.system.messaging.repository.MessageRepository;
@@ -415,6 +417,152 @@ class MessageServiceTest {
         assertEquals("Sounds good", reply.getContent());
         assertEquals("WORKFLOW", reply.getReferenceType());
         assertEquals("WF-001", reply.getReferenceId());
+    }
+
+    // =========================================================================
+    // sendMessage() input checks
+    // =========================================================================
+
+    @Test
+    @DisplayName("Should refuse a message from a user to themselves, before touching anything")
+    void sendMessage_toSelf_throwsAndSavesNothing() {
+
+        assertThrows(MessagingException.class, () ->
+                messageService.sendMessage(1L, 1L, "Note to self", "Body", null, null));
+
+        verifyNoInteractions(messageRepository, userRepository, notificationService);
+    }
+
+    @Test
+    @DisplayName("Should require a subject")
+    void sendMessage_blankSubject_throwsAndSavesNothing() {
+
+        assertThrows(MessagingException.class, () ->
+                messageService.sendMessage(1L, 2L, "   ", "Body", null, null));
+        assertThrows(MessagingException.class, () ->
+                messageService.sendMessage(1L, 2L, null, "Body", null, null));
+
+        verifyNoInteractions(messageRepository, notificationService);
+    }
+
+    @Test
+    @DisplayName("Should require message content")
+    void sendMessage_blankContent_throwsAndSavesNothing() {
+
+        assertThrows(MessagingException.class, () ->
+                messageService.sendMessage(1L, 2L, "Hello", "", null, null));
+
+        verifyNoInteractions(messageRepository, notificationService);
+    }
+
+    @Test
+    @DisplayName("Should refuse a subject longer than the 255-character column")
+    void sendMessage_subjectTooLong_throwsAndSavesNothing() {
+
+        String tooLong = "a".repeat(MessageService.MAX_SUBJECT_LENGTH + 1);
+
+        assertThrows(MessagingException.class, () ->
+                messageService.sendMessage(1L, 2L, tooLong, "Body", null, null));
+
+        verifyNoInteractions(messageRepository, notificationService);
+    }
+
+    @Test
+    @DisplayName("Should refuse content longer than the allowed maximum")
+    void sendMessage_contentTooLong_throwsAndSavesNothing() {
+
+        String tooLong = "a".repeat(MessageService.MAX_CONTENT_LENGTH + 1);
+
+        assertThrows(MessagingException.class, () ->
+                messageService.sendMessage(1L, 2L, "Hello", tooLong, null, null));
+
+        verifyNoInteractions(messageRepository, notificationService);
+    }
+
+    // =========================================================================
+    // replyToMessage() threading and participants
+    // =========================================================================
+
+    private Message parentMessage(long id, long senderId, long recipientId, String subject) {
+        Message parent = new Message();
+        parent.setId(id);
+        parent.setSenderId(senderId);
+        parent.setRecipientId(recipientId);
+        parent.setSubject(subject);
+        return parent;
+    }
+
+    private void stubReplySaving() {
+        when(messageRepository.save(any(Message.class))).thenAnswer(invocation -> {
+            Message m = invocation.getArgument(0);
+            m.setId(900L);
+            return m;
+        });
+    }
+
+    @Test
+    @DisplayName("Should store the parent message id so the reply is a real thread")
+    void replyToMessage_storesParentMessageId() {
+
+        Message parent = parentMessage(5L, 2L, 1L, "Original subject");
+
+        when(messageRepository.findById(5L)).thenReturn(Optional.of(parent));
+        when(userRepository.findById(1)).thenReturn(Optional.of(user(1, "bob")));
+        when(userRepository.findById(2)).thenReturn(Optional.of(user(2, "alice")));
+        stubReplySaving();
+
+        Message reply = messageService.replyToMessage(5L, 1L, "Sounds good");
+
+        assertEquals(5L, reply.getParentMessageId());
+    }
+
+    @Test
+    @DisplayName("Should send the reply to the other person when the ORIGINAL SENDER replies")
+    void replyToMessage_byOriginalSender_goesToOriginalRecipient() {
+
+        // alice (2) wrote to bob (1); alice now follows up on her own message
+        Message parent = parentMessage(6L, 2L, 1L, "Original subject");
+
+        when(messageRepository.findById(6L)).thenReturn(Optional.of(parent));
+        when(userRepository.findById(2)).thenReturn(Optional.of(user(2, "alice")));
+        when(userRepository.findById(1)).thenReturn(Optional.of(user(1, "bob")));
+        stubReplySaving();
+
+        Message reply = messageService.replyToMessage(6L, 2L, "Following up");
+
+        assertEquals(2L, reply.getSenderId());
+        assertEquals(1L, reply.getRecipientId());   // not back to herself
+    }
+
+    @Test
+    @DisplayName("Should not stack 'Re:' prefixes when replying to a reply")
+    void replyToMessage_subjectAlreadyPrefixed_isNotPrefixedAgain() {
+
+        Message parent = parentMessage(7L, 2L, 1L, "Re: Original subject");
+
+        when(messageRepository.findById(7L)).thenReturn(Optional.of(parent));
+        when(userRepository.findById(1)).thenReturn(Optional.of(user(1, "bob")));
+        when(userRepository.findById(2)).thenReturn(Optional.of(user(2, "alice")));
+        stubReplySaving();
+
+        Message reply = messageService.replyToMessage(7L, 1L, "Thanks");
+
+        assertEquals("Re: Original subject", reply.getSubject());
+    }
+
+    @Test
+    @DisplayName("Should refuse a reply from someone who is not part of the conversation")
+    void replyToMessage_byOutsider_throwsAndSavesNothing() {
+
+        Message parent = parentMessage(8L, 2L, 1L, "Private subject");
+
+        when(messageRepository.findById(8L)).thenReturn(Optional.of(parent));
+
+        assertThrows(MessagingAccessDeniedException.class, () ->
+                messageService.replyToMessage(8L, 99L, "I should not be able to reply"));
+
+        verify(messageRepository, never()).save(any());
+        verifyNoInteractions(notificationService);
     }
 
     // =========================================================================

@@ -3,6 +3,9 @@
 // ----------------------------------------------------------------------------------------
 package com.frwss.system.controller;
 
+import com.frwss.system.messaging.service.NotificationEvents;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.beans.factory.annotation.Autowired;
 import com.frwss.system.dto.IngestionResult;
 import com.frwss.system.service.IngestionService;
 import jakarta.servlet.http.HttpSession;
@@ -24,6 +27,11 @@ public class IngestionController {
     private static final Logger log = LoggerFactory.getLogger(IngestionController.class);
 
     private final IngestionService ingestionService;
+
+
+    // Optional: when it is not available (for example in a unit test) notifications are simply skipped.
+    @Autowired(required = false)
+    private NotificationEvents notificationEvents;
 
     // Constructor
     public IngestionController(IngestionService ingestionService) {
@@ -139,6 +147,14 @@ public class IngestionController {
             }
 
             ra.addFlashAttribute("message", message);
+            if (notificationEvents != null) {
+                var authentication = SecurityContextHolder.getContext().getAuthentication();
+                if (authentication != null) {
+                    notificationEvents.uploadFinished(
+                            authentication.getName(),
+                            dataType + " data (" + summary.savedCount() + " records saved)");
+                }
+            }
             session.removeAttribute("pendingRecords");
             session.removeAttribute("pendingType");
 

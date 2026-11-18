@@ -13,6 +13,8 @@ import com.frwss.system.workflow.model.WorkflowState;
 import com.frwss.system.workflow.model.WorkflowTransitionLog;
 import com.frwss.system.workflow.repository.WorkflowRecordRepository;
 import com.frwss.system.workflow.repository.WorkflowTransitionLogRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.frwss.system.messaging.service.NotificationEvents;
 import org.springframework.stereotype.Service;
 import com.frwss.system.workflow.dto.WorkflowHistoryResponseDto;
 import java.util.*;
@@ -32,6 +34,10 @@ public class WorkflowServiceImpl implements WorkflowService {
 
     private final AuditService auditService;
     private final ReconciliationService reconciliationService;
+
+    // Optional: when it is not available (for example in a unit test) notifications are simply skipped.
+    @Autowired(required = false)
+    private NotificationEvents notificationEvents;
 
     // Constructor
     public WorkflowServiceImpl(WorkflowRecordRepository workflowRecordRepository,
@@ -146,6 +152,17 @@ public class WorkflowServiceImpl implements WorkflowService {
         }
 
         // Record an audit event
+        // tell the person who submitted it when it is approved or rejected
+        if (notificationEvents != null
+                && (updatedRecord.getCurrentState() == WorkflowState.VERIFIED
+                    || updatedRecord.getCurrentState() == WorkflowState.REJECTED)) {
+            notificationEvents.workflowDecided(
+                    updatedRecord.getCreatedBy(),
+                    updatedRecord.getSourceRecordId(),
+                    updatedRecord.getSourceType(),
+                    updatedRecord.getCurrentState() == WorkflowState.VERIFIED);
+        }
+
         auditService.log(
                 AuditActionType.WORKFLOW_STATE_CHANGED,
                 "WorkflowRecord",

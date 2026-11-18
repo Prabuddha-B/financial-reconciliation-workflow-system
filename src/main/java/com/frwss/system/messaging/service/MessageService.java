@@ -1,5 +1,8 @@
 package com.frwss.system.messaging.service;
 
+import com.frwss.system.messaging.exception.MessagingAccessDeniedException;
+import com.frwss.system.messaging.exception.MessagingException;
+import com.frwss.system.messaging.exception.MessagingNotFoundException;
 import com.frwss.system.messaging.model.Message;
 import com.frwss.system.messaging.model.NotificationType;
 import com.frwss.system.messaging.repository.MessageRepository;
@@ -29,6 +32,12 @@ public class MessageService {
     // ✅ FIXED: Using SLF4J Logger (org.slf4j.Logger)
     private static final Logger log = LoggerFactory.getLogger(MessageService.class);
 
+    /** Longest subject allowed (the subject column is varchar(255)). */
+    public static final int MAX_SUBJECT_LENGTH = 255;
+
+    /** Longest message body allowed. The column is TEXT, so this is a policy limit. */
+    public static final int MAX_CONTENT_LENGTH = 10000;
+
     private final MessageRepository messageRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
@@ -56,17 +65,46 @@ public class MessageService {
     @Transactional
     public Message sendMessage(Long senderId, Long recipientId, String subject, String content,
                                String referenceType, String referenceId) {
+        return sendMessage(senderId, recipientId, subject, content, referenceType, referenceId, null);
+    }
+
+    /**
+     * Sends a message. Checks, before anything is saved: the sender is not the recipient, the subject
+     * and content are filled in and within the length limits, and both users exist. When
+     * {@code parentMessageId} is given the new message is stored as a reply to that message.
+     *
+     * @throws MessagingException if a check fails
+     */
+    @Transactional
+    public Message sendMessage(Long senderId, Long recipientId, String subject, String content,
+                               String referenceType, String referenceId, Long parentMessageId) {
+
+        if (senderId != null && senderId.equals(recipientId)) {
+            throw new MessagingException("You cannot send a message to yourself");
+        }
+        if (subject == null || subject.isBlank()) {
+            throw new MessagingException("Subject is required");
+        }
+        if (subject.length() > MAX_SUBJECT_LENGTH) {
+            throw new MessagingException("Subject is too long (maximum " + MAX_SUBJECT_LENGTH + " characters)");
+        }
+        if (content == null || content.isBlank()) {
+            throw new MessagingException("Message content is required");
+        }
+        if (content.length() > MAX_CONTENT_LENGTH) {
+            throw new MessagingException("Message is too long (maximum " + MAX_CONTENT_LENGTH + " characters)");
+        }
 
         // ✅ FIXED: Correct log format with {} placeholders
         log.info("📨 Sending message from user {} to user {}", senderId, recipientId);
 
         // Validate sender exists
         User sender = userRepository.findById(senderId.intValue())
-                .orElseThrow(() -> new RuntimeException("Sender not found"));
+                .orElseThrow(() -> new MessagingNotFoundException("Sender not found"));
 
         // Validate recipient exists
         User recipient = userRepository.findById(recipientId.intValue())
-                .orElseThrow(() -> new RuntimeException("Recipient not found"));
+                .orElseThrow(() -> new MessagingNotFoundException("Recipient not found"));
 
         // Create message
         Message message = new Message();
@@ -76,6 +114,7 @@ public class MessageService {
         message.setContent(content);
         message.setReferenceType(referenceType);
         message.setReferenceId(referenceId);
+        message.setParentMessageId(parentMessageId);
         message.setSentAt(LocalDateTime.now());
 
         Message savedMessage = messageRepository.save(message);
@@ -120,7 +159,7 @@ public class MessageService {
     @Transactional(readOnly = true)
     public Message getMessage(Long messageId) {
         return messageRepository.findById(messageId)
-                .orElseThrow(() -> new RuntimeException("Message not found"));
+                .orElseThrow(() -> new MessagingNotFoundException("Message not found"));
     }
 
     /**
@@ -132,7 +171,7 @@ public class MessageService {
 
         // Verify the user is the recipient
         if (!message.getRecipientId().equals(userId)) {
-            throw new RuntimeException("You are not authorized to read this message");
+            throw new MessagingAccessDeniedException("You are not authorized to read this message");
         }
 
         if (!message.getIsRead()) {
@@ -180,7 +219,7 @@ public class MessageService {
         } else if (message.getRecipientId().equals(userId)) {
             message.setIsDeletedByRecipient(true);
         } else {
-            throw new RuntimeException("You are not authorized to delete this message");
+            throw new MessagingAccessDeniedException("You are not authorized to delete this message");
         }
 
         messageRepository.save(message);
@@ -194,13 +233,32 @@ public class MessageService {
     public Message replyToMessage(Long parentMessageId, Long senderId, String content) {
         Message parentMessage = getMessage(parentMessageId);
 
+        boolean isOriginalSender = parentMessage.getSenderId().equals(senderId);
+        boolean isOriginalRecipient = parentMessage.getRecipientId().equals(senderId);
+
+        // only the two people in the conversation may reply to it
+        if (!isOriginalSender && !isOriginalRecipient) {
+            throw new MessagingAccessDeniedException("You are not part of this conversation");
+        }
+
+        // the reply goes to the other person in the conversation
+        Long replyTo = isOriginalRecipient ? parentMessage.getSenderId() : parentMessage.getRecipientId();
+
+        // do not stack "Re: Re: Re:" and keep the subject inside the column length
+        String parentSubject = parentMessage.getSubject() == null ? "" : parentMessage.getSubject();
+        String subject = parentSubject.regionMatches(true, 0, "Re:", 0, 3) ? parentSubject : "Re: " + parentSubject;
+        if (subject.length() > MAX_SUBJECT_LENGTH) {
+            subject = subject.substring(0, MAX_SUBJECT_LENGTH);
+        }
+
         return sendMessage(
                 senderId,
-                parentMessage.getSenderId(),
-                "Re: " + parentMessage.getSubject(),
+                replyTo,
+                subject,
                 content,
                 parentMessage.getReferenceType(),
-                parentMessage.getReferenceId()
+                parentMessage.getReferenceId(),
+                parentMessage.getId()
         );
     }
 
